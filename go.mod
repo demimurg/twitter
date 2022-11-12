@@ -1,4 +1,4 @@
-module twitter
+module github.com/demimurg/twitter
 
 go 1.19
 

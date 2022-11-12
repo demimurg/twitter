@@ -7,7 +7,7 @@ import (
 	mm_atomic "sync/atomic"
 	"time"
 	mm_time "time"
-	"twitter/entity"
+	"github.com/demimurg/twitter/entity"
 
 	"github.com/gojuno/minimock/v3"
 )

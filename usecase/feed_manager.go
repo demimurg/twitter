@@ -1,6 +1,6 @@
 package twitter
 
-import "twitter/entity"
+import "github.com/demimurg/twitter/entity"
 
 type FeedManager interface {
 	AddNewTweet(userID string, text string) error

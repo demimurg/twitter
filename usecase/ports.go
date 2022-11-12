@@ -3,7 +3,8 @@ package twitter
 import (
 	"fmt"
 	"time"
-	"twitter/entity"
+
+	"github.com/demimurg/twitter/entity"
 )
 
 //go:generate minimock -g -o ./mock -s .go

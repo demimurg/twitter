@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"twitter/entity"
-	"twitter/usecase/mock"
+	"github.com/demimurg/twitter/entity"
+	"github.com/demimurg/twitter/usecase/mock"
 
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
