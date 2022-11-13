@@ -1,0 +1,11 @@
+syntax = "proto3";
+option go_package = "github.com/demimurg/twitter/proto";
+import "google/protobuf/empty.proto";
+
+service Twitter {
+    rpc AddTweet(AddTweetRequest) returns (google.protobuf.Empty);
+}
+
+message AddTweetRequest {
+
+}

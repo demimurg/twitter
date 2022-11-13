@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/demimurg/twitter/entity"
+	"github.com/demimurg/twitter/internal/entity"
 )
 
 //go:generate minimock -g -o ./mock -s .go

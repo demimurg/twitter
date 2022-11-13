@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/demimurg/twitter/entity"
+	"github.com/demimurg/twitter/internal/entity"
 	"github.com/demimurg/twitter/pkg/log"
 )
 
@@ -78,7 +78,8 @@ func (fm *feedManager) GiveNewsFeed(ctx context.Context, userID int) ([]entity.T
 	for _, followingID := range following {
 		tweets, err := fm.tweetsRepo.GetLatestFromUser(ctx, followingID, 10)
 		if err != nil {
-			log.Error(context.TODO(), "can't get tweets",
+			log.Error(ctx, "can't get tweets",
+				"error", err,
 				"userID", userID)
 			continue
 		}

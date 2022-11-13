@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/demimurg/twitter/entity"
-	"github.com/demimurg/twitter/usecase/mock"
+	"github.com/demimurg/twitter/internal/entity"
+	"github.com/demimurg/twitter/internal/usecase/mock"
 
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
