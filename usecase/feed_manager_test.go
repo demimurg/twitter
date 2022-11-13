@@ -1,6 +1,7 @@
 package twitter
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
@@ -15,6 +16,7 @@ import (
 
 var (
 	fakeUserID = 666
+	ctx        = context.Background()
 )
 
 func TestFeedManager_AddNewTweet(t *testing.T) {
@@ -29,10 +31,10 @@ func TestFeedManager_AddNewTweet(t *testing.T) {
 			tweetText: "hello world!",
 			expect: func(m mocks) {
 				m.UserRepositoryMock.GetMock.
-					Expect(fakeUserID).
+					Expect(ctx, fakeUserID).
 					Return(&entity.User{ID: fakeUserID}, nil)
 				m.TweetRepositoryMock.AddMock.
-					Expect(fakeUserID, "hello world!").
+					Expect(ctx, fakeUserID, "hello world!").
 					Return(nil)
 			},
 		},
@@ -42,7 +44,7 @@ func TestFeedManager_AddNewTweet(t *testing.T) {
 			expect: func(m mocks) {
 				monthAgo := time.Now().Add(-30 * 24 * time.Hour)
 				m.UserRepositoryMock.GetMock.
-					Expect(fakeUserID).
+					Expect(ctx, fakeUserID).
 					Return(&entity.User{ID: fakeUserID, DeletedAt: &monthAgo}, nil)
 			},
 			wantError: true,
@@ -62,7 +64,7 @@ func TestFeedManager_AddNewTweet(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			feedManager := newFeedManager(t, tc.expect)
-			err := feedManager.AddNewTweet(fakeUserID, tc.tweetText)
+			err := feedManager.AddNewTweet(ctx, fakeUserID, tc.tweetText)
 
 			assert.Equal(t, tc.wantError, err != nil, "not expected error: %v", err)
 		})
@@ -82,15 +84,15 @@ func TestFeedManager_GiveNewsFeed(t *testing.T) {
 				// get following users
 				friend1, friend2 := 1, 2
 				m.FollowerRepositoryMock.GetFollowingMock.
-					Expect(fakeUserID, 10).
+					Expect(ctx, fakeUserID, 10).
 					Return([]int{friend1, friend2}, nil)
 				// fetch their latest tweets
 				m.TweetRepositoryMock.
 					GetLatestFromUserMock.
-					When(friend1, 10).
+					When(ctx, friend1, 10).
 					Then([]entity.Tweet{{Text: "wake up"}, {Text: "eat"}}, nil).
 					GetLatestFromUserMock.
-					When(friend2, 10).
+					When(ctx, friend2, 10).
 					Then([]entity.Tweet{{Text: "yoga class"}, {Text: "kitten"}}, nil)
 				// merge them
 			},
@@ -103,7 +105,7 @@ func TestFeedManager_GiveNewsFeed(t *testing.T) {
 			name: "database with followers is not available",
 			expect: func(m mocks) {
 				m.FollowerRepositoryMock.GetFollowingMock.
-					Expect(fakeUserID, 10).
+					Expect(ctx, fakeUserID, 10).
 					Return(nil, errors.New("sorry guys, i'have drop off database"))
 			},
 			wantError: true,
@@ -115,7 +117,7 @@ func TestFeedManager_GiveNewsFeed(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			feedManager := newFeedManager(t, tc.expect)
-			feed, err := feedManager.GiveNewsFeed(fakeUserID)
+			feed, err := feedManager.GiveNewsFeed(ctx, fakeUserID)
 
 			assert.Equal(t, tc.wantError, err != nil, "not expected error: %v", err)
 			assert.Equal(t, tc.wantFeed, feed)
