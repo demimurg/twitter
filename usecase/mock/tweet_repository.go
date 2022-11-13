@@ -7,6 +7,7 @@ import (
 	mm_atomic "sync/atomic"
 	mm_time "time"
 
+	"github.com/demimurg/twitter/entity"
 	"github.com/gojuno/minimock/v3"
 )
 
@@ -14,11 +15,23 @@ import (
 type TweetRepositoryMock struct {
 	t minimock.Tester
 
-	funcAdd          func(userID string, tweetText string) (err error)
-	inspectFuncAdd   func(userID string, tweetText string)
+	funcAdd          func(userID int, tweetText string) (err error)
+	inspectFuncAdd   func(userID int, tweetText string)
 	afterAddCounter  uint64
 	beforeAddCounter uint64
 	AddMock          mTweetRepositoryMockAdd
+
+	funcGetLatestFromUser          func(userID int, limit int) (ta1 []entity.Tweet, err error)
+	inspectFuncGetLatestFromUser   func(userID int, limit int)
+	afterGetLatestFromUserCounter  uint64
+	beforeGetLatestFromUserCounter uint64
+	GetLatestFromUserMock          mTweetRepositoryMockGetLatestFromUser
+
+	funcUpdateText          func(tweetID int, newText string) (err error)
+	inspectFuncUpdateText   func(tweetID int, newText string)
+	afterUpdateTextCounter  uint64
+	beforeUpdateTextCounter uint64
+	UpdateTextMock          mTweetRepositoryMockUpdateText
 }
 
 // NewTweetRepositoryMock returns a mock for twitter.TweetRepository
@@ -30,6 +43,12 @@ func NewTweetRepositoryMock(t minimock.Tester) *TweetRepositoryMock {
 
 	m.AddMock = mTweetRepositoryMockAdd{mock: m}
 	m.AddMock.callArgs = []*TweetRepositoryMockAddParams{}
+
+	m.GetLatestFromUserMock = mTweetRepositoryMockGetLatestFromUser{mock: m}
+	m.GetLatestFromUserMock.callArgs = []*TweetRepositoryMockGetLatestFromUserParams{}
+
+	m.UpdateTextMock = mTweetRepositoryMockUpdateText{mock: m}
+	m.UpdateTextMock.callArgs = []*TweetRepositoryMockUpdateTextParams{}
 
 	return m
 }
@@ -53,7 +72,7 @@ type TweetRepositoryMockAddExpectation struct {
 
 // TweetRepositoryMockAddParams contains parameters of the TweetRepository.Add
 type TweetRepositoryMockAddParams struct {
-	userID    string
+	userID    int
 	tweetText string
 }
 
@@ -63,7 +82,7 @@ type TweetRepositoryMockAddResults struct {
 }
 
 // Expect sets up expected params for TweetRepository.Add
-func (mmAdd *mTweetRepositoryMockAdd) Expect(userID string, tweetText string) *mTweetRepositoryMockAdd {
+func (mmAdd *mTweetRepositoryMockAdd) Expect(userID int, tweetText string) *mTweetRepositoryMockAdd {
 	if mmAdd.mock.funcAdd != nil {
 		mmAdd.mock.t.Fatalf("TweetRepositoryMock.Add mock is already set by Set")
 	}
@@ -83,7 +102,7 @@ func (mmAdd *mTweetRepositoryMockAdd) Expect(userID string, tweetText string) *m
 }
 
 // Inspect accepts an inspector function that has same arguments as the TweetRepository.Add
-func (mmAdd *mTweetRepositoryMockAdd) Inspect(f func(userID string, tweetText string)) *mTweetRepositoryMockAdd {
+func (mmAdd *mTweetRepositoryMockAdd) Inspect(f func(userID int, tweetText string)) *mTweetRepositoryMockAdd {
 	if mmAdd.mock.inspectFuncAdd != nil {
 		mmAdd.mock.t.Fatalf("Inspect function is already set for TweetRepositoryMock.Add")
 	}
@@ -107,7 +126,7 @@ func (mmAdd *mTweetRepositoryMockAdd) Return(err error) *TweetRepositoryMock {
 }
 
 //Set uses given function f to mock the TweetRepository.Add method
-func (mmAdd *mTweetRepositoryMockAdd) Set(f func(userID string, tweetText string) (err error)) *TweetRepositoryMock {
+func (mmAdd *mTweetRepositoryMockAdd) Set(f func(userID int, tweetText string) (err error)) *TweetRepositoryMock {
 	if mmAdd.defaultExpectation != nil {
 		mmAdd.mock.t.Fatalf("Default expectation is already set for the TweetRepository.Add method")
 	}
@@ -122,7 +141,7 @@ func (mmAdd *mTweetRepositoryMockAdd) Set(f func(userID string, tweetText string
 
 // When sets expectation for the TweetRepository.Add which will trigger the result defined by the following
 // Then helper
-func (mmAdd *mTweetRepositoryMockAdd) When(userID string, tweetText string) *TweetRepositoryMockAddExpectation {
+func (mmAdd *mTweetRepositoryMockAdd) When(userID int, tweetText string) *TweetRepositoryMockAddExpectation {
 	if mmAdd.mock.funcAdd != nil {
 		mmAdd.mock.t.Fatalf("TweetRepositoryMock.Add mock is already set by Set")
 	}
@@ -142,7 +161,7 @@ func (e *TweetRepositoryMockAddExpectation) Then(err error) *TweetRepositoryMock
 }
 
 // Add implements twitter.TweetRepository
-func (mmAdd *TweetRepositoryMock) Add(userID string, tweetText string) (err error) {
+func (mmAdd *TweetRepositoryMock) Add(userID int, tweetText string) (err error) {
 	mm_atomic.AddUint64(&mmAdd.beforeAddCounter, 1)
 	defer mm_atomic.AddUint64(&mmAdd.afterAddCounter, 1)
 
@@ -250,10 +269,447 @@ func (m *TweetRepositoryMock) MinimockAddInspect() {
 	}
 }
 
+type mTweetRepositoryMockGetLatestFromUser struct {
+	mock               *TweetRepositoryMock
+	defaultExpectation *TweetRepositoryMockGetLatestFromUserExpectation
+	expectations       []*TweetRepositoryMockGetLatestFromUserExpectation
+
+	callArgs []*TweetRepositoryMockGetLatestFromUserParams
+	mutex    sync.RWMutex
+}
+
+// TweetRepositoryMockGetLatestFromUserExpectation specifies expectation struct of the TweetRepository.GetLatestFromUser
+type TweetRepositoryMockGetLatestFromUserExpectation struct {
+	mock    *TweetRepositoryMock
+	params  *TweetRepositoryMockGetLatestFromUserParams
+	results *TweetRepositoryMockGetLatestFromUserResults
+	Counter uint64
+}
+
+// TweetRepositoryMockGetLatestFromUserParams contains parameters of the TweetRepository.GetLatestFromUser
+type TweetRepositoryMockGetLatestFromUserParams struct {
+	userID int
+	limit  int
+}
+
+// TweetRepositoryMockGetLatestFromUserResults contains results of the TweetRepository.GetLatestFromUser
+type TweetRepositoryMockGetLatestFromUserResults struct {
+	ta1 []entity.Tweet
+	err error
+}
+
+// Expect sets up expected params for TweetRepository.GetLatestFromUser
+func (mmGetLatestFromUser *mTweetRepositoryMockGetLatestFromUser) Expect(userID int, limit int) *mTweetRepositoryMockGetLatestFromUser {
+	if mmGetLatestFromUser.mock.funcGetLatestFromUser != nil {
+		mmGetLatestFromUser.mock.t.Fatalf("TweetRepositoryMock.GetLatestFromUser mock is already set by Set")
+	}
+
+	if mmGetLatestFromUser.defaultExpectation == nil {
+		mmGetLatestFromUser.defaultExpectation = &TweetRepositoryMockGetLatestFromUserExpectation{}
+	}
+
+	mmGetLatestFromUser.defaultExpectation.params = &TweetRepositoryMockGetLatestFromUserParams{userID, limit}
+	for _, e := range mmGetLatestFromUser.expectations {
+		if minimock.Equal(e.params, mmGetLatestFromUser.defaultExpectation.params) {
+			mmGetLatestFromUser.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetLatestFromUser.defaultExpectation.params)
+		}
+	}
+
+	return mmGetLatestFromUser
+}
+
+// Inspect accepts an inspector function that has same arguments as the TweetRepository.GetLatestFromUser
+func (mmGetLatestFromUser *mTweetRepositoryMockGetLatestFromUser) Inspect(f func(userID int, limit int)) *mTweetRepositoryMockGetLatestFromUser {
+	if mmGetLatestFromUser.mock.inspectFuncGetLatestFromUser != nil {
+		mmGetLatestFromUser.mock.t.Fatalf("Inspect function is already set for TweetRepositoryMock.GetLatestFromUser")
+	}
+
+	mmGetLatestFromUser.mock.inspectFuncGetLatestFromUser = f
+
+	return mmGetLatestFromUser
+}
+
+// Return sets up results that will be returned by TweetRepository.GetLatestFromUser
+func (mmGetLatestFromUser *mTweetRepositoryMockGetLatestFromUser) Return(ta1 []entity.Tweet, err error) *TweetRepositoryMock {
+	if mmGetLatestFromUser.mock.funcGetLatestFromUser != nil {
+		mmGetLatestFromUser.mock.t.Fatalf("TweetRepositoryMock.GetLatestFromUser mock is already set by Set")
+	}
+
+	if mmGetLatestFromUser.defaultExpectation == nil {
+		mmGetLatestFromUser.defaultExpectation = &TweetRepositoryMockGetLatestFromUserExpectation{mock: mmGetLatestFromUser.mock}
+	}
+	mmGetLatestFromUser.defaultExpectation.results = &TweetRepositoryMockGetLatestFromUserResults{ta1, err}
+	return mmGetLatestFromUser.mock
+}
+
+//Set uses given function f to mock the TweetRepository.GetLatestFromUser method
+func (mmGetLatestFromUser *mTweetRepositoryMockGetLatestFromUser) Set(f func(userID int, limit int) (ta1 []entity.Tweet, err error)) *TweetRepositoryMock {
+	if mmGetLatestFromUser.defaultExpectation != nil {
+		mmGetLatestFromUser.mock.t.Fatalf("Default expectation is already set for the TweetRepository.GetLatestFromUser method")
+	}
+
+	if len(mmGetLatestFromUser.expectations) > 0 {
+		mmGetLatestFromUser.mock.t.Fatalf("Some expectations are already set for the TweetRepository.GetLatestFromUser method")
+	}
+
+	mmGetLatestFromUser.mock.funcGetLatestFromUser = f
+	return mmGetLatestFromUser.mock
+}
+
+// When sets expectation for the TweetRepository.GetLatestFromUser which will trigger the result defined by the following
+// Then helper
+func (mmGetLatestFromUser *mTweetRepositoryMockGetLatestFromUser) When(userID int, limit int) *TweetRepositoryMockGetLatestFromUserExpectation {
+	if mmGetLatestFromUser.mock.funcGetLatestFromUser != nil {
+		mmGetLatestFromUser.mock.t.Fatalf("TweetRepositoryMock.GetLatestFromUser mock is already set by Set")
+	}
+
+	expectation := &TweetRepositoryMockGetLatestFromUserExpectation{
+		mock:   mmGetLatestFromUser.mock,
+		params: &TweetRepositoryMockGetLatestFromUserParams{userID, limit},
+	}
+	mmGetLatestFromUser.expectations = append(mmGetLatestFromUser.expectations, expectation)
+	return expectation
+}
+
+// Then sets up TweetRepository.GetLatestFromUser return parameters for the expectation previously defined by the When method
+func (e *TweetRepositoryMockGetLatestFromUserExpectation) Then(ta1 []entity.Tweet, err error) *TweetRepositoryMock {
+	e.results = &TweetRepositoryMockGetLatestFromUserResults{ta1, err}
+	return e.mock
+}
+
+// GetLatestFromUser implements twitter.TweetRepository
+func (mmGetLatestFromUser *TweetRepositoryMock) GetLatestFromUser(userID int, limit int) (ta1 []entity.Tweet, err error) {
+	mm_atomic.AddUint64(&mmGetLatestFromUser.beforeGetLatestFromUserCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetLatestFromUser.afterGetLatestFromUserCounter, 1)
+
+	if mmGetLatestFromUser.inspectFuncGetLatestFromUser != nil {
+		mmGetLatestFromUser.inspectFuncGetLatestFromUser(userID, limit)
+	}
+
+	mm_params := &TweetRepositoryMockGetLatestFromUserParams{userID, limit}
+
+	// Record call args
+	mmGetLatestFromUser.GetLatestFromUserMock.mutex.Lock()
+	mmGetLatestFromUser.GetLatestFromUserMock.callArgs = append(mmGetLatestFromUser.GetLatestFromUserMock.callArgs, mm_params)
+	mmGetLatestFromUser.GetLatestFromUserMock.mutex.Unlock()
+
+	for _, e := range mmGetLatestFromUser.GetLatestFromUserMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.ta1, e.results.err
+		}
+	}
+
+	if mmGetLatestFromUser.GetLatestFromUserMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetLatestFromUser.GetLatestFromUserMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetLatestFromUser.GetLatestFromUserMock.defaultExpectation.params
+		mm_got := TweetRepositoryMockGetLatestFromUserParams{userID, limit}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetLatestFromUser.t.Errorf("TweetRepositoryMock.GetLatestFromUser got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetLatestFromUser.GetLatestFromUserMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetLatestFromUser.t.Fatal("No results are set for the TweetRepositoryMock.GetLatestFromUser")
+		}
+		return (*mm_results).ta1, (*mm_results).err
+	}
+	if mmGetLatestFromUser.funcGetLatestFromUser != nil {
+		return mmGetLatestFromUser.funcGetLatestFromUser(userID, limit)
+	}
+	mmGetLatestFromUser.t.Fatalf("Unexpected call to TweetRepositoryMock.GetLatestFromUser. %v %v", userID, limit)
+	return
+}
+
+// GetLatestFromUserAfterCounter returns a count of finished TweetRepositoryMock.GetLatestFromUser invocations
+func (mmGetLatestFromUser *TweetRepositoryMock) GetLatestFromUserAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetLatestFromUser.afterGetLatestFromUserCounter)
+}
+
+// GetLatestFromUserBeforeCounter returns a count of TweetRepositoryMock.GetLatestFromUser invocations
+func (mmGetLatestFromUser *TweetRepositoryMock) GetLatestFromUserBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetLatestFromUser.beforeGetLatestFromUserCounter)
+}
+
+// Calls returns a list of arguments used in each call to TweetRepositoryMock.GetLatestFromUser.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetLatestFromUser *mTweetRepositoryMockGetLatestFromUser) Calls() []*TweetRepositoryMockGetLatestFromUserParams {
+	mmGetLatestFromUser.mutex.RLock()
+
+	argCopy := make([]*TweetRepositoryMockGetLatestFromUserParams, len(mmGetLatestFromUser.callArgs))
+	copy(argCopy, mmGetLatestFromUser.callArgs)
+
+	mmGetLatestFromUser.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetLatestFromUserDone returns true if the count of the GetLatestFromUser invocations corresponds
+// the number of defined expectations
+func (m *TweetRepositoryMock) MinimockGetLatestFromUserDone() bool {
+	for _, e := range m.GetLatestFromUserMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetLatestFromUserMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetLatestFromUserCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetLatestFromUser != nil && mm_atomic.LoadUint64(&m.afterGetLatestFromUserCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetLatestFromUserInspect logs each unmet expectation
+func (m *TweetRepositoryMock) MinimockGetLatestFromUserInspect() {
+	for _, e := range m.GetLatestFromUserMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to TweetRepositoryMock.GetLatestFromUser with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetLatestFromUserMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetLatestFromUserCounter) < 1 {
+		if m.GetLatestFromUserMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to TweetRepositoryMock.GetLatestFromUser")
+		} else {
+			m.t.Errorf("Expected call to TweetRepositoryMock.GetLatestFromUser with params: %#v", *m.GetLatestFromUserMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetLatestFromUser != nil && mm_atomic.LoadUint64(&m.afterGetLatestFromUserCounter) < 1 {
+		m.t.Error("Expected call to TweetRepositoryMock.GetLatestFromUser")
+	}
+}
+
+type mTweetRepositoryMockUpdateText struct {
+	mock               *TweetRepositoryMock
+	defaultExpectation *TweetRepositoryMockUpdateTextExpectation
+	expectations       []*TweetRepositoryMockUpdateTextExpectation
+
+	callArgs []*TweetRepositoryMockUpdateTextParams
+	mutex    sync.RWMutex
+}
+
+// TweetRepositoryMockUpdateTextExpectation specifies expectation struct of the TweetRepository.UpdateText
+type TweetRepositoryMockUpdateTextExpectation struct {
+	mock    *TweetRepositoryMock
+	params  *TweetRepositoryMockUpdateTextParams
+	results *TweetRepositoryMockUpdateTextResults
+	Counter uint64
+}
+
+// TweetRepositoryMockUpdateTextParams contains parameters of the TweetRepository.UpdateText
+type TweetRepositoryMockUpdateTextParams struct {
+	tweetID int
+	newText string
+}
+
+// TweetRepositoryMockUpdateTextResults contains results of the TweetRepository.UpdateText
+type TweetRepositoryMockUpdateTextResults struct {
+	err error
+}
+
+// Expect sets up expected params for TweetRepository.UpdateText
+func (mmUpdateText *mTweetRepositoryMockUpdateText) Expect(tweetID int, newText string) *mTweetRepositoryMockUpdateText {
+	if mmUpdateText.mock.funcUpdateText != nil {
+		mmUpdateText.mock.t.Fatalf("TweetRepositoryMock.UpdateText mock is already set by Set")
+	}
+
+	if mmUpdateText.defaultExpectation == nil {
+		mmUpdateText.defaultExpectation = &TweetRepositoryMockUpdateTextExpectation{}
+	}
+
+	mmUpdateText.defaultExpectation.params = &TweetRepositoryMockUpdateTextParams{tweetID, newText}
+	for _, e := range mmUpdateText.expectations {
+		if minimock.Equal(e.params, mmUpdateText.defaultExpectation.params) {
+			mmUpdateText.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmUpdateText.defaultExpectation.params)
+		}
+	}
+
+	return mmUpdateText
+}
+
+// Inspect accepts an inspector function that has same arguments as the TweetRepository.UpdateText
+func (mmUpdateText *mTweetRepositoryMockUpdateText) Inspect(f func(tweetID int, newText string)) *mTweetRepositoryMockUpdateText {
+	if mmUpdateText.mock.inspectFuncUpdateText != nil {
+		mmUpdateText.mock.t.Fatalf("Inspect function is already set for TweetRepositoryMock.UpdateText")
+	}
+
+	mmUpdateText.mock.inspectFuncUpdateText = f
+
+	return mmUpdateText
+}
+
+// Return sets up results that will be returned by TweetRepository.UpdateText
+func (mmUpdateText *mTweetRepositoryMockUpdateText) Return(err error) *TweetRepositoryMock {
+	if mmUpdateText.mock.funcUpdateText != nil {
+		mmUpdateText.mock.t.Fatalf("TweetRepositoryMock.UpdateText mock is already set by Set")
+	}
+
+	if mmUpdateText.defaultExpectation == nil {
+		mmUpdateText.defaultExpectation = &TweetRepositoryMockUpdateTextExpectation{mock: mmUpdateText.mock}
+	}
+	mmUpdateText.defaultExpectation.results = &TweetRepositoryMockUpdateTextResults{err}
+	return mmUpdateText.mock
+}
+
+//Set uses given function f to mock the TweetRepository.UpdateText method
+func (mmUpdateText *mTweetRepositoryMockUpdateText) Set(f func(tweetID int, newText string) (err error)) *TweetRepositoryMock {
+	if mmUpdateText.defaultExpectation != nil {
+		mmUpdateText.mock.t.Fatalf("Default expectation is already set for the TweetRepository.UpdateText method")
+	}
+
+	if len(mmUpdateText.expectations) > 0 {
+		mmUpdateText.mock.t.Fatalf("Some expectations are already set for the TweetRepository.UpdateText method")
+	}
+
+	mmUpdateText.mock.funcUpdateText = f
+	return mmUpdateText.mock
+}
+
+// When sets expectation for the TweetRepository.UpdateText which will trigger the result defined by the following
+// Then helper
+func (mmUpdateText *mTweetRepositoryMockUpdateText) When(tweetID int, newText string) *TweetRepositoryMockUpdateTextExpectation {
+	if mmUpdateText.mock.funcUpdateText != nil {
+		mmUpdateText.mock.t.Fatalf("TweetRepositoryMock.UpdateText mock is already set by Set")
+	}
+
+	expectation := &TweetRepositoryMockUpdateTextExpectation{
+		mock:   mmUpdateText.mock,
+		params: &TweetRepositoryMockUpdateTextParams{tweetID, newText},
+	}
+	mmUpdateText.expectations = append(mmUpdateText.expectations, expectation)
+	return expectation
+}
+
+// Then sets up TweetRepository.UpdateText return parameters for the expectation previously defined by the When method
+func (e *TweetRepositoryMockUpdateTextExpectation) Then(err error) *TweetRepositoryMock {
+	e.results = &TweetRepositoryMockUpdateTextResults{err}
+	return e.mock
+}
+
+// UpdateText implements twitter.TweetRepository
+func (mmUpdateText *TweetRepositoryMock) UpdateText(tweetID int, newText string) (err error) {
+	mm_atomic.AddUint64(&mmUpdateText.beforeUpdateTextCounter, 1)
+	defer mm_atomic.AddUint64(&mmUpdateText.afterUpdateTextCounter, 1)
+
+	if mmUpdateText.inspectFuncUpdateText != nil {
+		mmUpdateText.inspectFuncUpdateText(tweetID, newText)
+	}
+
+	mm_params := &TweetRepositoryMockUpdateTextParams{tweetID, newText}
+
+	// Record call args
+	mmUpdateText.UpdateTextMock.mutex.Lock()
+	mmUpdateText.UpdateTextMock.callArgs = append(mmUpdateText.UpdateTextMock.callArgs, mm_params)
+	mmUpdateText.UpdateTextMock.mutex.Unlock()
+
+	for _, e := range mmUpdateText.UpdateTextMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.err
+		}
+	}
+
+	if mmUpdateText.UpdateTextMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmUpdateText.UpdateTextMock.defaultExpectation.Counter, 1)
+		mm_want := mmUpdateText.UpdateTextMock.defaultExpectation.params
+		mm_got := TweetRepositoryMockUpdateTextParams{tweetID, newText}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmUpdateText.t.Errorf("TweetRepositoryMock.UpdateText got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmUpdateText.UpdateTextMock.defaultExpectation.results
+		if mm_results == nil {
+			mmUpdateText.t.Fatal("No results are set for the TweetRepositoryMock.UpdateText")
+		}
+		return (*mm_results).err
+	}
+	if mmUpdateText.funcUpdateText != nil {
+		return mmUpdateText.funcUpdateText(tweetID, newText)
+	}
+	mmUpdateText.t.Fatalf("Unexpected call to TweetRepositoryMock.UpdateText. %v %v", tweetID, newText)
+	return
+}
+
+// UpdateTextAfterCounter returns a count of finished TweetRepositoryMock.UpdateText invocations
+func (mmUpdateText *TweetRepositoryMock) UpdateTextAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmUpdateText.afterUpdateTextCounter)
+}
+
+// UpdateTextBeforeCounter returns a count of TweetRepositoryMock.UpdateText invocations
+func (mmUpdateText *TweetRepositoryMock) UpdateTextBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmUpdateText.beforeUpdateTextCounter)
+}
+
+// Calls returns a list of arguments used in each call to TweetRepositoryMock.UpdateText.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmUpdateText *mTweetRepositoryMockUpdateText) Calls() []*TweetRepositoryMockUpdateTextParams {
+	mmUpdateText.mutex.RLock()
+
+	argCopy := make([]*TweetRepositoryMockUpdateTextParams, len(mmUpdateText.callArgs))
+	copy(argCopy, mmUpdateText.callArgs)
+
+	mmUpdateText.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockUpdateTextDone returns true if the count of the UpdateText invocations corresponds
+// the number of defined expectations
+func (m *TweetRepositoryMock) MinimockUpdateTextDone() bool {
+	for _, e := range m.UpdateTextMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.UpdateTextMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterUpdateTextCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcUpdateText != nil && mm_atomic.LoadUint64(&m.afterUpdateTextCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockUpdateTextInspect logs each unmet expectation
+func (m *TweetRepositoryMock) MinimockUpdateTextInspect() {
+	for _, e := range m.UpdateTextMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to TweetRepositoryMock.UpdateText with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.UpdateTextMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterUpdateTextCounter) < 1 {
+		if m.UpdateTextMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to TweetRepositoryMock.UpdateText")
+		} else {
+			m.t.Errorf("Expected call to TweetRepositoryMock.UpdateText with params: %#v", *m.UpdateTextMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcUpdateText != nil && mm_atomic.LoadUint64(&m.afterUpdateTextCounter) < 1 {
+		m.t.Error("Expected call to TweetRepositoryMock.UpdateText")
+	}
+}
+
 // MinimockFinish checks that all mocked methods have been called the expected number of times
 func (m *TweetRepositoryMock) MinimockFinish() {
 	if !m.minimockDone() {
 		m.MinimockAddInspect()
+
+		m.MinimockGetLatestFromUserInspect()
+
+		m.MinimockUpdateTextInspect()
 		m.t.FailNow()
 	}
 }
@@ -277,5 +733,7 @@ func (m *TweetRepositoryMock) MinimockWait(timeout mm_time.Duration) {
 func (m *TweetRepositoryMock) minimockDone() bool {
 	done := true
 	return done &&
-		m.MinimockAddDone()
+		m.MinimockAddDone() &&
+		m.MinimockGetLatestFromUserDone() &&
+		m.MinimockUpdateTextDone()
 }

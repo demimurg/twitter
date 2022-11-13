@@ -7,8 +7,8 @@ import (
 	mm_atomic "sync/atomic"
 	"time"
 	mm_time "time"
-	"github.com/demimurg/twitter/entity"
 
+	"github.com/demimurg/twitter/entity"
 	"github.com/gojuno/minimock/v3"
 )
 
@@ -16,8 +16,8 @@ import (
 type RegistratorMock struct {
 	t minimock.Tester
 
-	funcDeactivateUser          func(userID string) (err error)
-	inspectFuncDeactivateUser   func(userID string)
+	funcDeactivateUser          func(userID int) (err error)
+	inspectFuncDeactivateUser   func(userID int)
 	afterDeactivateUserCounter  uint64
 	beforeDeactivateUserCounter uint64
 	DeactivateUserMock          mRegistratorMockDeactivateUser
@@ -64,7 +64,7 @@ type RegistratorMockDeactivateUserExpectation struct {
 
 // RegistratorMockDeactivateUserParams contains parameters of the Registrator.DeactivateUser
 type RegistratorMockDeactivateUserParams struct {
-	userID string
+	userID int
 }
 
 // RegistratorMockDeactivateUserResults contains results of the Registrator.DeactivateUser
@@ -73,7 +73,7 @@ type RegistratorMockDeactivateUserResults struct {
 }
 
 // Expect sets up expected params for Registrator.DeactivateUser
-func (mmDeactivateUser *mRegistratorMockDeactivateUser) Expect(userID string) *mRegistratorMockDeactivateUser {
+func (mmDeactivateUser *mRegistratorMockDeactivateUser) Expect(userID int) *mRegistratorMockDeactivateUser {
 	if mmDeactivateUser.mock.funcDeactivateUser != nil {
 		mmDeactivateUser.mock.t.Fatalf("RegistratorMock.DeactivateUser mock is already set by Set")
 	}
@@ -93,7 +93,7 @@ func (mmDeactivateUser *mRegistratorMockDeactivateUser) Expect(userID string) *m
 }
 
 // Inspect accepts an inspector function that has same arguments as the Registrator.DeactivateUser
-func (mmDeactivateUser *mRegistratorMockDeactivateUser) Inspect(f func(userID string)) *mRegistratorMockDeactivateUser {
+func (mmDeactivateUser *mRegistratorMockDeactivateUser) Inspect(f func(userID int)) *mRegistratorMockDeactivateUser {
 	if mmDeactivateUser.mock.inspectFuncDeactivateUser != nil {
 		mmDeactivateUser.mock.t.Fatalf("Inspect function is already set for RegistratorMock.DeactivateUser")
 	}
@@ -117,7 +117,7 @@ func (mmDeactivateUser *mRegistratorMockDeactivateUser) Return(err error) *Regis
 }
 
 //Set uses given function f to mock the Registrator.DeactivateUser method
-func (mmDeactivateUser *mRegistratorMockDeactivateUser) Set(f func(userID string) (err error)) *RegistratorMock {
+func (mmDeactivateUser *mRegistratorMockDeactivateUser) Set(f func(userID int) (err error)) *RegistratorMock {
 	if mmDeactivateUser.defaultExpectation != nil {
 		mmDeactivateUser.mock.t.Fatalf("Default expectation is already set for the Registrator.DeactivateUser method")
 	}
@@ -132,7 +132,7 @@ func (mmDeactivateUser *mRegistratorMockDeactivateUser) Set(f func(userID string
 
 // When sets expectation for the Registrator.DeactivateUser which will trigger the result defined by the following
 // Then helper
-func (mmDeactivateUser *mRegistratorMockDeactivateUser) When(userID string) *RegistratorMockDeactivateUserExpectation {
+func (mmDeactivateUser *mRegistratorMockDeactivateUser) When(userID int) *RegistratorMockDeactivateUserExpectation {
 	if mmDeactivateUser.mock.funcDeactivateUser != nil {
 		mmDeactivateUser.mock.t.Fatalf("RegistratorMock.DeactivateUser mock is already set by Set")
 	}
@@ -152,7 +152,7 @@ func (e *RegistratorMockDeactivateUserExpectation) Then(err error) *RegistratorM
 }
 
 // DeactivateUser implements twitter.Registrator
-func (mmDeactivateUser *RegistratorMock) DeactivateUser(userID string) (err error) {
+func (mmDeactivateUser *RegistratorMock) DeactivateUser(userID int) (err error) {
 	mm_atomic.AddUint64(&mmDeactivateUser.beforeDeactivateUserCounter, 1)
 	defer mm_atomic.AddUint64(&mmDeactivateUser.afterDeactivateUserCounter, 1)
 

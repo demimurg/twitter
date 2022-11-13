@@ -4,19 +4,34 @@
 Стандартный шаблон для табличных тестов выглядит следующим образом:
 ```go
 func Test_Template(t *testing.T) {
-	t.Parallel()
+	type mocks struct {
+		// *mock.OneMock
+		// *mock.TwoMock
+	}
+	// you need to create feed manager and mocks for each testcase
+	setup := func(t *testing.T, expect func(mocks)) Some {
+		mc := minimock.NewController(t)
+		t.Cleanup(mc.Finish)
+
+		m := mocks{
+			// mock.NewOneMock(mc), mock.NewTwoMock(mc),
+		}
+		expect(m)
+
+		return &some{
+			// one: m.OneMock,
+			// two: m.TwoMock,
+		}
+	}
 
 	var (
-		_ = "fake"
+		_ = "fake variable"
 	)
 
-	type mocks struct {
-		// *mock.SomeInterfaceMock
-	}
 	testCases := []struct {
 		name string
 		// your args
-		setup func(mocks)
+		expect func(mocks)
 		// want value
 		wantError bool
 	}{
@@ -28,17 +43,8 @@ func Test_Template(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			mc := minimock.NewController(t)
-			defer mc.Finish()
-			m := mocks{
-				// mock.NewSomeInterfaceMock(mc)
-			}
-			tc.setup(m)
-
-			// init your usecase using mock interfaces
-			// someUsecase := usecase{m.SomeInterface}
-			// err := someUsecase.CallMethod(tc.arg)
-			var err error
+			someUsecase := setup(t, tc.expect)
+			err := someUsecase.CallMethod(tc.arg)
 			assert.Equal(t, tc.wantError, err != nil, "not expected error: %v", err)
 		})
 	}

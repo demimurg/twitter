@@ -30,7 +30,7 @@ func init() {
 	buildLogger()
 }
 
-// SetLevel will parse and set "ERROR", "INFO" or "DEBUG" levels. Any case accepted
+// SetLevel will parse and set "debug/info/error" levels. Any case accepted
 func SetLevel(name string) {
 	var err error
 	cfg.Level, err = zap.ParseAtomicLevel(name)
@@ -84,7 +84,7 @@ func Info(ctx context.Context, msg string, keyVal ...any) {
 	from(ctx).Infow(msg, keyVal...)
 }
 
-// Error used to handle exceptional case. You can use `Error(ctx, "some msg", err)` as shorthand for `Error(ctx, "some msg", "error", err)``
+// Error used to handle exceptional case. You can use `Error(ctx, "some msg", err)` as shorthand for `Error(ctx, "some msg", "error", err)“
 func Error(ctx context.Context, msg string, keyVal ...any) {
 	if len(keyVal) > 0 {
 		err, ok := keyVal[0].(error)

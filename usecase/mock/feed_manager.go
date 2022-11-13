@@ -6,8 +6,8 @@ import (
 	"sync"
 	mm_atomic "sync/atomic"
 	mm_time "time"
-	"github.com/demimurg/twitter/entity"
 
+	"github.com/demimurg/twitter/entity"
 	"github.com/gojuno/minimock/v3"
 )
 
@@ -15,29 +15,41 @@ import (
 type FeedManagerMock struct {
 	t minimock.Tester
 
-	funcAddNewTweet          func(userID string, text string) (err error)
-	inspectFuncAddNewTweet   func(userID string, text string)
+	funcAddFollower          func(userID int, toUserID int) (err error)
+	inspectFuncAddFollower   func(userID int, toUserID int)
+	afterAddFollowerCounter  uint64
+	beforeAddFollowerCounter uint64
+	AddFollowerMock          mFeedManagerMockAddFollower
+
+	funcAddNewTweet          func(userID int, text string) (err error)
+	inspectFuncAddNewTweet   func(userID int, text string)
 	afterAddNewTweetCounter  uint64
 	beforeAddNewTweetCounter uint64
 	AddNewTweetMock          mFeedManagerMockAddNewTweet
 
-	funcEditComment          func(commentID string, text string) (err error)
-	inspectFuncEditComment   func(commentID string, text string)
+	funcEditComment          func(commentID int, text string) (err error)
+	inspectFuncEditComment   func(commentID int, text string)
 	afterEditCommentCounter  uint64
 	beforeEditCommentCounter uint64
 	EditCommentMock          mFeedManagerMockEditComment
 
-	funcEditTweet          func(messageID string, text string) (err error)
-	inspectFuncEditTweet   func(messageID string, text string)
+	funcEditTweet          func(tweetID int, text string) (err error)
+	inspectFuncEditTweet   func(tweetID int, text string)
 	afterEditTweetCounter  uint64
 	beforeEditTweetCounter uint64
 	EditTweetMock          mFeedManagerMockEditTweet
 
-	funcGiveNewsFeed          func(userID string) (np1 *entity.NewsFeed, err error)
-	inspectFuncGiveNewsFeed   func(userID string)
+	funcGiveNewsFeed          func(userID int) (ta1 []entity.Tweet, err error)
+	inspectFuncGiveNewsFeed   func(userID int)
 	afterGiveNewsFeedCounter  uint64
 	beforeGiveNewsFeedCounter uint64
 	GiveNewsFeedMock          mFeedManagerMockGiveNewsFeed
+
+	funcRemoveFollower          func(userID int, fromUserID int) (err error)
+	inspectFuncRemoveFollower   func(userID int, fromUserID int)
+	afterRemoveFollowerCounter  uint64
+	beforeRemoveFollowerCounter uint64
+	RemoveFollowerMock          mFeedManagerMockRemoveFollower
 }
 
 // NewFeedManagerMock returns a mock for twitter.FeedManager
@@ -46,6 +58,9 @@ func NewFeedManagerMock(t minimock.Tester) *FeedManagerMock {
 	if controller, ok := t.(minimock.MockController); ok {
 		controller.RegisterMocker(m)
 	}
+
+	m.AddFollowerMock = mFeedManagerMockAddFollower{mock: m}
+	m.AddFollowerMock.callArgs = []*FeedManagerMockAddFollowerParams{}
 
 	m.AddNewTweetMock = mFeedManagerMockAddNewTweet{mock: m}
 	m.AddNewTweetMock.callArgs = []*FeedManagerMockAddNewTweetParams{}
@@ -59,7 +74,226 @@ func NewFeedManagerMock(t minimock.Tester) *FeedManagerMock {
 	m.GiveNewsFeedMock = mFeedManagerMockGiveNewsFeed{mock: m}
 	m.GiveNewsFeedMock.callArgs = []*FeedManagerMockGiveNewsFeedParams{}
 
+	m.RemoveFollowerMock = mFeedManagerMockRemoveFollower{mock: m}
+	m.RemoveFollowerMock.callArgs = []*FeedManagerMockRemoveFollowerParams{}
+
 	return m
+}
+
+type mFeedManagerMockAddFollower struct {
+	mock               *FeedManagerMock
+	defaultExpectation *FeedManagerMockAddFollowerExpectation
+	expectations       []*FeedManagerMockAddFollowerExpectation
+
+	callArgs []*FeedManagerMockAddFollowerParams
+	mutex    sync.RWMutex
+}
+
+// FeedManagerMockAddFollowerExpectation specifies expectation struct of the FeedManager.AddFollower
+type FeedManagerMockAddFollowerExpectation struct {
+	mock    *FeedManagerMock
+	params  *FeedManagerMockAddFollowerParams
+	results *FeedManagerMockAddFollowerResults
+	Counter uint64
+}
+
+// FeedManagerMockAddFollowerParams contains parameters of the FeedManager.AddFollower
+type FeedManagerMockAddFollowerParams struct {
+	userID   int
+	toUserID int
+}
+
+// FeedManagerMockAddFollowerResults contains results of the FeedManager.AddFollower
+type FeedManagerMockAddFollowerResults struct {
+	err error
+}
+
+// Expect sets up expected params for FeedManager.AddFollower
+func (mmAddFollower *mFeedManagerMockAddFollower) Expect(userID int, toUserID int) *mFeedManagerMockAddFollower {
+	if mmAddFollower.mock.funcAddFollower != nil {
+		mmAddFollower.mock.t.Fatalf("FeedManagerMock.AddFollower mock is already set by Set")
+	}
+
+	if mmAddFollower.defaultExpectation == nil {
+		mmAddFollower.defaultExpectation = &FeedManagerMockAddFollowerExpectation{}
+	}
+
+	mmAddFollower.defaultExpectation.params = &FeedManagerMockAddFollowerParams{userID, toUserID}
+	for _, e := range mmAddFollower.expectations {
+		if minimock.Equal(e.params, mmAddFollower.defaultExpectation.params) {
+			mmAddFollower.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmAddFollower.defaultExpectation.params)
+		}
+	}
+
+	return mmAddFollower
+}
+
+// Inspect accepts an inspector function that has same arguments as the FeedManager.AddFollower
+func (mmAddFollower *mFeedManagerMockAddFollower) Inspect(f func(userID int, toUserID int)) *mFeedManagerMockAddFollower {
+	if mmAddFollower.mock.inspectFuncAddFollower != nil {
+		mmAddFollower.mock.t.Fatalf("Inspect function is already set for FeedManagerMock.AddFollower")
+	}
+
+	mmAddFollower.mock.inspectFuncAddFollower = f
+
+	return mmAddFollower
+}
+
+// Return sets up results that will be returned by FeedManager.AddFollower
+func (mmAddFollower *mFeedManagerMockAddFollower) Return(err error) *FeedManagerMock {
+	if mmAddFollower.mock.funcAddFollower != nil {
+		mmAddFollower.mock.t.Fatalf("FeedManagerMock.AddFollower mock is already set by Set")
+	}
+
+	if mmAddFollower.defaultExpectation == nil {
+		mmAddFollower.defaultExpectation = &FeedManagerMockAddFollowerExpectation{mock: mmAddFollower.mock}
+	}
+	mmAddFollower.defaultExpectation.results = &FeedManagerMockAddFollowerResults{err}
+	return mmAddFollower.mock
+}
+
+//Set uses given function f to mock the FeedManager.AddFollower method
+func (mmAddFollower *mFeedManagerMockAddFollower) Set(f func(userID int, toUserID int) (err error)) *FeedManagerMock {
+	if mmAddFollower.defaultExpectation != nil {
+		mmAddFollower.mock.t.Fatalf("Default expectation is already set for the FeedManager.AddFollower method")
+	}
+
+	if len(mmAddFollower.expectations) > 0 {
+		mmAddFollower.mock.t.Fatalf("Some expectations are already set for the FeedManager.AddFollower method")
+	}
+
+	mmAddFollower.mock.funcAddFollower = f
+	return mmAddFollower.mock
+}
+
+// When sets expectation for the FeedManager.AddFollower which will trigger the result defined by the following
+// Then helper
+func (mmAddFollower *mFeedManagerMockAddFollower) When(userID int, toUserID int) *FeedManagerMockAddFollowerExpectation {
+	if mmAddFollower.mock.funcAddFollower != nil {
+		mmAddFollower.mock.t.Fatalf("FeedManagerMock.AddFollower mock is already set by Set")
+	}
+
+	expectation := &FeedManagerMockAddFollowerExpectation{
+		mock:   mmAddFollower.mock,
+		params: &FeedManagerMockAddFollowerParams{userID, toUserID},
+	}
+	mmAddFollower.expectations = append(mmAddFollower.expectations, expectation)
+	return expectation
+}
+
+// Then sets up FeedManager.AddFollower return parameters for the expectation previously defined by the When method
+func (e *FeedManagerMockAddFollowerExpectation) Then(err error) *FeedManagerMock {
+	e.results = &FeedManagerMockAddFollowerResults{err}
+	return e.mock
+}
+
+// AddFollower implements twitter.FeedManager
+func (mmAddFollower *FeedManagerMock) AddFollower(userID int, toUserID int) (err error) {
+	mm_atomic.AddUint64(&mmAddFollower.beforeAddFollowerCounter, 1)
+	defer mm_atomic.AddUint64(&mmAddFollower.afterAddFollowerCounter, 1)
+
+	if mmAddFollower.inspectFuncAddFollower != nil {
+		mmAddFollower.inspectFuncAddFollower(userID, toUserID)
+	}
+
+	mm_params := &FeedManagerMockAddFollowerParams{userID, toUserID}
+
+	// Record call args
+	mmAddFollower.AddFollowerMock.mutex.Lock()
+	mmAddFollower.AddFollowerMock.callArgs = append(mmAddFollower.AddFollowerMock.callArgs, mm_params)
+	mmAddFollower.AddFollowerMock.mutex.Unlock()
+
+	for _, e := range mmAddFollower.AddFollowerMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.err
+		}
+	}
+
+	if mmAddFollower.AddFollowerMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmAddFollower.AddFollowerMock.defaultExpectation.Counter, 1)
+		mm_want := mmAddFollower.AddFollowerMock.defaultExpectation.params
+		mm_got := FeedManagerMockAddFollowerParams{userID, toUserID}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmAddFollower.t.Errorf("FeedManagerMock.AddFollower got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmAddFollower.AddFollowerMock.defaultExpectation.results
+		if mm_results == nil {
+			mmAddFollower.t.Fatal("No results are set for the FeedManagerMock.AddFollower")
+		}
+		return (*mm_results).err
+	}
+	if mmAddFollower.funcAddFollower != nil {
+		return mmAddFollower.funcAddFollower(userID, toUserID)
+	}
+	mmAddFollower.t.Fatalf("Unexpected call to FeedManagerMock.AddFollower. %v %v", userID, toUserID)
+	return
+}
+
+// AddFollowerAfterCounter returns a count of finished FeedManagerMock.AddFollower invocations
+func (mmAddFollower *FeedManagerMock) AddFollowerAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmAddFollower.afterAddFollowerCounter)
+}
+
+// AddFollowerBeforeCounter returns a count of FeedManagerMock.AddFollower invocations
+func (mmAddFollower *FeedManagerMock) AddFollowerBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmAddFollower.beforeAddFollowerCounter)
+}
+
+// Calls returns a list of arguments used in each call to FeedManagerMock.AddFollower.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmAddFollower *mFeedManagerMockAddFollower) Calls() []*FeedManagerMockAddFollowerParams {
+	mmAddFollower.mutex.RLock()
+
+	argCopy := make([]*FeedManagerMockAddFollowerParams, len(mmAddFollower.callArgs))
+	copy(argCopy, mmAddFollower.callArgs)
+
+	mmAddFollower.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockAddFollowerDone returns true if the count of the AddFollower invocations corresponds
+// the number of defined expectations
+func (m *FeedManagerMock) MinimockAddFollowerDone() bool {
+	for _, e := range m.AddFollowerMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.AddFollowerMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterAddFollowerCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcAddFollower != nil && mm_atomic.LoadUint64(&m.afterAddFollowerCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockAddFollowerInspect logs each unmet expectation
+func (m *FeedManagerMock) MinimockAddFollowerInspect() {
+	for _, e := range m.AddFollowerMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to FeedManagerMock.AddFollower with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.AddFollowerMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterAddFollowerCounter) < 1 {
+		if m.AddFollowerMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to FeedManagerMock.AddFollower")
+		} else {
+			m.t.Errorf("Expected call to FeedManagerMock.AddFollower with params: %#v", *m.AddFollowerMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcAddFollower != nil && mm_atomic.LoadUint64(&m.afterAddFollowerCounter) < 1 {
+		m.t.Error("Expected call to FeedManagerMock.AddFollower")
+	}
 }
 
 type mFeedManagerMockAddNewTweet struct {
@@ -81,7 +315,7 @@ type FeedManagerMockAddNewTweetExpectation struct {
 
 // FeedManagerMockAddNewTweetParams contains parameters of the FeedManager.AddNewTweet
 type FeedManagerMockAddNewTweetParams struct {
-	userID string
+	userID int
 	text   string
 }
 
@@ -91,7 +325,7 @@ type FeedManagerMockAddNewTweetResults struct {
 }
 
 // Expect sets up expected params for FeedManager.AddNewTweet
-func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Expect(userID string, text string) *mFeedManagerMockAddNewTweet {
+func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Expect(userID int, text string) *mFeedManagerMockAddNewTweet {
 	if mmAddNewTweet.mock.funcAddNewTweet != nil {
 		mmAddNewTweet.mock.t.Fatalf("FeedManagerMock.AddNewTweet mock is already set by Set")
 	}
@@ -111,7 +345,7 @@ func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Expect(userID string, text str
 }
 
 // Inspect accepts an inspector function that has same arguments as the FeedManager.AddNewTweet
-func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Inspect(f func(userID string, text string)) *mFeedManagerMockAddNewTweet {
+func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Inspect(f func(userID int, text string)) *mFeedManagerMockAddNewTweet {
 	if mmAddNewTweet.mock.inspectFuncAddNewTweet != nil {
 		mmAddNewTweet.mock.t.Fatalf("Inspect function is already set for FeedManagerMock.AddNewTweet")
 	}
@@ -135,7 +369,7 @@ func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Return(err error) *FeedManager
 }
 
 //Set uses given function f to mock the FeedManager.AddNewTweet method
-func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Set(f func(userID string, text string) (err error)) *FeedManagerMock {
+func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Set(f func(userID int, text string) (err error)) *FeedManagerMock {
 	if mmAddNewTweet.defaultExpectation != nil {
 		mmAddNewTweet.mock.t.Fatalf("Default expectation is already set for the FeedManager.AddNewTweet method")
 	}
@@ -150,7 +384,7 @@ func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Set(f func(userID string, text
 
 // When sets expectation for the FeedManager.AddNewTweet which will trigger the result defined by the following
 // Then helper
-func (mmAddNewTweet *mFeedManagerMockAddNewTweet) When(userID string, text string) *FeedManagerMockAddNewTweetExpectation {
+func (mmAddNewTweet *mFeedManagerMockAddNewTweet) When(userID int, text string) *FeedManagerMockAddNewTweetExpectation {
 	if mmAddNewTweet.mock.funcAddNewTweet != nil {
 		mmAddNewTweet.mock.t.Fatalf("FeedManagerMock.AddNewTweet mock is already set by Set")
 	}
@@ -170,7 +404,7 @@ func (e *FeedManagerMockAddNewTweetExpectation) Then(err error) *FeedManagerMock
 }
 
 // AddNewTweet implements twitter.FeedManager
-func (mmAddNewTweet *FeedManagerMock) AddNewTweet(userID string, text string) (err error) {
+func (mmAddNewTweet *FeedManagerMock) AddNewTweet(userID int, text string) (err error) {
 	mm_atomic.AddUint64(&mmAddNewTweet.beforeAddNewTweetCounter, 1)
 	defer mm_atomic.AddUint64(&mmAddNewTweet.afterAddNewTweetCounter, 1)
 
@@ -297,7 +531,7 @@ type FeedManagerMockEditCommentExpectation struct {
 
 // FeedManagerMockEditCommentParams contains parameters of the FeedManager.EditComment
 type FeedManagerMockEditCommentParams struct {
-	commentID string
+	commentID int
 	text      string
 }
 
@@ -307,7 +541,7 @@ type FeedManagerMockEditCommentResults struct {
 }
 
 // Expect sets up expected params for FeedManager.EditComment
-func (mmEditComment *mFeedManagerMockEditComment) Expect(commentID string, text string) *mFeedManagerMockEditComment {
+func (mmEditComment *mFeedManagerMockEditComment) Expect(commentID int, text string) *mFeedManagerMockEditComment {
 	if mmEditComment.mock.funcEditComment != nil {
 		mmEditComment.mock.t.Fatalf("FeedManagerMock.EditComment mock is already set by Set")
 	}
@@ -327,7 +561,7 @@ func (mmEditComment *mFeedManagerMockEditComment) Expect(commentID string, text 
 }
 
 // Inspect accepts an inspector function that has same arguments as the FeedManager.EditComment
-func (mmEditComment *mFeedManagerMockEditComment) Inspect(f func(commentID string, text string)) *mFeedManagerMockEditComment {
+func (mmEditComment *mFeedManagerMockEditComment) Inspect(f func(commentID int, text string)) *mFeedManagerMockEditComment {
 	if mmEditComment.mock.inspectFuncEditComment != nil {
 		mmEditComment.mock.t.Fatalf("Inspect function is already set for FeedManagerMock.EditComment")
 	}
@@ -351,7 +585,7 @@ func (mmEditComment *mFeedManagerMockEditComment) Return(err error) *FeedManager
 }
 
 //Set uses given function f to mock the FeedManager.EditComment method
-func (mmEditComment *mFeedManagerMockEditComment) Set(f func(commentID string, text string) (err error)) *FeedManagerMock {
+func (mmEditComment *mFeedManagerMockEditComment) Set(f func(commentID int, text string) (err error)) *FeedManagerMock {
 	if mmEditComment.defaultExpectation != nil {
 		mmEditComment.mock.t.Fatalf("Default expectation is already set for the FeedManager.EditComment method")
 	}
@@ -366,7 +600,7 @@ func (mmEditComment *mFeedManagerMockEditComment) Set(f func(commentID string, t
 
 // When sets expectation for the FeedManager.EditComment which will trigger the result defined by the following
 // Then helper
-func (mmEditComment *mFeedManagerMockEditComment) When(commentID string, text string) *FeedManagerMockEditCommentExpectation {
+func (mmEditComment *mFeedManagerMockEditComment) When(commentID int, text string) *FeedManagerMockEditCommentExpectation {
 	if mmEditComment.mock.funcEditComment != nil {
 		mmEditComment.mock.t.Fatalf("FeedManagerMock.EditComment mock is already set by Set")
 	}
@@ -386,7 +620,7 @@ func (e *FeedManagerMockEditCommentExpectation) Then(err error) *FeedManagerMock
 }
 
 // EditComment implements twitter.FeedManager
-func (mmEditComment *FeedManagerMock) EditComment(commentID string, text string) (err error) {
+func (mmEditComment *FeedManagerMock) EditComment(commentID int, text string) (err error) {
 	mm_atomic.AddUint64(&mmEditComment.beforeEditCommentCounter, 1)
 	defer mm_atomic.AddUint64(&mmEditComment.afterEditCommentCounter, 1)
 
@@ -513,8 +747,8 @@ type FeedManagerMockEditTweetExpectation struct {
 
 // FeedManagerMockEditTweetParams contains parameters of the FeedManager.EditTweet
 type FeedManagerMockEditTweetParams struct {
-	messageID string
-	text      string
+	tweetID int
+	text    string
 }
 
 // FeedManagerMockEditTweetResults contains results of the FeedManager.EditTweet
@@ -523,7 +757,7 @@ type FeedManagerMockEditTweetResults struct {
 }
 
 // Expect sets up expected params for FeedManager.EditTweet
-func (mmEditTweet *mFeedManagerMockEditTweet) Expect(messageID string, text string) *mFeedManagerMockEditTweet {
+func (mmEditTweet *mFeedManagerMockEditTweet) Expect(tweetID int, text string) *mFeedManagerMockEditTweet {
 	if mmEditTweet.mock.funcEditTweet != nil {
 		mmEditTweet.mock.t.Fatalf("FeedManagerMock.EditTweet mock is already set by Set")
 	}
@@ -532,7 +766,7 @@ func (mmEditTweet *mFeedManagerMockEditTweet) Expect(messageID string, text stri
 		mmEditTweet.defaultExpectation = &FeedManagerMockEditTweetExpectation{}
 	}
 
-	mmEditTweet.defaultExpectation.params = &FeedManagerMockEditTweetParams{messageID, text}
+	mmEditTweet.defaultExpectation.params = &FeedManagerMockEditTweetParams{tweetID, text}
 	for _, e := range mmEditTweet.expectations {
 		if minimock.Equal(e.params, mmEditTweet.defaultExpectation.params) {
 			mmEditTweet.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmEditTweet.defaultExpectation.params)
@@ -543,7 +777,7 @@ func (mmEditTweet *mFeedManagerMockEditTweet) Expect(messageID string, text stri
 }
 
 // Inspect accepts an inspector function that has same arguments as the FeedManager.EditTweet
-func (mmEditTweet *mFeedManagerMockEditTweet) Inspect(f func(messageID string, text string)) *mFeedManagerMockEditTweet {
+func (mmEditTweet *mFeedManagerMockEditTweet) Inspect(f func(tweetID int, text string)) *mFeedManagerMockEditTweet {
 	if mmEditTweet.mock.inspectFuncEditTweet != nil {
 		mmEditTweet.mock.t.Fatalf("Inspect function is already set for FeedManagerMock.EditTweet")
 	}
@@ -567,7 +801,7 @@ func (mmEditTweet *mFeedManagerMockEditTweet) Return(err error) *FeedManagerMock
 }
 
 //Set uses given function f to mock the FeedManager.EditTweet method
-func (mmEditTweet *mFeedManagerMockEditTweet) Set(f func(messageID string, text string) (err error)) *FeedManagerMock {
+func (mmEditTweet *mFeedManagerMockEditTweet) Set(f func(tweetID int, text string) (err error)) *FeedManagerMock {
 	if mmEditTweet.defaultExpectation != nil {
 		mmEditTweet.mock.t.Fatalf("Default expectation is already set for the FeedManager.EditTweet method")
 	}
@@ -582,14 +816,14 @@ func (mmEditTweet *mFeedManagerMockEditTweet) Set(f func(messageID string, text 
 
 // When sets expectation for the FeedManager.EditTweet which will trigger the result defined by the following
 // Then helper
-func (mmEditTweet *mFeedManagerMockEditTweet) When(messageID string, text string) *FeedManagerMockEditTweetExpectation {
+func (mmEditTweet *mFeedManagerMockEditTweet) When(tweetID int, text string) *FeedManagerMockEditTweetExpectation {
 	if mmEditTweet.mock.funcEditTweet != nil {
 		mmEditTweet.mock.t.Fatalf("FeedManagerMock.EditTweet mock is already set by Set")
 	}
 
 	expectation := &FeedManagerMockEditTweetExpectation{
 		mock:   mmEditTweet.mock,
-		params: &FeedManagerMockEditTweetParams{messageID, text},
+		params: &FeedManagerMockEditTweetParams{tweetID, text},
 	}
 	mmEditTweet.expectations = append(mmEditTweet.expectations, expectation)
 	return expectation
@@ -602,15 +836,15 @@ func (e *FeedManagerMockEditTweetExpectation) Then(err error) *FeedManagerMock {
 }
 
 // EditTweet implements twitter.FeedManager
-func (mmEditTweet *FeedManagerMock) EditTweet(messageID string, text string) (err error) {
+func (mmEditTweet *FeedManagerMock) EditTweet(tweetID int, text string) (err error) {
 	mm_atomic.AddUint64(&mmEditTweet.beforeEditTweetCounter, 1)
 	defer mm_atomic.AddUint64(&mmEditTweet.afterEditTweetCounter, 1)
 
 	if mmEditTweet.inspectFuncEditTweet != nil {
-		mmEditTweet.inspectFuncEditTweet(messageID, text)
+		mmEditTweet.inspectFuncEditTweet(tweetID, text)
 	}
 
-	mm_params := &FeedManagerMockEditTweetParams{messageID, text}
+	mm_params := &FeedManagerMockEditTweetParams{tweetID, text}
 
 	// Record call args
 	mmEditTweet.EditTweetMock.mutex.Lock()
@@ -627,7 +861,7 @@ func (mmEditTweet *FeedManagerMock) EditTweet(messageID string, text string) (er
 	if mmEditTweet.EditTweetMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmEditTweet.EditTweetMock.defaultExpectation.Counter, 1)
 		mm_want := mmEditTweet.EditTweetMock.defaultExpectation.params
-		mm_got := FeedManagerMockEditTweetParams{messageID, text}
+		mm_got := FeedManagerMockEditTweetParams{tweetID, text}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
 			mmEditTweet.t.Errorf("FeedManagerMock.EditTweet got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
@@ -639,9 +873,9 @@ func (mmEditTweet *FeedManagerMock) EditTweet(messageID string, text string) (er
 		return (*mm_results).err
 	}
 	if mmEditTweet.funcEditTweet != nil {
-		return mmEditTweet.funcEditTweet(messageID, text)
+		return mmEditTweet.funcEditTweet(tweetID, text)
 	}
-	mmEditTweet.t.Fatalf("Unexpected call to FeedManagerMock.EditTweet. %v %v", messageID, text)
+	mmEditTweet.t.Fatalf("Unexpected call to FeedManagerMock.EditTweet. %v %v", tweetID, text)
 	return
 }
 
@@ -729,17 +963,17 @@ type FeedManagerMockGiveNewsFeedExpectation struct {
 
 // FeedManagerMockGiveNewsFeedParams contains parameters of the FeedManager.GiveNewsFeed
 type FeedManagerMockGiveNewsFeedParams struct {
-	userID string
+	userID int
 }
 
 // FeedManagerMockGiveNewsFeedResults contains results of the FeedManager.GiveNewsFeed
 type FeedManagerMockGiveNewsFeedResults struct {
-	np1 *entity.NewsFeed
+	ta1 []entity.Tweet
 	err error
 }
 
 // Expect sets up expected params for FeedManager.GiveNewsFeed
-func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Expect(userID string) *mFeedManagerMockGiveNewsFeed {
+func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Expect(userID int) *mFeedManagerMockGiveNewsFeed {
 	if mmGiveNewsFeed.mock.funcGiveNewsFeed != nil {
 		mmGiveNewsFeed.mock.t.Fatalf("FeedManagerMock.GiveNewsFeed mock is already set by Set")
 	}
@@ -759,7 +993,7 @@ func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Expect(userID string) *mFeed
 }
 
 // Inspect accepts an inspector function that has same arguments as the FeedManager.GiveNewsFeed
-func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Inspect(f func(userID string)) *mFeedManagerMockGiveNewsFeed {
+func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Inspect(f func(userID int)) *mFeedManagerMockGiveNewsFeed {
 	if mmGiveNewsFeed.mock.inspectFuncGiveNewsFeed != nil {
 		mmGiveNewsFeed.mock.t.Fatalf("Inspect function is already set for FeedManagerMock.GiveNewsFeed")
 	}
@@ -770,7 +1004,7 @@ func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Inspect(f func(userID string
 }
 
 // Return sets up results that will be returned by FeedManager.GiveNewsFeed
-func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Return(np1 *entity.NewsFeed, err error) *FeedManagerMock {
+func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Return(ta1 []entity.Tweet, err error) *FeedManagerMock {
 	if mmGiveNewsFeed.mock.funcGiveNewsFeed != nil {
 		mmGiveNewsFeed.mock.t.Fatalf("FeedManagerMock.GiveNewsFeed mock is already set by Set")
 	}
@@ -778,12 +1012,12 @@ func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Return(np1 *entity.NewsFeed,
 	if mmGiveNewsFeed.defaultExpectation == nil {
 		mmGiveNewsFeed.defaultExpectation = &FeedManagerMockGiveNewsFeedExpectation{mock: mmGiveNewsFeed.mock}
 	}
-	mmGiveNewsFeed.defaultExpectation.results = &FeedManagerMockGiveNewsFeedResults{np1, err}
+	mmGiveNewsFeed.defaultExpectation.results = &FeedManagerMockGiveNewsFeedResults{ta1, err}
 	return mmGiveNewsFeed.mock
 }
 
 //Set uses given function f to mock the FeedManager.GiveNewsFeed method
-func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Set(f func(userID string) (np1 *entity.NewsFeed, err error)) *FeedManagerMock {
+func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Set(f func(userID int) (ta1 []entity.Tweet, err error)) *FeedManagerMock {
 	if mmGiveNewsFeed.defaultExpectation != nil {
 		mmGiveNewsFeed.mock.t.Fatalf("Default expectation is already set for the FeedManager.GiveNewsFeed method")
 	}
@@ -798,7 +1032,7 @@ func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Set(f func(userID string) (n
 
 // When sets expectation for the FeedManager.GiveNewsFeed which will trigger the result defined by the following
 // Then helper
-func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) When(userID string) *FeedManagerMockGiveNewsFeedExpectation {
+func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) When(userID int) *FeedManagerMockGiveNewsFeedExpectation {
 	if mmGiveNewsFeed.mock.funcGiveNewsFeed != nil {
 		mmGiveNewsFeed.mock.t.Fatalf("FeedManagerMock.GiveNewsFeed mock is already set by Set")
 	}
@@ -812,13 +1046,13 @@ func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) When(userID string) *FeedMan
 }
 
 // Then sets up FeedManager.GiveNewsFeed return parameters for the expectation previously defined by the When method
-func (e *FeedManagerMockGiveNewsFeedExpectation) Then(np1 *entity.NewsFeed, err error) *FeedManagerMock {
-	e.results = &FeedManagerMockGiveNewsFeedResults{np1, err}
+func (e *FeedManagerMockGiveNewsFeedExpectation) Then(ta1 []entity.Tweet, err error) *FeedManagerMock {
+	e.results = &FeedManagerMockGiveNewsFeedResults{ta1, err}
 	return e.mock
 }
 
 // GiveNewsFeed implements twitter.FeedManager
-func (mmGiveNewsFeed *FeedManagerMock) GiveNewsFeed(userID string) (np1 *entity.NewsFeed, err error) {
+func (mmGiveNewsFeed *FeedManagerMock) GiveNewsFeed(userID int) (ta1 []entity.Tweet, err error) {
 	mm_atomic.AddUint64(&mmGiveNewsFeed.beforeGiveNewsFeedCounter, 1)
 	defer mm_atomic.AddUint64(&mmGiveNewsFeed.afterGiveNewsFeedCounter, 1)
 
@@ -836,7 +1070,7 @@ func (mmGiveNewsFeed *FeedManagerMock) GiveNewsFeed(userID string) (np1 *entity.
 	for _, e := range mmGiveNewsFeed.GiveNewsFeedMock.expectations {
 		if minimock.Equal(e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.np1, e.results.err
+			return e.results.ta1, e.results.err
 		}
 	}
 
@@ -852,7 +1086,7 @@ func (mmGiveNewsFeed *FeedManagerMock) GiveNewsFeed(userID string) (np1 *entity.
 		if mm_results == nil {
 			mmGiveNewsFeed.t.Fatal("No results are set for the FeedManagerMock.GiveNewsFeed")
 		}
-		return (*mm_results).np1, (*mm_results).err
+		return (*mm_results).ta1, (*mm_results).err
 	}
 	if mmGiveNewsFeed.funcGiveNewsFeed != nil {
 		return mmGiveNewsFeed.funcGiveNewsFeed(userID)
@@ -926,9 +1160,227 @@ func (m *FeedManagerMock) MinimockGiveNewsFeedInspect() {
 	}
 }
 
+type mFeedManagerMockRemoveFollower struct {
+	mock               *FeedManagerMock
+	defaultExpectation *FeedManagerMockRemoveFollowerExpectation
+	expectations       []*FeedManagerMockRemoveFollowerExpectation
+
+	callArgs []*FeedManagerMockRemoveFollowerParams
+	mutex    sync.RWMutex
+}
+
+// FeedManagerMockRemoveFollowerExpectation specifies expectation struct of the FeedManager.RemoveFollower
+type FeedManagerMockRemoveFollowerExpectation struct {
+	mock    *FeedManagerMock
+	params  *FeedManagerMockRemoveFollowerParams
+	results *FeedManagerMockRemoveFollowerResults
+	Counter uint64
+}
+
+// FeedManagerMockRemoveFollowerParams contains parameters of the FeedManager.RemoveFollower
+type FeedManagerMockRemoveFollowerParams struct {
+	userID     int
+	fromUserID int
+}
+
+// FeedManagerMockRemoveFollowerResults contains results of the FeedManager.RemoveFollower
+type FeedManagerMockRemoveFollowerResults struct {
+	err error
+}
+
+// Expect sets up expected params for FeedManager.RemoveFollower
+func (mmRemoveFollower *mFeedManagerMockRemoveFollower) Expect(userID int, fromUserID int) *mFeedManagerMockRemoveFollower {
+	if mmRemoveFollower.mock.funcRemoveFollower != nil {
+		mmRemoveFollower.mock.t.Fatalf("FeedManagerMock.RemoveFollower mock is already set by Set")
+	}
+
+	if mmRemoveFollower.defaultExpectation == nil {
+		mmRemoveFollower.defaultExpectation = &FeedManagerMockRemoveFollowerExpectation{}
+	}
+
+	mmRemoveFollower.defaultExpectation.params = &FeedManagerMockRemoveFollowerParams{userID, fromUserID}
+	for _, e := range mmRemoveFollower.expectations {
+		if minimock.Equal(e.params, mmRemoveFollower.defaultExpectation.params) {
+			mmRemoveFollower.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmRemoveFollower.defaultExpectation.params)
+		}
+	}
+
+	return mmRemoveFollower
+}
+
+// Inspect accepts an inspector function that has same arguments as the FeedManager.RemoveFollower
+func (mmRemoveFollower *mFeedManagerMockRemoveFollower) Inspect(f func(userID int, fromUserID int)) *mFeedManagerMockRemoveFollower {
+	if mmRemoveFollower.mock.inspectFuncRemoveFollower != nil {
+		mmRemoveFollower.mock.t.Fatalf("Inspect function is already set for FeedManagerMock.RemoveFollower")
+	}
+
+	mmRemoveFollower.mock.inspectFuncRemoveFollower = f
+
+	return mmRemoveFollower
+}
+
+// Return sets up results that will be returned by FeedManager.RemoveFollower
+func (mmRemoveFollower *mFeedManagerMockRemoveFollower) Return(err error) *FeedManagerMock {
+	if mmRemoveFollower.mock.funcRemoveFollower != nil {
+		mmRemoveFollower.mock.t.Fatalf("FeedManagerMock.RemoveFollower mock is already set by Set")
+	}
+
+	if mmRemoveFollower.defaultExpectation == nil {
+		mmRemoveFollower.defaultExpectation = &FeedManagerMockRemoveFollowerExpectation{mock: mmRemoveFollower.mock}
+	}
+	mmRemoveFollower.defaultExpectation.results = &FeedManagerMockRemoveFollowerResults{err}
+	return mmRemoveFollower.mock
+}
+
+//Set uses given function f to mock the FeedManager.RemoveFollower method
+func (mmRemoveFollower *mFeedManagerMockRemoveFollower) Set(f func(userID int, fromUserID int) (err error)) *FeedManagerMock {
+	if mmRemoveFollower.defaultExpectation != nil {
+		mmRemoveFollower.mock.t.Fatalf("Default expectation is already set for the FeedManager.RemoveFollower method")
+	}
+
+	if len(mmRemoveFollower.expectations) > 0 {
+		mmRemoveFollower.mock.t.Fatalf("Some expectations are already set for the FeedManager.RemoveFollower method")
+	}
+
+	mmRemoveFollower.mock.funcRemoveFollower = f
+	return mmRemoveFollower.mock
+}
+
+// When sets expectation for the FeedManager.RemoveFollower which will trigger the result defined by the following
+// Then helper
+func (mmRemoveFollower *mFeedManagerMockRemoveFollower) When(userID int, fromUserID int) *FeedManagerMockRemoveFollowerExpectation {
+	if mmRemoveFollower.mock.funcRemoveFollower != nil {
+		mmRemoveFollower.mock.t.Fatalf("FeedManagerMock.RemoveFollower mock is already set by Set")
+	}
+
+	expectation := &FeedManagerMockRemoveFollowerExpectation{
+		mock:   mmRemoveFollower.mock,
+		params: &FeedManagerMockRemoveFollowerParams{userID, fromUserID},
+	}
+	mmRemoveFollower.expectations = append(mmRemoveFollower.expectations, expectation)
+	return expectation
+}
+
+// Then sets up FeedManager.RemoveFollower return parameters for the expectation previously defined by the When method
+func (e *FeedManagerMockRemoveFollowerExpectation) Then(err error) *FeedManagerMock {
+	e.results = &FeedManagerMockRemoveFollowerResults{err}
+	return e.mock
+}
+
+// RemoveFollower implements twitter.FeedManager
+func (mmRemoveFollower *FeedManagerMock) RemoveFollower(userID int, fromUserID int) (err error) {
+	mm_atomic.AddUint64(&mmRemoveFollower.beforeRemoveFollowerCounter, 1)
+	defer mm_atomic.AddUint64(&mmRemoveFollower.afterRemoveFollowerCounter, 1)
+
+	if mmRemoveFollower.inspectFuncRemoveFollower != nil {
+		mmRemoveFollower.inspectFuncRemoveFollower(userID, fromUserID)
+	}
+
+	mm_params := &FeedManagerMockRemoveFollowerParams{userID, fromUserID}
+
+	// Record call args
+	mmRemoveFollower.RemoveFollowerMock.mutex.Lock()
+	mmRemoveFollower.RemoveFollowerMock.callArgs = append(mmRemoveFollower.RemoveFollowerMock.callArgs, mm_params)
+	mmRemoveFollower.RemoveFollowerMock.mutex.Unlock()
+
+	for _, e := range mmRemoveFollower.RemoveFollowerMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.err
+		}
+	}
+
+	if mmRemoveFollower.RemoveFollowerMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmRemoveFollower.RemoveFollowerMock.defaultExpectation.Counter, 1)
+		mm_want := mmRemoveFollower.RemoveFollowerMock.defaultExpectation.params
+		mm_got := FeedManagerMockRemoveFollowerParams{userID, fromUserID}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmRemoveFollower.t.Errorf("FeedManagerMock.RemoveFollower got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmRemoveFollower.RemoveFollowerMock.defaultExpectation.results
+		if mm_results == nil {
+			mmRemoveFollower.t.Fatal("No results are set for the FeedManagerMock.RemoveFollower")
+		}
+		return (*mm_results).err
+	}
+	if mmRemoveFollower.funcRemoveFollower != nil {
+		return mmRemoveFollower.funcRemoveFollower(userID, fromUserID)
+	}
+	mmRemoveFollower.t.Fatalf("Unexpected call to FeedManagerMock.RemoveFollower. %v %v", userID, fromUserID)
+	return
+}
+
+// RemoveFollowerAfterCounter returns a count of finished FeedManagerMock.RemoveFollower invocations
+func (mmRemoveFollower *FeedManagerMock) RemoveFollowerAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmRemoveFollower.afterRemoveFollowerCounter)
+}
+
+// RemoveFollowerBeforeCounter returns a count of FeedManagerMock.RemoveFollower invocations
+func (mmRemoveFollower *FeedManagerMock) RemoveFollowerBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmRemoveFollower.beforeRemoveFollowerCounter)
+}
+
+// Calls returns a list of arguments used in each call to FeedManagerMock.RemoveFollower.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmRemoveFollower *mFeedManagerMockRemoveFollower) Calls() []*FeedManagerMockRemoveFollowerParams {
+	mmRemoveFollower.mutex.RLock()
+
+	argCopy := make([]*FeedManagerMockRemoveFollowerParams, len(mmRemoveFollower.callArgs))
+	copy(argCopy, mmRemoveFollower.callArgs)
+
+	mmRemoveFollower.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockRemoveFollowerDone returns true if the count of the RemoveFollower invocations corresponds
+// the number of defined expectations
+func (m *FeedManagerMock) MinimockRemoveFollowerDone() bool {
+	for _, e := range m.RemoveFollowerMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.RemoveFollowerMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterRemoveFollowerCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcRemoveFollower != nil && mm_atomic.LoadUint64(&m.afterRemoveFollowerCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockRemoveFollowerInspect logs each unmet expectation
+func (m *FeedManagerMock) MinimockRemoveFollowerInspect() {
+	for _, e := range m.RemoveFollowerMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to FeedManagerMock.RemoveFollower with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.RemoveFollowerMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterRemoveFollowerCounter) < 1 {
+		if m.RemoveFollowerMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to FeedManagerMock.RemoveFollower")
+		} else {
+			m.t.Errorf("Expected call to FeedManagerMock.RemoveFollower with params: %#v", *m.RemoveFollowerMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcRemoveFollower != nil && mm_atomic.LoadUint64(&m.afterRemoveFollowerCounter) < 1 {
+		m.t.Error("Expected call to FeedManagerMock.RemoveFollower")
+	}
+}
+
 // MinimockFinish checks that all mocked methods have been called the expected number of times
 func (m *FeedManagerMock) MinimockFinish() {
 	if !m.minimockDone() {
+		m.MinimockAddFollowerInspect()
+
 		m.MinimockAddNewTweetInspect()
 
 		m.MinimockEditCommentInspect()
@@ -936,6 +1388,8 @@ func (m *FeedManagerMock) MinimockFinish() {
 		m.MinimockEditTweetInspect()
 
 		m.MinimockGiveNewsFeedInspect()
+
+		m.MinimockRemoveFollowerInspect()
 		m.t.FailNow()
 	}
 }
@@ -959,8 +1413,10 @@ func (m *FeedManagerMock) MinimockWait(timeout mm_time.Duration) {
 func (m *FeedManagerMock) minimockDone() bool {
 	done := true
 	return done &&
+		m.MinimockAddFollowerDone() &&
 		m.MinimockAddNewTweetDone() &&
 		m.MinimockEditCommentDone() &&
 		m.MinimockEditTweetDone() &&
-		m.MinimockGiveNewsFeedDone()
+		m.MinimockGiveNewsFeedDone() &&
+		m.MinimockRemoveFollowerDone()
 }

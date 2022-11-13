@@ -6,8 +6,8 @@ import (
 	"sync"
 	mm_atomic "sync/atomic"
 	mm_time "time"
-	"github.com/demimurg/twitter/entity"
 
+	"github.com/demimurg/twitter/entity"
 	"github.com/gojuno/minimock/v3"
 )
 
@@ -21,20 +21,20 @@ type UserRepositoryMock struct {
 	beforeAddCounter uint64
 	AddMock          mUserRepositoryMockAdd
 
-	funcDelete          func(userID string) (err error)
-	inspectFuncDelete   func(userID string)
+	funcDelete          func(userID int) (err error)
+	inspectFuncDelete   func(userID int)
 	afterDeleteCounter  uint64
 	beforeDeleteCounter uint64
 	DeleteMock          mUserRepositoryMockDelete
 
-	funcGet          func(userID string) (up1 *entity.User, err error)
-	inspectFuncGet   func(userID string)
+	funcGet          func(userID int) (up1 *entity.User, err error)
+	inspectFuncGet   func(userID int)
 	afterGetCounter  uint64
 	beforeGetCounter uint64
 	GetMock          mUserRepositoryMockGet
 
-	funcUpdateCaption          func(userID string, caption string) (err error)
-	inspectFuncUpdateCaption   func(userID string, caption string)
+	funcUpdateCaption          func(userID int, caption string) (err error)
+	inspectFuncUpdateCaption   func(userID int, caption string)
 	afterUpdateCaptionCounter  uint64
 	beforeUpdateCaptionCounter uint64
 	UpdateCaptionMock          mUserRepositoryMockUpdateCaption
@@ -296,7 +296,7 @@ type UserRepositoryMockDeleteExpectation struct {
 
 // UserRepositoryMockDeleteParams contains parameters of the UserRepository.Delete
 type UserRepositoryMockDeleteParams struct {
-	userID string
+	userID int
 }
 
 // UserRepositoryMockDeleteResults contains results of the UserRepository.Delete
@@ -305,7 +305,7 @@ type UserRepositoryMockDeleteResults struct {
 }
 
 // Expect sets up expected params for UserRepository.Delete
-func (mmDelete *mUserRepositoryMockDelete) Expect(userID string) *mUserRepositoryMockDelete {
+func (mmDelete *mUserRepositoryMockDelete) Expect(userID int) *mUserRepositoryMockDelete {
 	if mmDelete.mock.funcDelete != nil {
 		mmDelete.mock.t.Fatalf("UserRepositoryMock.Delete mock is already set by Set")
 	}
@@ -325,7 +325,7 @@ func (mmDelete *mUserRepositoryMockDelete) Expect(userID string) *mUserRepositor
 }
 
 // Inspect accepts an inspector function that has same arguments as the UserRepository.Delete
-func (mmDelete *mUserRepositoryMockDelete) Inspect(f func(userID string)) *mUserRepositoryMockDelete {
+func (mmDelete *mUserRepositoryMockDelete) Inspect(f func(userID int)) *mUserRepositoryMockDelete {
 	if mmDelete.mock.inspectFuncDelete != nil {
 		mmDelete.mock.t.Fatalf("Inspect function is already set for UserRepositoryMock.Delete")
 	}
@@ -349,7 +349,7 @@ func (mmDelete *mUserRepositoryMockDelete) Return(err error) *UserRepositoryMock
 }
 
 //Set uses given function f to mock the UserRepository.Delete method
-func (mmDelete *mUserRepositoryMockDelete) Set(f func(userID string) (err error)) *UserRepositoryMock {
+func (mmDelete *mUserRepositoryMockDelete) Set(f func(userID int) (err error)) *UserRepositoryMock {
 	if mmDelete.defaultExpectation != nil {
 		mmDelete.mock.t.Fatalf("Default expectation is already set for the UserRepository.Delete method")
 	}
@@ -364,7 +364,7 @@ func (mmDelete *mUserRepositoryMockDelete) Set(f func(userID string) (err error)
 
 // When sets expectation for the UserRepository.Delete which will trigger the result defined by the following
 // Then helper
-func (mmDelete *mUserRepositoryMockDelete) When(userID string) *UserRepositoryMockDeleteExpectation {
+func (mmDelete *mUserRepositoryMockDelete) When(userID int) *UserRepositoryMockDeleteExpectation {
 	if mmDelete.mock.funcDelete != nil {
 		mmDelete.mock.t.Fatalf("UserRepositoryMock.Delete mock is already set by Set")
 	}
@@ -384,7 +384,7 @@ func (e *UserRepositoryMockDeleteExpectation) Then(err error) *UserRepositoryMoc
 }
 
 // Delete implements twitter.UserRepository
-func (mmDelete *UserRepositoryMock) Delete(userID string) (err error) {
+func (mmDelete *UserRepositoryMock) Delete(userID int) (err error) {
 	mm_atomic.AddUint64(&mmDelete.beforeDeleteCounter, 1)
 	defer mm_atomic.AddUint64(&mmDelete.afterDeleteCounter, 1)
 
@@ -511,7 +511,7 @@ type UserRepositoryMockGetExpectation struct {
 
 // UserRepositoryMockGetParams contains parameters of the UserRepository.Get
 type UserRepositoryMockGetParams struct {
-	userID string
+	userID int
 }
 
 // UserRepositoryMockGetResults contains results of the UserRepository.Get
@@ -521,7 +521,7 @@ type UserRepositoryMockGetResults struct {
 }
 
 // Expect sets up expected params for UserRepository.Get
-func (mmGet *mUserRepositoryMockGet) Expect(userID string) *mUserRepositoryMockGet {
+func (mmGet *mUserRepositoryMockGet) Expect(userID int) *mUserRepositoryMockGet {
 	if mmGet.mock.funcGet != nil {
 		mmGet.mock.t.Fatalf("UserRepositoryMock.Get mock is already set by Set")
 	}
@@ -541,7 +541,7 @@ func (mmGet *mUserRepositoryMockGet) Expect(userID string) *mUserRepositoryMockG
 }
 
 // Inspect accepts an inspector function that has same arguments as the UserRepository.Get
-func (mmGet *mUserRepositoryMockGet) Inspect(f func(userID string)) *mUserRepositoryMockGet {
+func (mmGet *mUserRepositoryMockGet) Inspect(f func(userID int)) *mUserRepositoryMockGet {
 	if mmGet.mock.inspectFuncGet != nil {
 		mmGet.mock.t.Fatalf("Inspect function is already set for UserRepositoryMock.Get")
 	}
@@ -565,7 +565,7 @@ func (mmGet *mUserRepositoryMockGet) Return(up1 *entity.User, err error) *UserRe
 }
 
 //Set uses given function f to mock the UserRepository.Get method
-func (mmGet *mUserRepositoryMockGet) Set(f func(userID string) (up1 *entity.User, err error)) *UserRepositoryMock {
+func (mmGet *mUserRepositoryMockGet) Set(f func(userID int) (up1 *entity.User, err error)) *UserRepositoryMock {
 	if mmGet.defaultExpectation != nil {
 		mmGet.mock.t.Fatalf("Default expectation is already set for the UserRepository.Get method")
 	}
@@ -580,7 +580,7 @@ func (mmGet *mUserRepositoryMockGet) Set(f func(userID string) (up1 *entity.User
 
 // When sets expectation for the UserRepository.Get which will trigger the result defined by the following
 // Then helper
-func (mmGet *mUserRepositoryMockGet) When(userID string) *UserRepositoryMockGetExpectation {
+func (mmGet *mUserRepositoryMockGet) When(userID int) *UserRepositoryMockGetExpectation {
 	if mmGet.mock.funcGet != nil {
 		mmGet.mock.t.Fatalf("UserRepositoryMock.Get mock is already set by Set")
 	}
@@ -600,7 +600,7 @@ func (e *UserRepositoryMockGetExpectation) Then(up1 *entity.User, err error) *Us
 }
 
 // Get implements twitter.UserRepository
-func (mmGet *UserRepositoryMock) Get(userID string) (up1 *entity.User, err error) {
+func (mmGet *UserRepositoryMock) Get(userID int) (up1 *entity.User, err error) {
 	mm_atomic.AddUint64(&mmGet.beforeGetCounter, 1)
 	defer mm_atomic.AddUint64(&mmGet.afterGetCounter, 1)
 
@@ -727,7 +727,7 @@ type UserRepositoryMockUpdateCaptionExpectation struct {
 
 // UserRepositoryMockUpdateCaptionParams contains parameters of the UserRepository.UpdateCaption
 type UserRepositoryMockUpdateCaptionParams struct {
-	userID  string
+	userID  int
 	caption string
 }
 
@@ -737,7 +737,7 @@ type UserRepositoryMockUpdateCaptionResults struct {
 }
 
 // Expect sets up expected params for UserRepository.UpdateCaption
-func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) Expect(userID string, caption string) *mUserRepositoryMockUpdateCaption {
+func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) Expect(userID int, caption string) *mUserRepositoryMockUpdateCaption {
 	if mmUpdateCaption.mock.funcUpdateCaption != nil {
 		mmUpdateCaption.mock.t.Fatalf("UserRepositoryMock.UpdateCaption mock is already set by Set")
 	}
@@ -757,7 +757,7 @@ func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) Expect(userID string, c
 }
 
 // Inspect accepts an inspector function that has same arguments as the UserRepository.UpdateCaption
-func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) Inspect(f func(userID string, caption string)) *mUserRepositoryMockUpdateCaption {
+func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) Inspect(f func(userID int, caption string)) *mUserRepositoryMockUpdateCaption {
 	if mmUpdateCaption.mock.inspectFuncUpdateCaption != nil {
 		mmUpdateCaption.mock.t.Fatalf("Inspect function is already set for UserRepositoryMock.UpdateCaption")
 	}
@@ -781,7 +781,7 @@ func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) Return(err error) *User
 }
 
 //Set uses given function f to mock the UserRepository.UpdateCaption method
-func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) Set(f func(userID string, caption string) (err error)) *UserRepositoryMock {
+func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) Set(f func(userID int, caption string) (err error)) *UserRepositoryMock {
 	if mmUpdateCaption.defaultExpectation != nil {
 		mmUpdateCaption.mock.t.Fatalf("Default expectation is already set for the UserRepository.UpdateCaption method")
 	}
@@ -796,7 +796,7 @@ func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) Set(f func(userID strin
 
 // When sets expectation for the UserRepository.UpdateCaption which will trigger the result defined by the following
 // Then helper
-func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) When(userID string, caption string) *UserRepositoryMockUpdateCaptionExpectation {
+func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) When(userID int, caption string) *UserRepositoryMockUpdateCaptionExpectation {
 	if mmUpdateCaption.mock.funcUpdateCaption != nil {
 		mmUpdateCaption.mock.t.Fatalf("UserRepositoryMock.UpdateCaption mock is already set by Set")
 	}
@@ -816,7 +816,7 @@ func (e *UserRepositoryMockUpdateCaptionExpectation) Then(err error) *UserReposi
 }
 
 // UpdateCaption implements twitter.UserRepository
-func (mmUpdateCaption *UserRepositoryMock) UpdateCaption(userID string, caption string) (err error) {
+func (mmUpdateCaption *UserRepositoryMock) UpdateCaption(userID int, caption string) (err error) {
 	mm_atomic.AddUint64(&mmUpdateCaption.beforeUpdateCaptionCounter, 1)
 	defer mm_atomic.AddUint64(&mmUpdateCaption.afterUpdateCaptionCounter, 1)
 
