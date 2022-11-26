@@ -1,4 +1,4 @@
-package twitter
+package usecase
 
 import (
 	"context"
@@ -31,10 +31,7 @@ func NewFeedManager(
 	usersRepo UserRepository, followersRepo FollowerRepository,
 	tweetsRepo TweetRepository, commentsRepo CommentsRepository,
 ) FeedManager {
-	return &feedManager{
-		usersRepo: usersRepo, followersRepo: followersRepo,
-		tweetsRepo: tweetsRepo, commentsRepo: commentsRepo,
-	}
+	return &feedManager{usersRepo, followersRepo, tweetsRepo, commentsRepo}
 }
 
 type feedManager struct {

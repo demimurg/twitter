@@ -11,7 +11,7 @@ import (
 	"github.com/gojuno/minimock/v3"
 )
 
-// ScamDetectorClientMock implements twitter.ScamDetectorClient
+// ScamDetectorClientMock implements usecase.ScamDetectorClient
 type ScamDetectorClientMock struct {
 	t minimock.Tester
 
@@ -22,7 +22,7 @@ type ScamDetectorClientMock struct {
 	CheckEmailMock          mScamDetectorClientMockCheckEmail
 }
 
-// NewScamDetectorClientMock returns a mock for twitter.ScamDetectorClient
+// NewScamDetectorClientMock returns a mock for usecase.ScamDetectorClient
 func NewScamDetectorClientMock(t minimock.Tester) *ScamDetectorClientMock {
 	m := &ScamDetectorClientMock{t: t}
 	if controller, ok := t.(minimock.MockController); ok {
@@ -142,7 +142,7 @@ func (e *ScamDetectorClientMockCheckEmailExpectation) Then(err error) *ScamDetec
 	return e.mock
 }
 
-// CheckEmail implements twitter.ScamDetectorClient
+// CheckEmail implements usecase.ScamDetectorClient
 func (mmCheckEmail *ScamDetectorClientMock) CheckEmail(ctx context.Context, email string) (err error) {
 	mm_atomic.AddUint64(&mmCheckEmail.beforeCheckEmailCounter, 1)
 	defer mm_atomic.AddUint64(&mmCheckEmail.afterCheckEmailCounter, 1)

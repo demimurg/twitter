@@ -1,4 +1,4 @@
-package twitter
+package usecase
 
 import (
 	"context"
@@ -23,13 +23,13 @@ func TestFeedManager_AddNewTweet(t *testing.T) {
 	testCases := []struct {
 		name      string
 		tweetText string
-		expect    func(mocks)
+		expect    func(fmmocks)
 		wantError bool
 	}{
 		{
 			name:      "basic case",
 			tweetText: "hello world!",
-			expect: func(m mocks) {
+			expect: func(m fmmocks) {
 				m.UserRepositoryMock.GetMock.
 					Expect(ctx, fakeUserID).
 					Return(&entity.User{ID: fakeUserID}, nil)
@@ -41,7 +41,7 @@ func TestFeedManager_AddNewTweet(t *testing.T) {
 		{
 			name:      "user was deactivated",
 			tweetText: "i'm alive",
-			expect: func(m mocks) {
+			expect: func(m fmmocks) {
 				monthAgo := time.Now().Add(-30 * 24 * time.Hour)
 				m.UserRepositoryMock.GetMock.
 					Expect(ctx, fakeUserID).
@@ -52,8 +52,8 @@ func TestFeedManager_AddNewTweet(t *testing.T) {
 		{
 			name:      "tweet length is to big",
 			tweetText: strings.Repeat("-", 71),
-			expect: func(m mocks) {
-				// there is no calls to mocks, will be entry validation of length and error returns
+			expect: func(m fmmocks) {
+				// there is no calls to urmocks, will be entry validation of length and error returns
 			},
 			wantError: true,
 		},
@@ -74,13 +74,13 @@ func TestFeedManager_AddNewTweet(t *testing.T) {
 func TestFeedManager_GiveNewsFeed(t *testing.T) {
 	testCases := []struct {
 		name      string
-		expect    func(mocks)
+		expect    func(fmmocks)
 		wantFeed  []entity.Tweet
 		wantError bool
 	}{
 		{
 			name: "just give my newsfeed",
-			expect: func(m mocks) {
+			expect: func(m fmmocks) {
 				// get following users
 				friend1, friend2 := 1, 2
 				m.FollowerRepositoryMock.GetFollowingMock.
@@ -103,7 +103,7 @@ func TestFeedManager_GiveNewsFeed(t *testing.T) {
 		},
 		{
 			name: "database with followers is not available",
-			expect: func(m mocks) {
+			expect: func(m fmmocks) {
 				m.FollowerRepositoryMock.GetFollowingMock.
 					Expect(ctx, fakeUserID, 10).
 					Return(nil, errors.New("sorry guys, i'have drop off database"))
@@ -113,9 +113,7 @@ func TestFeedManager_GiveNewsFeed(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
 			feedManager := newFeedManager(t, tc.expect)
 			feed, err := feedManager.GiveNewsFeed(ctx, fakeUserID)
 
@@ -127,7 +125,8 @@ func TestFeedManager_GiveNewsFeed(t *testing.T) {
 
 // ---------------------------------- SETUP MOCKS ----------------------------------
 
-type mocks struct {
+// feed manager mocks
+type fmmocks struct {
 	*mock.UserRepositoryMock
 	*mock.FollowerRepositoryMock
 	*mock.TweetRepositoryMock
@@ -135,11 +134,11 @@ type mocks struct {
 }
 
 // newFeedManager will create feed manager with mocked dependencies ans set expectations to them
-func newFeedManager(t *testing.T, expect func(mocks)) FeedManager {
+func newFeedManager(t *testing.T, expect func(fmmocks)) FeedManager {
 	mc := minimock.NewController(t)
 	t.Cleanup(mc.Finish)
 
-	m := mocks{
+	m := fmmocks{
 		mock.NewUserRepositoryMock(mc),
 		mock.NewFollowerRepositoryMock(mc),
 		mock.NewTweetRepositoryMock(mc),

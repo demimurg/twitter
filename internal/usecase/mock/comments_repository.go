@@ -11,7 +11,7 @@ import (
 	"github.com/gojuno/minimock/v3"
 )
 
-// CommentsRepositoryMock implements twitter.CommentsRepository
+// CommentsRepositoryMock implements usecase.CommentsRepository
 type CommentsRepositoryMock struct {
 	t minimock.Tester
 
@@ -28,7 +28,7 @@ type CommentsRepositoryMock struct {
 	UpdateTextMock          mCommentsRepositoryMockUpdateText
 }
 
-// NewCommentsRepositoryMock returns a mock for twitter.CommentsRepository
+// NewCommentsRepositoryMock returns a mock for usecase.CommentsRepository
 func NewCommentsRepositoryMock(t minimock.Tester) *CommentsRepositoryMock {
 	m := &CommentsRepositoryMock{t: t}
 	if controller, ok := t.(minimock.MockController); ok {
@@ -153,7 +153,7 @@ func (e *CommentsRepositoryMockAddExpectation) Then(err error) *CommentsReposito
 	return e.mock
 }
 
-// Add implements twitter.CommentsRepository
+// Add implements usecase.CommentsRepository
 func (mmAdd *CommentsRepositoryMock) Add(ctx context.Context, userID int, tweetID string, text string) (err error) {
 	mm_atomic.AddUint64(&mmAdd.beforeAddCounter, 1)
 	defer mm_atomic.AddUint64(&mmAdd.afterAddCounter, 1)
@@ -370,7 +370,7 @@ func (e *CommentsRepositoryMockUpdateTextExpectation) Then(err error) *CommentsR
 	return e.mock
 }
 
-// UpdateText implements twitter.CommentsRepository
+// UpdateText implements usecase.CommentsRepository
 func (mmUpdateText *CommentsRepositoryMock) UpdateText(ctx context.Context, commentID int, newText string) (err error) {
 	mm_atomic.AddUint64(&mmUpdateText.beforeUpdateTextCounter, 1)
 	defer mm_atomic.AddUint64(&mmUpdateText.afterUpdateTextCounter, 1)

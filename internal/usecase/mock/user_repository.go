@@ -6,18 +6,19 @@ import (
 	"context"
 	"sync"
 	mm_atomic "sync/atomic"
+	"time"
 	mm_time "time"
 
 	"github.com/demimurg/twitter/internal/entity"
 	"github.com/gojuno/minimock/v3"
 )
 
-// UserRepositoryMock implements twitter.UserRepository
+// UserRepositoryMock implements usecase.UserRepository
 type UserRepositoryMock struct {
 	t minimock.Tester
 
-	funcAdd          func(ctx context.Context, name string) (err error)
-	inspectFuncAdd   func(ctx context.Context, name string)
+	funcAdd          func(ctx context.Context, name string, email string, birthDate *time.Time) (i1 int, err error)
+	inspectFuncAdd   func(ctx context.Context, name string, email string, birthDate *time.Time)
 	afterAddCounter  uint64
 	beforeAddCounter uint64
 	AddMock          mUserRepositoryMockAdd
@@ -41,7 +42,7 @@ type UserRepositoryMock struct {
 	UpdateCaptionMock          mUserRepositoryMockUpdateCaption
 }
 
-// NewUserRepositoryMock returns a mock for twitter.UserRepository
+// NewUserRepositoryMock returns a mock for usecase.UserRepository
 func NewUserRepositoryMock(t minimock.Tester) *UserRepositoryMock {
 	m := &UserRepositoryMock{t: t}
 	if controller, ok := t.(minimock.MockController); ok {
@@ -82,17 +83,20 @@ type UserRepositoryMockAddExpectation struct {
 
 // UserRepositoryMockAddParams contains parameters of the UserRepository.Add
 type UserRepositoryMockAddParams struct {
-	ctx  context.Context
-	name string
+	ctx       context.Context
+	name      string
+	email     string
+	birthDate *time.Time
 }
 
 // UserRepositoryMockAddResults contains results of the UserRepository.Add
 type UserRepositoryMockAddResults struct {
+	i1  int
 	err error
 }
 
 // Expect sets up expected params for UserRepository.Add
-func (mmAdd *mUserRepositoryMockAdd) Expect(ctx context.Context, name string) *mUserRepositoryMockAdd {
+func (mmAdd *mUserRepositoryMockAdd) Expect(ctx context.Context, name string, email string, birthDate *time.Time) *mUserRepositoryMockAdd {
 	if mmAdd.mock.funcAdd != nil {
 		mmAdd.mock.t.Fatalf("UserRepositoryMock.Add mock is already set by Set")
 	}
@@ -101,7 +105,7 @@ func (mmAdd *mUserRepositoryMockAdd) Expect(ctx context.Context, name string) *m
 		mmAdd.defaultExpectation = &UserRepositoryMockAddExpectation{}
 	}
 
-	mmAdd.defaultExpectation.params = &UserRepositoryMockAddParams{ctx, name}
+	mmAdd.defaultExpectation.params = &UserRepositoryMockAddParams{ctx, name, email, birthDate}
 	for _, e := range mmAdd.expectations {
 		if minimock.Equal(e.params, mmAdd.defaultExpectation.params) {
 			mmAdd.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmAdd.defaultExpectation.params)
@@ -112,7 +116,7 @@ func (mmAdd *mUserRepositoryMockAdd) Expect(ctx context.Context, name string) *m
 }
 
 // Inspect accepts an inspector function that has same arguments as the UserRepository.Add
-func (mmAdd *mUserRepositoryMockAdd) Inspect(f func(ctx context.Context, name string)) *mUserRepositoryMockAdd {
+func (mmAdd *mUserRepositoryMockAdd) Inspect(f func(ctx context.Context, name string, email string, birthDate *time.Time)) *mUserRepositoryMockAdd {
 	if mmAdd.mock.inspectFuncAdd != nil {
 		mmAdd.mock.t.Fatalf("Inspect function is already set for UserRepositoryMock.Add")
 	}
@@ -123,7 +127,7 @@ func (mmAdd *mUserRepositoryMockAdd) Inspect(f func(ctx context.Context, name st
 }
 
 // Return sets up results that will be returned by UserRepository.Add
-func (mmAdd *mUserRepositoryMockAdd) Return(err error) *UserRepositoryMock {
+func (mmAdd *mUserRepositoryMockAdd) Return(i1 int, err error) *UserRepositoryMock {
 	if mmAdd.mock.funcAdd != nil {
 		mmAdd.mock.t.Fatalf("UserRepositoryMock.Add mock is already set by Set")
 	}
@@ -131,12 +135,12 @@ func (mmAdd *mUserRepositoryMockAdd) Return(err error) *UserRepositoryMock {
 	if mmAdd.defaultExpectation == nil {
 		mmAdd.defaultExpectation = &UserRepositoryMockAddExpectation{mock: mmAdd.mock}
 	}
-	mmAdd.defaultExpectation.results = &UserRepositoryMockAddResults{err}
+	mmAdd.defaultExpectation.results = &UserRepositoryMockAddResults{i1, err}
 	return mmAdd.mock
 }
 
 //Set uses given function f to mock the UserRepository.Add method
-func (mmAdd *mUserRepositoryMockAdd) Set(f func(ctx context.Context, name string) (err error)) *UserRepositoryMock {
+func (mmAdd *mUserRepositoryMockAdd) Set(f func(ctx context.Context, name string, email string, birthDate *time.Time) (i1 int, err error)) *UserRepositoryMock {
 	if mmAdd.defaultExpectation != nil {
 		mmAdd.mock.t.Fatalf("Default expectation is already set for the UserRepository.Add method")
 	}
@@ -151,35 +155,35 @@ func (mmAdd *mUserRepositoryMockAdd) Set(f func(ctx context.Context, name string
 
 // When sets expectation for the UserRepository.Add which will trigger the result defined by the following
 // Then helper
-func (mmAdd *mUserRepositoryMockAdd) When(ctx context.Context, name string) *UserRepositoryMockAddExpectation {
+func (mmAdd *mUserRepositoryMockAdd) When(ctx context.Context, name string, email string, birthDate *time.Time) *UserRepositoryMockAddExpectation {
 	if mmAdd.mock.funcAdd != nil {
 		mmAdd.mock.t.Fatalf("UserRepositoryMock.Add mock is already set by Set")
 	}
 
 	expectation := &UserRepositoryMockAddExpectation{
 		mock:   mmAdd.mock,
-		params: &UserRepositoryMockAddParams{ctx, name},
+		params: &UserRepositoryMockAddParams{ctx, name, email, birthDate},
 	}
 	mmAdd.expectations = append(mmAdd.expectations, expectation)
 	return expectation
 }
 
 // Then sets up UserRepository.Add return parameters for the expectation previously defined by the When method
-func (e *UserRepositoryMockAddExpectation) Then(err error) *UserRepositoryMock {
-	e.results = &UserRepositoryMockAddResults{err}
+func (e *UserRepositoryMockAddExpectation) Then(i1 int, err error) *UserRepositoryMock {
+	e.results = &UserRepositoryMockAddResults{i1, err}
 	return e.mock
 }
 
-// Add implements twitter.UserRepository
-func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string) (err error) {
+// Add implements usecase.UserRepository
+func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string, email string, birthDate *time.Time) (i1 int, err error) {
 	mm_atomic.AddUint64(&mmAdd.beforeAddCounter, 1)
 	defer mm_atomic.AddUint64(&mmAdd.afterAddCounter, 1)
 
 	if mmAdd.inspectFuncAdd != nil {
-		mmAdd.inspectFuncAdd(ctx, name)
+		mmAdd.inspectFuncAdd(ctx, name, email, birthDate)
 	}
 
-	mm_params := &UserRepositoryMockAddParams{ctx, name}
+	mm_params := &UserRepositoryMockAddParams{ctx, name, email, birthDate}
 
 	// Record call args
 	mmAdd.AddMock.mutex.Lock()
@@ -189,14 +193,14 @@ func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string) (err erro
 	for _, e := range mmAdd.AddMock.expectations {
 		if minimock.Equal(e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.err
+			return e.results.i1, e.results.err
 		}
 	}
 
 	if mmAdd.AddMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmAdd.AddMock.defaultExpectation.Counter, 1)
 		mm_want := mmAdd.AddMock.defaultExpectation.params
-		mm_got := UserRepositoryMockAddParams{ctx, name}
+		mm_got := UserRepositoryMockAddParams{ctx, name, email, birthDate}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
 			mmAdd.t.Errorf("UserRepositoryMock.Add got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
@@ -205,12 +209,12 @@ func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string) (err erro
 		if mm_results == nil {
 			mmAdd.t.Fatal("No results are set for the UserRepositoryMock.Add")
 		}
-		return (*mm_results).err
+		return (*mm_results).i1, (*mm_results).err
 	}
 	if mmAdd.funcAdd != nil {
-		return mmAdd.funcAdd(ctx, name)
+		return mmAdd.funcAdd(ctx, name, email, birthDate)
 	}
-	mmAdd.t.Fatalf("Unexpected call to UserRepositoryMock.Add. %v %v", ctx, name)
+	mmAdd.t.Fatalf("Unexpected call to UserRepositoryMock.Add. %v %v %v %v", ctx, name, email, birthDate)
 	return
 }
 
@@ -386,7 +390,7 @@ func (e *UserRepositoryMockDeleteExpectation) Then(err error) *UserRepositoryMoc
 	return e.mock
 }
 
-// Delete implements twitter.UserRepository
+// Delete implements usecase.UserRepository
 func (mmDelete *UserRepositoryMock) Delete(ctx context.Context, userID int) (err error) {
 	mm_atomic.AddUint64(&mmDelete.beforeDeleteCounter, 1)
 	defer mm_atomic.AddUint64(&mmDelete.afterDeleteCounter, 1)
@@ -603,7 +607,7 @@ func (e *UserRepositoryMockGetExpectation) Then(up1 *entity.User, err error) *Us
 	return e.mock
 }
 
-// Get implements twitter.UserRepository
+// Get implements usecase.UserRepository
 func (mmGet *UserRepositoryMock) Get(ctx context.Context, userID int) (up1 *entity.User, err error) {
 	mm_atomic.AddUint64(&mmGet.beforeGetCounter, 1)
 	defer mm_atomic.AddUint64(&mmGet.afterGetCounter, 1)
@@ -820,7 +824,7 @@ func (e *UserRepositoryMockUpdateCaptionExpectation) Then(err error) *UserReposi
 	return e.mock
 }
 
-// UpdateCaption implements twitter.UserRepository
+// UpdateCaption implements usecase.UserRepository
 func (mmUpdateCaption *UserRepositoryMock) UpdateCaption(ctx context.Context, userID int, caption string) (err error) {
 	mm_atomic.AddUint64(&mmUpdateCaption.beforeUpdateCaptionCounter, 1)
 	defer mm_atomic.AddUint64(&mmUpdateCaption.afterUpdateCaptionCounter, 1)

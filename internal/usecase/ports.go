@@ -1,17 +1,18 @@
-package twitter
+package usecase
 
 import (
 	"context"
 	"fmt"
-	"time"
+    "time"
 
-	"github.com/demimurg/twitter/internal/entity"
+    "github.com/demimurg/twitter/internal/entity"
 )
 
 //go:generate minimock -g -o ./mock -s .go
 
 type UserRepository interface {
-	Add(ctx context.Context, name string) error
+    // Add will creates new user in repo and returns id assigned to it
+    Add(ctx context.Context, name, email string, birthDate *time.Time) (int, error)
 	Get(ctx context.Context, userID int) (*entity.User, error)
 	UpdateCaption(ctx context.Context, userID int, caption string) error
 	Delete(ctx context.Context, userID int) error
@@ -43,11 +44,4 @@ var ErrFakeEmail = fmt.Errorf("this email is a fake")
 
 type ScamDetectorClient interface {
 	CheckEmail(ctx context.Context, email string) error
-}
-
-// ------------------------ USECASE ------------------------
-
-type Registrator interface {
-	RegisterUser(ctx context.Context, name, email string, birthDate *time.Time) (*entity.User, error)
-	DeactivateUser(ctx context.Context, userID int) error
 }

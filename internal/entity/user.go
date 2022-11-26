@@ -4,9 +4,10 @@ import "time"
 
 type User struct {
 	ID        int
-	Login     string
+	Email     string
 	FullName  string
 	Caption   string
 	Followers int
+    BirthDate *time.Time
 	DeletedAt *time.Time
 }

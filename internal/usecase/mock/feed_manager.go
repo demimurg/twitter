@@ -12,7 +12,7 @@ import (
 	"github.com/gojuno/minimock/v3"
 )
 
-// FeedManagerMock implements twitter.FeedManager
+// FeedManagerMock implements usecase.FeedManager
 type FeedManagerMock struct {
 	t minimock.Tester
 
@@ -53,7 +53,7 @@ type FeedManagerMock struct {
 	RemoveFollowerMock          mFeedManagerMockRemoveFollower
 }
 
-// NewFeedManagerMock returns a mock for twitter.FeedManager
+// NewFeedManagerMock returns a mock for usecase.FeedManager
 func NewFeedManagerMock(t minimock.Tester) *FeedManagerMock {
 	m := &FeedManagerMock{t: t}
 	if controller, ok := t.(minimock.MockController); ok {
@@ -189,7 +189,7 @@ func (e *FeedManagerMockAddFollowerExpectation) Then(err error) *FeedManagerMock
 	return e.mock
 }
 
-// AddFollower implements twitter.FeedManager
+// AddFollower implements usecase.FeedManager
 func (mmAddFollower *FeedManagerMock) AddFollower(ctx context.Context, userID int, toUserID int) (err error) {
 	mm_atomic.AddUint64(&mmAddFollower.beforeAddFollowerCounter, 1)
 	defer mm_atomic.AddUint64(&mmAddFollower.afterAddFollowerCounter, 1)
@@ -406,7 +406,7 @@ func (e *FeedManagerMockAddNewTweetExpectation) Then(err error) *FeedManagerMock
 	return e.mock
 }
 
-// AddNewTweet implements twitter.FeedManager
+// AddNewTweet implements usecase.FeedManager
 func (mmAddNewTweet *FeedManagerMock) AddNewTweet(ctx context.Context, userID int, text string) (err error) {
 	mm_atomic.AddUint64(&mmAddNewTweet.beforeAddNewTweetCounter, 1)
 	defer mm_atomic.AddUint64(&mmAddNewTweet.afterAddNewTweetCounter, 1)
@@ -623,7 +623,7 @@ func (e *FeedManagerMockEditCommentExpectation) Then(err error) *FeedManagerMock
 	return e.mock
 }
 
-// EditComment implements twitter.FeedManager
+// EditComment implements usecase.FeedManager
 func (mmEditComment *FeedManagerMock) EditComment(ctx context.Context, commentID int, text string) (err error) {
 	mm_atomic.AddUint64(&mmEditComment.beforeEditCommentCounter, 1)
 	defer mm_atomic.AddUint64(&mmEditComment.afterEditCommentCounter, 1)
@@ -840,7 +840,7 @@ func (e *FeedManagerMockEditTweetExpectation) Then(err error) *FeedManagerMock {
 	return e.mock
 }
 
-// EditTweet implements twitter.FeedManager
+// EditTweet implements usecase.FeedManager
 func (mmEditTweet *FeedManagerMock) EditTweet(ctx context.Context, tweetID int, text string) (err error) {
 	mm_atomic.AddUint64(&mmEditTweet.beforeEditTweetCounter, 1)
 	defer mm_atomic.AddUint64(&mmEditTweet.afterEditTweetCounter, 1)
@@ -1057,7 +1057,7 @@ func (e *FeedManagerMockGiveNewsFeedExpectation) Then(ta1 []entity.Tweet, err er
 	return e.mock
 }
 
-// GiveNewsFeed implements twitter.FeedManager
+// GiveNewsFeed implements usecase.FeedManager
 func (mmGiveNewsFeed *FeedManagerMock) GiveNewsFeed(ctx context.Context, userID int) (ta1 []entity.Tweet, err error) {
 	mm_atomic.AddUint64(&mmGiveNewsFeed.beforeGiveNewsFeedCounter, 1)
 	defer mm_atomic.AddUint64(&mmGiveNewsFeed.afterGiveNewsFeedCounter, 1)
@@ -1274,7 +1274,7 @@ func (e *FeedManagerMockRemoveFollowerExpectation) Then(err error) *FeedManagerM
 	return e.mock
 }
 
-// RemoveFollower implements twitter.FeedManager
+// RemoveFollower implements usecase.FeedManager
 func (mmRemoveFollower *FeedManagerMock) RemoveFollower(ctx context.Context, userID int, fromUserID int) (err error) {
 	mm_atomic.AddUint64(&mmRemoveFollower.beforeRemoveFollowerCounter, 1)
 	defer mm_atomic.AddUint64(&mmRemoveFollower.afterRemoveFollowerCounter, 1)

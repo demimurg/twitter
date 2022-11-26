@@ -11,7 +11,7 @@ import (
 	"github.com/gojuno/minimock/v3"
 )
 
-// FollowerRepositoryMock implements twitter.FollowerRepository
+// FollowerRepositoryMock implements usecase.FollowerRepository
 type FollowerRepositoryMock struct {
 	t minimock.Tester
 
@@ -40,7 +40,7 @@ type FollowerRepositoryMock struct {
 	RemoveMock          mFollowerRepositoryMockRemove
 }
 
-// NewFollowerRepositoryMock returns a mock for twitter.FollowerRepository
+// NewFollowerRepositoryMock returns a mock for usecase.FollowerRepository
 func NewFollowerRepositoryMock(t minimock.Tester) *FollowerRepositoryMock {
 	m := &FollowerRepositoryMock{t: t}
 	if controller, ok := t.(minimock.MockController); ok {
@@ -170,7 +170,7 @@ func (e *FollowerRepositoryMockAddExpectation) Then(err error) *FollowerReposito
 	return e.mock
 }
 
-// Add implements twitter.FollowerRepository
+// Add implements usecase.FollowerRepository
 func (mmAdd *FollowerRepositoryMock) Add(ctx context.Context, followerID int, toUserID int) (err error) {
 	mm_atomic.AddUint64(&mmAdd.beforeAddCounter, 1)
 	defer mm_atomic.AddUint64(&mmAdd.afterAddCounter, 1)
@@ -388,7 +388,7 @@ func (e *FollowerRepositoryMockGetFollowersExpectation) Then(ia1 []int, err erro
 	return e.mock
 }
 
-// GetFollowers implements twitter.FollowerRepository
+// GetFollowers implements usecase.FollowerRepository
 func (mmGetFollowers *FollowerRepositoryMock) GetFollowers(ctx context.Context, userID int, topN int) (ia1 []int, err error) {
 	mm_atomic.AddUint64(&mmGetFollowers.beforeGetFollowersCounter, 1)
 	defer mm_atomic.AddUint64(&mmGetFollowers.afterGetFollowersCounter, 1)
@@ -606,7 +606,7 @@ func (e *FollowerRepositoryMockGetFollowingExpectation) Then(ia1 []int, err erro
 	return e.mock
 }
 
-// GetFollowing implements twitter.FollowerRepository
+// GetFollowing implements usecase.FollowerRepository
 func (mmGetFollowing *FollowerRepositoryMock) GetFollowing(ctx context.Context, userID int, topN int) (ia1 []int, err error) {
 	mm_atomic.AddUint64(&mmGetFollowing.beforeGetFollowingCounter, 1)
 	defer mm_atomic.AddUint64(&mmGetFollowing.afterGetFollowingCounter, 1)
@@ -823,7 +823,7 @@ func (e *FollowerRepositoryMockRemoveExpectation) Then(err error) *FollowerRepos
 	return e.mock
 }
 
-// Remove implements twitter.FollowerRepository
+// Remove implements usecase.FollowerRepository
 func (mmRemove *FollowerRepositoryMock) Remove(ctx context.Context, followerID int, fromUserID int) (err error) {
 	mm_atomic.AddUint64(&mmRemove.beforeRemoveCounter, 1)
 	defer mm_atomic.AddUint64(&mmRemove.afterRemoveCounter, 1)

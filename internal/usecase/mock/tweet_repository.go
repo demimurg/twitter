@@ -12,7 +12,7 @@ import (
 	"github.com/gojuno/minimock/v3"
 )
 
-// TweetRepositoryMock implements twitter.TweetRepository
+// TweetRepositoryMock implements usecase.TweetRepository
 type TweetRepositoryMock struct {
 	t minimock.Tester
 
@@ -35,7 +35,7 @@ type TweetRepositoryMock struct {
 	UpdateTextMock          mTweetRepositoryMockUpdateText
 }
 
-// NewTweetRepositoryMock returns a mock for twitter.TweetRepository
+// NewTweetRepositoryMock returns a mock for usecase.TweetRepository
 func NewTweetRepositoryMock(t minimock.Tester) *TweetRepositoryMock {
 	m := &TweetRepositoryMock{t: t}
 	if controller, ok := t.(minimock.MockController); ok {
@@ -162,7 +162,7 @@ func (e *TweetRepositoryMockAddExpectation) Then(err error) *TweetRepositoryMock
 	return e.mock
 }
 
-// Add implements twitter.TweetRepository
+// Add implements usecase.TweetRepository
 func (mmAdd *TweetRepositoryMock) Add(ctx context.Context, userID int, tweetText string) (err error) {
 	mm_atomic.AddUint64(&mmAdd.beforeAddCounter, 1)
 	defer mm_atomic.AddUint64(&mmAdd.afterAddCounter, 1)
@@ -380,7 +380,7 @@ func (e *TweetRepositoryMockGetLatestFromUserExpectation) Then(ta1 []entity.Twee
 	return e.mock
 }
 
-// GetLatestFromUser implements twitter.TweetRepository
+// GetLatestFromUser implements usecase.TweetRepository
 func (mmGetLatestFromUser *TweetRepositoryMock) GetLatestFromUser(ctx context.Context, userID int, limit int) (ta1 []entity.Tweet, err error) {
 	mm_atomic.AddUint64(&mmGetLatestFromUser.beforeGetLatestFromUserCounter, 1)
 	defer mm_atomic.AddUint64(&mmGetLatestFromUser.afterGetLatestFromUserCounter, 1)
@@ -597,7 +597,7 @@ func (e *TweetRepositoryMockUpdateTextExpectation) Then(err error) *TweetReposit
 	return e.mock
 }
 
-// UpdateText implements twitter.TweetRepository
+// UpdateText implements usecase.TweetRepository
 func (mmUpdateText *TweetRepositoryMock) UpdateText(ctx context.Context, tweetID int, newText string) (err error) {
 	mm_atomic.AddUint64(&mmUpdateText.beforeUpdateTextCounter, 1)
 	defer mm_atomic.AddUint64(&mmUpdateText.afterUpdateTextCounter, 1)
