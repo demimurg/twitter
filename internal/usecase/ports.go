@@ -8,8 +8,6 @@ import (
     "github.com/demimurg/twitter/internal/entity"
 )
 
-//go:generate minimock -g -o ./mock -s .go
-
 type UserRepository interface {
     // Add will creates new user in repo and returns id assigned to it
     Add(ctx context.Context, name, email string, birthDate *time.Time) (int, error)
