@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "github.com/demimurg/twitter/proto";
+option go_package = "github.com/demimurg/twitter/pkg/proto";
 import "google/protobuf/empty.proto";
 
 service Twitter {

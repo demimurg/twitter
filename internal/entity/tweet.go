@@ -1,15 +1,17 @@
 package entity
 
+import "time"
+
 type Tweet struct {
-	ID         int
+	ID, UserID int
 	Text       string
 	Likes      int
 	CommentIDs []string
+	CreatedAt  time.Time
 }
 
 type Comment struct {
-	ID     int
-	UserID string
-	Text   string
-	Likes  int
+	ID, UserID int
+	Text       string
+	Likes      int
 }
