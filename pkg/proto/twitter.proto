@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 
 service Twitter {
     rpc AddTweet(AddTweetRequest) returns (google.protobuf.Empty);
-    rpc GetNewsFeed(GetNewsFeedRequest) returns (google.protobuf.Empty);
+    rpc GetNewsFeed(GetNewsFeedRequest) returns (GetNewsFeedResponse);
     rpc Register(RegisterRequest) returns (google.protobuf.Empty);
     rpc Follow(FollowRequest) returns (google.protobuf.Empty);
 }
@@ -20,6 +20,10 @@ message GetNewsFeedRequest {
     int64 offset = 2;
     // TODO: remove after auth with jwt will be implemented
     int64 user_id = 10;
+};
+
+message GetNewsFeedResponse {
+    repeated string tweets = 1;
 };
 
 message RegisterRequest {

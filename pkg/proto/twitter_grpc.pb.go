@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TwitterClient interface {
 	AddTweet(ctx context.Context, in *AddTweetRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest, opts ...grpc.CallOption) (*GetNewsFeedResponse, error)
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Follow(ctx context.Context, in *FollowRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -46,8 +46,8 @@ func (c *twitterClient) AddTweet(ctx context.Context, in *AddTweetRequest, opts 
 	return out, nil
 }
 
-func (c *twitterClient) GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *twitterClient) GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest, opts ...grpc.CallOption) (*GetNewsFeedResponse, error) {
+	out := new(GetNewsFeedResponse)
 	err := c.cc.Invoke(ctx, "/Twitter/GetNewsFeed", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (c *twitterClient) Follow(ctx context.Context, in *FollowRequest, opts ...g
 // for forward compatibility
 type TwitterServer interface {
 	AddTweet(context.Context, *AddTweetRequest) (*emptypb.Empty, error)
-	GetNewsFeed(context.Context, *GetNewsFeedRequest) (*emptypb.Empty, error)
+	GetNewsFeed(context.Context, *GetNewsFeedRequest) (*GetNewsFeedResponse, error)
 	Register(context.Context, *RegisterRequest) (*emptypb.Empty, error)
 	Follow(context.Context, *FollowRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedTwitterServer()
@@ -91,7 +91,7 @@ type UnimplementedTwitterServer struct {
 func (UnimplementedTwitterServer) AddTweet(context.Context, *AddTweetRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTweet not implemented")
 }
-func (UnimplementedTwitterServer) GetNewsFeed(context.Context, *GetNewsFeedRequest) (*emptypb.Empty, error) {
+func (UnimplementedTwitterServer) GetNewsFeed(context.Context, *GetNewsFeedRequest) (*GetNewsFeedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewsFeed not implemented")
 }
 func (UnimplementedTwitterServer) Register(context.Context, *RegisterRequest) (*emptypb.Empty, error) {

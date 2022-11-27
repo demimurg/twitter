@@ -3,8 +3,9 @@ package usecase
 import (
 	"context"
 	"errors"
+    "fmt"
 
-	"github.com/demimurg/twitter/internal/entity"
+    "github.com/demimurg/twitter/internal/entity"
 	"github.com/demimurg/twitter/pkg/log"
 )
 
@@ -23,7 +24,6 @@ type FeedManager interface {
 
 var (
 	ErrUserDeactivated   = errors.New("user was deactivated")
-	ErrTweetLengthTooBig = errors.New("tweet text exceeded maximum length ")
 )
 
 // NewFeedManager returns usecase for work with user news feed
@@ -51,7 +51,10 @@ func (fm *feedManager) RemoveFollower(ctx context.Context, userID, fromUserID in
 
 func (fm *feedManager) AddNewTweet(ctx context.Context, userID int, text string) error {
 	if len(text) > 70 {
-		return ErrTweetLengthTooBig
+        return fmt.Errorf(
+            "%w: tweet length %d more than allowed %d",
+            ErrValidationFailed, len(text), 70,
+        )
 	}
 
 	user, err := fm.usersRepo.Get(ctx, userID)
