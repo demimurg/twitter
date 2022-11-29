@@ -69,7 +69,7 @@ func TestUserRegistrator_Register(t *testing.T) {
 					Expect(ctx, "elon.musk@twitter.com").
 					Return(errors.New("sorry, scam client is down"))
 				// problem with scam client doesn't stop us to go here
-                // it's called gracefull degradation
+				// it's called gracefull degradation
 				m.UserRepositoryMock.AddMock.
 					Expect(ctx, "Elon Musk", "elon.musk@twitter.com", date(1971, 6, 28)).
 					Return(1, nil)
@@ -102,7 +102,7 @@ func TestUserRegistrator_Deactivate(t *testing.T) {
 	r := newUserRegistrator(t, expect)
 
 	err := r.Deactivate(ctx, fakeUserID)
-    assert.NoError(t, err)
+	assert.NoError(t, err)
 }
 
 // ---------------------------------- SETUP MOCKS ----------------------------------

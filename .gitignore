@@ -1,0 +1,6 @@
+# ide
+.idea
+.vscode
+.fleet
+# playground folder to test and run some ideas
+cmd/play

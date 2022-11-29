@@ -141,7 +141,7 @@ func (mmAdd *mUserRepositoryMockAdd) Return(i1 int, err error) *UserRepositoryMo
 	return mmAdd.mock
 }
 
-//Set uses given function f to mock the UserRepository.Add method
+// Set uses given function f to mock the UserRepository.Add method
 func (mmAdd *mUserRepositoryMockAdd) Set(f func(ctx context.Context, name string, email string, birthDate *time.Time) (i1 int, err error)) *UserRepositoryMock {
 	if mmAdd.defaultExpectation != nil {
 		mmAdd.mock.t.Fatalf("Default expectation is already set for the UserRepository.Add method")
@@ -357,7 +357,7 @@ func (mmDelete *mUserRepositoryMockDelete) Return(err error) *UserRepositoryMock
 	return mmDelete.mock
 }
 
-//Set uses given function f to mock the UserRepository.Delete method
+// Set uses given function f to mock the UserRepository.Delete method
 func (mmDelete *mUserRepositoryMockDelete) Set(f func(ctx context.Context, userID int) (err error)) *UserRepositoryMock {
 	if mmDelete.defaultExpectation != nil {
 		mmDelete.mock.t.Fatalf("Default expectation is already set for the UserRepository.Delete method")
@@ -574,7 +574,7 @@ func (mmGet *mUserRepositoryMockGet) Return(up1 *entity.User, err error) *UserRe
 	return mmGet.mock
 }
 
-//Set uses given function f to mock the UserRepository.Get method
+// Set uses given function f to mock the UserRepository.Get method
 func (mmGet *mUserRepositoryMockGet) Set(f func(ctx context.Context, userID int) (up1 *entity.User, err error)) *UserRepositoryMock {
 	if mmGet.defaultExpectation != nil {
 		mmGet.mock.t.Fatalf("Default expectation is already set for the UserRepository.Get method")
@@ -791,7 +791,7 @@ func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) Return(err error) *User
 	return mmUpdateCaption.mock
 }
 
-//Set uses given function f to mock the UserRepository.UpdateCaption method
+// Set uses given function f to mock the UserRepository.UpdateCaption method
 func (mmUpdateCaption *mUserRepositoryMockUpdateCaption) Set(f func(ctx context.Context, userID int, caption string) (err error)) *UserRepositoryMock {
 	if mmUpdateCaption.defaultExpectation != nil {
 		mmUpdateCaption.mock.t.Fatalf("Default expectation is already set for the UserRepository.UpdateCaption method")

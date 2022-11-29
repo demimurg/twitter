@@ -109,7 +109,7 @@ func (mmCheckEmail *mScamDetectorClientMockCheckEmail) Return(err error) *ScamDe
 	return mmCheckEmail.mock
 }
 
-//Set uses given function f to mock the ScamDetectorClient.CheckEmail method
+// Set uses given function f to mock the ScamDetectorClient.CheckEmail method
 func (mmCheckEmail *mScamDetectorClientMockCheckEmail) Set(f func(ctx context.Context, email string) (err error)) *ScamDetectorClientMock {
 	if mmCheckEmail.defaultExpectation != nil {
 		mmCheckEmail.mock.t.Fatalf("Default expectation is already set for the ScamDetectorClient.CheckEmail method")

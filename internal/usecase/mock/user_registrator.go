@@ -119,7 +119,7 @@ func (mmDeactivate *mUserRegistratorMockDeactivate) Return(err error) *UserRegis
 	return mmDeactivate.mock
 }
 
-//Set uses given function f to mock the UserRegistrator.Deactivate method
+// Set uses given function f to mock the UserRegistrator.Deactivate method
 func (mmDeactivate *mUserRegistratorMockDeactivate) Set(f func(ctx context.Context, userID int) (err error)) *UserRegistratorMock {
 	if mmDeactivate.defaultExpectation != nil {
 		mmDeactivate.mock.t.Fatalf("Default expectation is already set for the UserRegistrator.Deactivate method")
@@ -338,7 +338,7 @@ func (mmRegister *mUserRegistratorMockRegister) Return(up1 *entity.User, err err
 	return mmRegister.mock
 }
 
-//Set uses given function f to mock the UserRegistrator.Register method
+// Set uses given function f to mock the UserRegistrator.Register method
 func (mmRegister *mUserRegistratorMockRegister) Set(f func(ctx context.Context, name string, email string, birthDate string) (up1 *entity.User, err error)) *UserRegistratorMock {
 	if mmRegister.defaultExpectation != nil {
 		mmRegister.mock.t.Fatalf("Default expectation is already set for the UserRegistrator.Register method")

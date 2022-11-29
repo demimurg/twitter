@@ -156,7 +156,7 @@ func (mmAddFollower *mFeedManagerMockAddFollower) Return(err error) *FeedManager
 	return mmAddFollower.mock
 }
 
-//Set uses given function f to mock the FeedManager.AddFollower method
+// Set uses given function f to mock the FeedManager.AddFollower method
 func (mmAddFollower *mFeedManagerMockAddFollower) Set(f func(ctx context.Context, userID int, toUserID int) (err error)) *FeedManagerMock {
 	if mmAddFollower.defaultExpectation != nil {
 		mmAddFollower.mock.t.Fatalf("Default expectation is already set for the FeedManager.AddFollower method")
@@ -373,7 +373,7 @@ func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Return(err error) *FeedManager
 	return mmAddNewTweet.mock
 }
 
-//Set uses given function f to mock the FeedManager.AddNewTweet method
+// Set uses given function f to mock the FeedManager.AddNewTweet method
 func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Set(f func(ctx context.Context, userID int, text string) (err error)) *FeedManagerMock {
 	if mmAddNewTweet.defaultExpectation != nil {
 		mmAddNewTweet.mock.t.Fatalf("Default expectation is already set for the FeedManager.AddNewTweet method")
@@ -590,7 +590,7 @@ func (mmEditComment *mFeedManagerMockEditComment) Return(err error) *FeedManager
 	return mmEditComment.mock
 }
 
-//Set uses given function f to mock the FeedManager.EditComment method
+// Set uses given function f to mock the FeedManager.EditComment method
 func (mmEditComment *mFeedManagerMockEditComment) Set(f func(ctx context.Context, commentID int, text string) (err error)) *FeedManagerMock {
 	if mmEditComment.defaultExpectation != nil {
 		mmEditComment.mock.t.Fatalf("Default expectation is already set for the FeedManager.EditComment method")
@@ -807,7 +807,7 @@ func (mmEditTweet *mFeedManagerMockEditTweet) Return(err error) *FeedManagerMock
 	return mmEditTweet.mock
 }
 
-//Set uses given function f to mock the FeedManager.EditTweet method
+// Set uses given function f to mock the FeedManager.EditTweet method
 func (mmEditTweet *mFeedManagerMockEditTweet) Set(f func(ctx context.Context, tweetID int, text string) (err error)) *FeedManagerMock {
 	if mmEditTweet.defaultExpectation != nil {
 		mmEditTweet.mock.t.Fatalf("Default expectation is already set for the FeedManager.EditTweet method")
@@ -1024,7 +1024,7 @@ func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Return(ta1 []entity.Tweet, e
 	return mmGiveNewsFeed.mock
 }
 
-//Set uses given function f to mock the FeedManager.GiveNewsFeed method
+// Set uses given function f to mock the FeedManager.GiveNewsFeed method
 func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Set(f func(ctx context.Context, userID int) (ta1 []entity.Tweet, err error)) *FeedManagerMock {
 	if mmGiveNewsFeed.defaultExpectation != nil {
 		mmGiveNewsFeed.mock.t.Fatalf("Default expectation is already set for the FeedManager.GiveNewsFeed method")
@@ -1241,7 +1241,7 @@ func (mmRemoveFollower *mFeedManagerMockRemoveFollower) Return(err error) *FeedM
 	return mmRemoveFollower.mock
 }
 
-//Set uses given function f to mock the FeedManager.RemoveFollower method
+// Set uses given function f to mock the FeedManager.RemoveFollower method
 func (mmRemoveFollower *mFeedManagerMockRemoveFollower) Set(f func(ctx context.Context, userID int, fromUserID int) (err error)) *FeedManagerMock {
 	if mmRemoveFollower.defaultExpectation != nil {
 		mmRemoveFollower.mock.t.Fatalf("Default expectation is already set for the FeedManager.RemoveFollower method")

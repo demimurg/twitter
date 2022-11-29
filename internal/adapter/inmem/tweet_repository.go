@@ -40,8 +40,8 @@ func (t *tweetRepo) GetLatestFromUser(_ context.Context, userID int, limit int) 
 		return userTweets[i].CreatedAt.After(userTweets[j].CreatedAt)
 	})
 
-    if limit > len(userTweets) {
-       return userTweets, nil
+	if limit > len(userTweets) {
+		return userTweets, nil
 	}
-    return userTweets[:limit], nil
+	return userTweets[:limit], nil
 }

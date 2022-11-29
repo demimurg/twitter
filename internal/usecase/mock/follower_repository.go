@@ -137,7 +137,7 @@ func (mmAdd *mFollowerRepositoryMockAdd) Return(err error) *FollowerRepositoryMo
 	return mmAdd.mock
 }
 
-//Set uses given function f to mock the FollowerRepository.Add method
+// Set uses given function f to mock the FollowerRepository.Add method
 func (mmAdd *mFollowerRepositoryMockAdd) Set(f func(ctx context.Context, followerID int, toUserID int) (err error)) *FollowerRepositoryMock {
 	if mmAdd.defaultExpectation != nil {
 		mmAdd.mock.t.Fatalf("Default expectation is already set for the FollowerRepository.Add method")
@@ -355,7 +355,7 @@ func (mmGetFollowers *mFollowerRepositoryMockGetFollowers) Return(ia1 []int, err
 	return mmGetFollowers.mock
 }
 
-//Set uses given function f to mock the FollowerRepository.GetFollowers method
+// Set uses given function f to mock the FollowerRepository.GetFollowers method
 func (mmGetFollowers *mFollowerRepositoryMockGetFollowers) Set(f func(ctx context.Context, userID int, topN int) (ia1 []int, err error)) *FollowerRepositoryMock {
 	if mmGetFollowers.defaultExpectation != nil {
 		mmGetFollowers.mock.t.Fatalf("Default expectation is already set for the FollowerRepository.GetFollowers method")
@@ -573,7 +573,7 @@ func (mmGetFollowing *mFollowerRepositoryMockGetFollowing) Return(ia1 []int, err
 	return mmGetFollowing.mock
 }
 
-//Set uses given function f to mock the FollowerRepository.GetFollowing method
+// Set uses given function f to mock the FollowerRepository.GetFollowing method
 func (mmGetFollowing *mFollowerRepositoryMockGetFollowing) Set(f func(ctx context.Context, userID int, topN int) (ia1 []int, err error)) *FollowerRepositoryMock {
 	if mmGetFollowing.defaultExpectation != nil {
 		mmGetFollowing.mock.t.Fatalf("Default expectation is already set for the FollowerRepository.GetFollowing method")
@@ -790,7 +790,7 @@ func (mmRemove *mFollowerRepositoryMockRemove) Return(err error) *FollowerReposi
 	return mmRemove.mock
 }
 
-//Set uses given function f to mock the FollowerRepository.Remove method
+// Set uses given function f to mock the FollowerRepository.Remove method
 func (mmRemove *mFollowerRepositoryMockRemove) Set(f func(ctx context.Context, followerID int, fromUserID int) (err error)) *FollowerRepositoryMock {
 	if mmRemove.defaultExpectation != nil {
 		mmRemove.mock.t.Fatalf("Default expectation is already set for the FollowerRepository.Remove method")

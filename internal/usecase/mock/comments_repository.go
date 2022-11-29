@@ -120,7 +120,7 @@ func (mmAdd *mCommentsRepositoryMockAdd) Return(err error) *CommentsRepositoryMo
 	return mmAdd.mock
 }
 
-//Set uses given function f to mock the CommentsRepository.Add method
+// Set uses given function f to mock the CommentsRepository.Add method
 func (mmAdd *mCommentsRepositoryMockAdd) Set(f func(ctx context.Context, userID int, tweetID string, text string) (err error)) *CommentsRepositoryMock {
 	if mmAdd.defaultExpectation != nil {
 		mmAdd.mock.t.Fatalf("Default expectation is already set for the CommentsRepository.Add method")
@@ -337,7 +337,7 @@ func (mmUpdateText *mCommentsRepositoryMockUpdateText) Return(err error) *Commen
 	return mmUpdateText.mock
 }
 
-//Set uses given function f to mock the CommentsRepository.UpdateText method
+// Set uses given function f to mock the CommentsRepository.UpdateText method
 func (mmUpdateText *mCommentsRepositoryMockUpdateText) Set(f func(ctx context.Context, commentID int, newText string) (err error)) *CommentsRepositoryMock {
 	if mmUpdateText.defaultExpectation != nil {
 		mmUpdateText.mock.t.Fatalf("Default expectation is already set for the CommentsRepository.UpdateText method")

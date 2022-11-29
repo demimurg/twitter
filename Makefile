@@ -1,3 +1,6 @@
+run:
+	go run ./cmd/twitter | jq
+
 mocks:
 	minimock -s .go -i github.com/demimurg/twitter/internal/usecase.* -o ./internal/usecase/mock
 

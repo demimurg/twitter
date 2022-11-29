@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/gojuno/minimock/v3 v3.0.10
+	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.8.1
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1

@@ -129,7 +129,7 @@ func (mmAdd *mTweetRepositoryMockAdd) Return(err error) *TweetRepositoryMock {
 	return mmAdd.mock
 }
 
-//Set uses given function f to mock the TweetRepository.Add method
+// Set uses given function f to mock the TweetRepository.Add method
 func (mmAdd *mTweetRepositoryMockAdd) Set(f func(ctx context.Context, userID int, tweetText string) (err error)) *TweetRepositoryMock {
 	if mmAdd.defaultExpectation != nil {
 		mmAdd.mock.t.Fatalf("Default expectation is already set for the TweetRepository.Add method")
@@ -347,7 +347,7 @@ func (mmGetLatestFromUser *mTweetRepositoryMockGetLatestFromUser) Return(ta1 []e
 	return mmGetLatestFromUser.mock
 }
 
-//Set uses given function f to mock the TweetRepository.GetLatestFromUser method
+// Set uses given function f to mock the TweetRepository.GetLatestFromUser method
 func (mmGetLatestFromUser *mTweetRepositoryMockGetLatestFromUser) Set(f func(ctx context.Context, userID int, limit int) (ta1 []entity.Tweet, err error)) *TweetRepositoryMock {
 	if mmGetLatestFromUser.defaultExpectation != nil {
 		mmGetLatestFromUser.mock.t.Fatalf("Default expectation is already set for the TweetRepository.GetLatestFromUser method")
@@ -564,7 +564,7 @@ func (mmUpdateText *mTweetRepositoryMockUpdateText) Return(err error) *TweetRepo
 	return mmUpdateText.mock
 }
 
-//Set uses given function f to mock the TweetRepository.UpdateText method
+// Set uses given function f to mock the TweetRepository.UpdateText method
 func (mmUpdateText *mTweetRepositoryMockUpdateText) Set(f func(ctx context.Context, tweetID int, newText string) (err error)) *TweetRepositoryMock {
 	if mmUpdateText.defaultExpectation != nil {
 		mmUpdateText.mock.t.Fatalf("Default expectation is already set for the TweetRepository.UpdateText method")

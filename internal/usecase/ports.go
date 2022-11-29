@@ -3,14 +3,14 @@ package usecase
 import (
 	"context"
 	"fmt"
-    "time"
+	"time"
 
-    "github.com/demimurg/twitter/internal/entity"
+	"github.com/demimurg/twitter/internal/entity"
 )
 
 type UserRepository interface {
-    // Add will creates new user in repo and returns id assigned to it
-    Add(ctx context.Context, name, email string, birthDate *time.Time) (int, error)
+	// Add will creates new user in repo and returns id assigned to it
+	Add(ctx context.Context, name, email string, birthDate *time.Time) (int, error)
 	Get(ctx context.Context, userID int) (*entity.User, error)
 	UpdateCaption(ctx context.Context, userID int, caption string) error
 	Delete(ctx context.Context, userID int) error

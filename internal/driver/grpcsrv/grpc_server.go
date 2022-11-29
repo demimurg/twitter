@@ -4,18 +4,26 @@ import (
 	"context"
 	"errors"
 	"github.com/demimurg/twitter/internal/usecase"
+	"github.com/demimurg/twitter/pkg/log"
 	"github.com/demimurg/twitter/pkg/proto"
+	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"strings"
 )
 
 func NewTwitter(feedManager usecase.FeedManager, userRegistrator usecase.UserRegistrator) *grpc.Server {
-	srv := grpc.NewServer()
+	srv := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(logRequest, recoverPanic),
+	)
 	proto.RegisterTwitterServer(srv, &twitter{
 		fm: feedManager, ur: userRegistrator,
 	})
+	reflection.Register(srv)
 	return srv
 }
 
@@ -65,4 +73,27 @@ func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*emptyp
 		return &emptypb.Empty{}, err
 	}
 	return &emptypb.Empty{}, nil
+}
+
+func logRequest(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	uniq := strings.Split(uuid.New().String(), "-")
+	ctx = log.With(ctx, "trace_id", uniq[len(uniq)-1])
+	log.Info(ctx, "received request",
+		"method", info.FullMethod)
+	return handler(ctx, req)
+}
+
+func recoverPanic(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	defer func() {
+		if msg := recover(); msg != nil {
+            // print stack trace of panic in json
+            // the first frames will be with runtime package info
+            // but the next one is a place where panic appeared
+            log.Error(ctx, "rpc throw panic",
+                "panic", msg,
+                zap.StackSkip("stacktrace", 1), // skip current func
+                "todo", "copy stacktrace and print with newlines using `echo -e <stactrace>`, search problem line from up to down")
+		}
+	}()
+	return handler(ctx, req)
 }
