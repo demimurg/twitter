@@ -8,8 +8,15 @@ jobs:
     container: golang:1.19-alpine
     steps:
       - uses: actions/checkout@v3
-      - name: vendor
+      - name: Vendor
         run: go mod vendor
-      - name: go test
+      - name: Go Test
         run: CGO_ENABLED=0 go test -coverpkg=./... ./...
-      
+  golangci-lint:
+    name: Run linter
+    runs-on: ubuntu-latest
+    container: golangci/golangci-lint:v1.50-alpine
+    steps:
+      - uses: actions/checkout@v3
+      - name: Golangci Lint
+        run: golangci-lint run
