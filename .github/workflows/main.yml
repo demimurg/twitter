@@ -8,6 +8,8 @@ jobs:
     container: golang:1.19-alpine
     steps:
       - uses: actions/checkout@v3
-      - run: go mod vendor
-      - run: go test ./...
+      - name: vendor
+        run: go mod vendor
+      - name: go test
+        run: CGO_ENABLED=0 go test -coverpkg=./... ./...
       
