@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   go-test:
-    name: Run unit tests for ${{ GITHUB_REPOSITORY }}
+    name: Run unit tests
     runs-on: ubuntu-latest
     container: golang:1.19-alpine
     steps:
