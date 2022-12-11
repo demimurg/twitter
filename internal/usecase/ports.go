@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"fmt"
+    "errors"
 	"time"
 
 	"github.com/demimurg/twitter/internal/entity"
@@ -38,7 +38,7 @@ type FollowerRepository interface {
 	GetFollowers(ctx context.Context, userID, topN int) ([]int, error)
 }
 
-var ErrFakeEmail = fmt.Errorf("this email is a fake")
+var ErrFakeEmail = errors.New("this email is a fake")
 
 type ScamDetectorClient interface {
 	CheckEmail(ctx context.Context, email string) error

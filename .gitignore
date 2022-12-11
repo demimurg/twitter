@@ -1,6 +1,8 @@
-# ide
+# ide specific folders
 .idea
 .vscode
 .fleet
 # playground folder to test and run some ideas
 cmd/play
+# directory for go dependencies
+vendor
