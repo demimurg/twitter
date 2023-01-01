@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-hub/kubectl@v1.26
+      - uses: actions-hub/kubectl@v1.26.0
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
