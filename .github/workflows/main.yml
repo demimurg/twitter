@@ -49,5 +49,5 @@ jobs:
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
-          arg: replace --force -f k8s.yaml
+          args: replace --force -f k8s.yaml
             
