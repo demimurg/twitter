@@ -1,7 +1,6 @@
-## Тестирование
+## Testing
 
-Для мокирования зависимостей мы используем библиотеку minimock. 
-Стандартный шаблон для табличных тестов выглядит следующим образом:
+You should mock dependencies using following way with minimock library:
 ```go
 func Test_Template(t *testing.T) {
 	type mocks struct {
@@ -9,20 +8,7 @@ func Test_Template(t *testing.T) {
 		// *mock.TwoMock
 	}
 	// you need to create feed manager and mocks for each testcase
-	setup := func(t *testing.T, expect func(mocks)) Some {
-		mc := minimock.NewController(t)
-		t.Cleanup(mc.Finish)
 
-		m := mocks{
-			// mock.NewOneMock(mc), mock.NewTwoMock(mc),
-		}
-		expect(m)
-
-		return &some{
-			// one: m.OneMock,
-			// two: m.TwoMock,
-		}
-	}
 
 	var (
 		_ = "fake variable"
@@ -42,9 +28,17 @@ func Test_Template(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
+            mc := minimock.NewController(t)
+            defer mc.Finish
+            m := mocks{
+                // mock.NewOneMock(mc), mock.NewTwoMock(mc),
+            }
+            tc.expect(m)
 
-			someUsecase := setup(t, tc.expect)
-			err := someUsecase.CallMethod(tc.arg)
+            s := &some{
+                // one: m.OneMock, // two: m.TwoMock
+            }
+			err := s.CallMethod(tc.arg)
 			assert.Equal(t, tc.wantError, err != nil, "not expected error: %v", err)
 		})
 	}
