@@ -8,7 +8,7 @@ jobs:
     container: golang:1.19-alpine
     steps:
       - uses: actions/checkout@v3
-      - name: Go Test
+      - name: Run unit tests
         run: CGO_ENABLED=0 go test -coverpkg=./... ./...
   golangci-lint:
     name: Run Linter
@@ -16,23 +16,23 @@ jobs:
     container: golangci/golangci-lint:v1.50-alpine
     steps:
       - uses: actions/checkout@v3
-      - name: start check with golangci-lint
+      - name: Start check with golangci-lint
         run: golangci-lint run
   docker-image:
-    name: Build and Push Docker Image
+    name: Build and Push Docker
     needs: [go-test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: log into the container registry
+      - name: Log into the container registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: set up docker buildx engine
+      - name: Set up docker buildx engine
         uses: docker/setup-buildx-action@v2
-      - name: build and push dockerimage
+      - name: Build and push docker image
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -40,13 +40,14 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ghcr.io/${{ github.repository }}:latest
   deploy-kube:
-    name: Deploy Image to Kubernetes Cluster
+    name: Deploy Image to Kubernetes
     needs: [docker-image]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: setup kubectl client
-        run: snap install kubectl --classic && echo ${{ secrets.KUBECONFIG }} | base64 --decode > .kube/config
-      - name: deploy kubernetes resources
-        run: kubectl replace --force -f k8s.yaml
+      - uses: actions-hub/kubectl@v1.26
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        with:
+          arg: replace --force -f k8s.yaml
             
