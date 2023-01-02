@@ -50,8 +50,8 @@ func TestFeedManager_AddNewTweet(t *testing.T) {
 			wantError: true,
 		},
 		{
-			name:      "tweet length is to big",
-			tweetText: strings.Repeat("-", 71),
+			name:      "tweet length is too big",
+			tweetText: strings.Repeat("-", entity.MaxAllowedSymbols + 1),
 			expect: func(m fmmocks) {
 				// there is no calls to urmocks, will be entry validation of length and error returns
 			},
