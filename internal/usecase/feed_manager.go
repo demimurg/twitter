@@ -28,17 +28,17 @@ var (
 
 // NewFeedManager returns usecase for work with user news feed
 func NewFeedManager(
-	usersRepo UserRepository, followersRepo FollowerRepository,
-	tweetsRepo TweetRepository, commentsRepo CommentsRepository,
+	usersRepo UserRepository,
+    followersRepo FollowerRepository,
+    tweetsRepo TweetRepository,
 ) FeedManager {
-	return &feedManager{usersRepo, followersRepo, tweetsRepo, commentsRepo}
+	return &feedManager{usersRepo, followersRepo, tweetsRepo}
 }
 
 type feedManager struct {
 	usersRepo     UserRepository
 	followersRepo FollowerRepository
 	tweetsRepo    TweetRepository
-	commentsRepo  CommentsRepository
 }
 
 func (fm *feedManager) AddFollower(ctx context.Context, userID, toUserID int) error {
@@ -76,7 +76,7 @@ func (fm *feedManager) GiveNewsFeed(ctx context.Context, userID int) ([]entity.T
 
 	var newsFeed []entity.Tweet
 	for _, followingID := range following {
-		tweets, err := fm.tweetsRepo.GetLatestFromUser(ctx, followingID, 10)
+		tweets, err := fm.tweetsRepo.GetLatest(ctx, followingID, 10)
 		if err != nil {
 			log.Error(ctx, "can't get tweets",
 				"error", err,
@@ -91,9 +91,9 @@ func (fm *feedManager) GiveNewsFeed(ctx context.Context, userID int) ([]entity.T
 }
 
 func (fm *feedManager) EditTweet(ctx context.Context, tweetID int, text string) error {
-	return fm.tweetsRepo.UpdateText(ctx, tweetID, text)
+	return fm.tweetsRepo.Update(ctx, tweetID, text)
 }
 
 func (fm *feedManager) EditComment(ctx context.Context, commentID int, text string) error {
-	return fm.commentsRepo.UpdateText(ctx, commentID, text)
+	return fm.tweetsRepo.UpdateComment(ctx, commentID, text)
 }

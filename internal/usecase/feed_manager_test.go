@@ -88,10 +88,10 @@ func TestFeedManager_GiveNewsFeed(t *testing.T) {
 					Return([]int{friend1, friend2}, nil)
 				// fetch their latest tweets
 				m.TweetRepositoryMock.
-					GetLatestFromUserMock.
+					GetLatestMock.
 					When(ctx, friend1, 10).
 					Then([]entity.Tweet{{Text: "wake up"}, {Text: "eat"}}, nil).
-					GetLatestFromUserMock.
+					GetLatestMock.
 					When(ctx, friend2, 10).
 					Then([]entity.Tweet{{Text: "yoga class"}, {Text: "kitten"}}, nil)
 				// merge them
@@ -130,7 +130,6 @@ type fmmocks struct {
 	*mock.UserRepositoryMock
 	*mock.FollowerRepositoryMock
 	*mock.TweetRepositoryMock
-	*mock.CommentsRepositoryMock
 }
 
 // newFeedManager will create feed manager with mocked dependencies ans set expectations to them
@@ -142,12 +141,8 @@ func newFeedManager(t *testing.T, expect func(fmmocks)) FeedManager {
 		mock.NewUserRepositoryMock(mc),
 		mock.NewFollowerRepositoryMock(mc),
 		mock.NewTweetRepositoryMock(mc),
-		mock.NewCommentsRepositoryMock(mc),
 	}
 	expect(m)
 
-	return NewFeedManager(
-		m.UserRepositoryMock, m.FollowerRepositoryMock,
-		m.TweetRepositoryMock, m.CommentsRepositoryMock,
-	)
+	return NewFeedManager(m.UserRepositoryMock, m.FollowerRepositoryMock, m.TweetRepositoryMock)
 }

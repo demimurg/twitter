@@ -18,13 +18,10 @@ type UserRepository interface {
 
 type TweetRepository interface {
 	Add(ctx context.Context, userID int, tweetText string) error
-	UpdateText(ctx context.Context, tweetID int, newText string) error
-	GetLatestFromUser(ctx context.Context, userID int, limit int) ([]entity.Tweet, error)
-}
-
-type CommentsRepository interface {
-	Add(ctx context.Context, userID int, tweetID, text string) error
-	UpdateText(ctx context.Context, commentID int, newText string) error
+    AddComment(ctx context.Context, userID int, tweetID, commentText string) error
+	Update(ctx context.Context, tweetID int, newText string) error
+    UpdateComment(ctx context.Context, commentID int, newText string) error
+	GetLatest(ctx context.Context, userID int, limit int) ([]entity.Tweet, error)
 }
 
 type FollowerRepository interface {

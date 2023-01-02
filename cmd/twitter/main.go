@@ -14,7 +14,7 @@ func main() {
 	tweetRepo := inmem.NewTweetRepository()
 	followerRepo := inmem.NewFollowerRepository()
 
-    feedManager := usecase.NewFeedManager(userRepo, followerRepo, tweetRepo, nil)
+    feedManager := usecase.NewFeedManager(userRepo, followerRepo, tweetRepo)
     userRegistrator := usecase.NewUserRegistrator(userRepo, scamClient)
 
 	srv := grpcsrv.NewTwitter(feedManager, userRegistrator)
