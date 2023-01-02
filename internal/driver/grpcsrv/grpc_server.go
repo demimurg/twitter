@@ -3,6 +3,8 @@ package grpcsrv
 import (
 	"context"
 	"errors"
+	"strings"
+
 	"github.com/demimurg/twitter/internal/usecase"
 	"github.com/demimurg/twitter/pkg/log"
 	"github.com/demimurg/twitter/pkg/proto"
@@ -13,7 +15,6 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"strings"
 )
 
 func NewTwitter(feedManager usecase.FeedManager, userRegistrator usecase.UserRegistrator) *grpc.Server {
@@ -34,7 +35,7 @@ type twitter struct {
 }
 
 func (t *twitter) AddTweet(ctx context.Context, req *proto.AddTweetRequest) (*emptypb.Empty, error) {
-	err := t.fm.AddNewTweet(ctx, int(req.UserId), req.Text)
+	err := t.fm.AddTweet(ctx, int(req.UserId), req.Text)
 	if err != nil {
 		if errors.Is(err, usecase.ErrValidationFailed) {
 			return &emptypb.Empty{}, status.Error(codes.InvalidArgument, err.Error())
@@ -45,7 +46,7 @@ func (t *twitter) AddTweet(ctx context.Context, req *proto.AddTweetRequest) (*em
 }
 
 func (t *twitter) GetNewsFeed(ctx context.Context, req *proto.GetNewsFeedRequest) (*proto.GetNewsFeedResponse, error) {
-	feed, err := t.fm.GiveNewsFeed(ctx, int(req.UserId))
+	feed, err := t.fm.GetNewsFeed(ctx, int(req.UserId))
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func (t *twitter) Register(ctx context.Context, req *proto.RegisterRequest) (*em
 }
 
 func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*emptypb.Empty, error) {
-	err := t.fm.AddFollower(ctx, int(req.UserId), int(req.NewFollowerId))
+	err := t.fm.AddFollower(ctx, int(req.NewFollowerId), int(req.UserId))
 	if err != nil {
 		return &emptypb.Empty{}, err
 	}
@@ -76,7 +77,7 @@ func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*emptyp
 }
 
 func logRequest(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	uniq := strings.Split(uuid.New().String(), "-")
+	uniq := strings.Split(uuid.NewString(), "-")
 	ctx = log.With(ctx, "trace_id", uniq[len(uniq)-1])
 	log.Info(ctx, "received request",
 		"method", info.FullMethod)
@@ -86,13 +87,13 @@ func logRequest(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo
 func recoverPanic(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	defer func() {
 		if msg := recover(); msg != nil {
-            // print stack trace of panic in json
-            // the first frames will be with runtime package info
-            // but the next one is a place where panic appeared
-            log.Error(ctx, "rpc throw panic",
-                "panic", msg,
-                zap.StackSkip("stacktrace", 1), // skip current func
-                "todo", "copy stacktrace and print with newlines using `echo -e <stactrace>`, search problem line from up to down")
+			// print stack trace of panic in json
+			// the first frames will be with runtime package info
+			// but the next one is a place where panic appeared
+			log.Error(ctx, "rpc throw panic",
+				"panic", msg,
+				zap.StackSkip("stacktrace", 1), // skip current func
+				"todo", "copy stacktrace and print with newlines using `echo -e <stactrace>`, search problem line from up to down")
 		}
 	}()
 	return handler(ctx, req)

@@ -3,12 +3,13 @@ package usecase
 import (
 	"context"
 	"errors"
+	"testing"
+	"time"
+
 	"github.com/demimurg/twitter/internal/entity"
 	"github.com/demimurg/twitter/internal/usecase/mock"
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestUserRegistrator_Register(t *testing.T) {

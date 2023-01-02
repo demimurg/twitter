@@ -2,11 +2,12 @@ package inmem
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/demimurg/twitter/internal/entity"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestUserRepository(t *testing.T) {

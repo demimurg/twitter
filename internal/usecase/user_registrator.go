@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/demimurg/twitter/internal/entity"
 	"github.com/demimurg/twitter/pkg/log"
-	"time"
 )
 
 type UserRegistrator interface {

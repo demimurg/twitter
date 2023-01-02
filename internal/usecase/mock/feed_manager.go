@@ -24,11 +24,11 @@ type FeedManagerMock struct {
 	beforeAddFollowerCounter uint64
 	AddFollowerMock          mFeedManagerMockAddFollower
 
-	funcAddNewTweet          func(ctx context.Context, userID int, text string) (err error)
-	inspectFuncAddNewTweet   func(ctx context.Context, userID int, text string)
-	afterAddNewTweetCounter  uint64
-	beforeAddNewTweetCounter uint64
-	AddNewTweetMock          mFeedManagerMockAddNewTweet
+	funcAddTweet          func(ctx context.Context, userID int, text string) (err error)
+	inspectFuncAddTweet   func(ctx context.Context, userID int, text string)
+	afterAddTweetCounter  uint64
+	beforeAddTweetCounter uint64
+	AddTweetMock          mFeedManagerMockAddTweet
 
 	funcEditComment          func(ctx context.Context, commentID int, text string) (err error)
 	inspectFuncEditComment   func(ctx context.Context, commentID int, text string)
@@ -42,11 +42,11 @@ type FeedManagerMock struct {
 	beforeEditTweetCounter uint64
 	EditTweetMock          mFeedManagerMockEditTweet
 
-	funcGiveNewsFeed          func(ctx context.Context, userID int) (ta1 []entity.Tweet, err error)
-	inspectFuncGiveNewsFeed   func(ctx context.Context, userID int)
-	afterGiveNewsFeedCounter  uint64
-	beforeGiveNewsFeedCounter uint64
-	GiveNewsFeedMock          mFeedManagerMockGiveNewsFeed
+	funcGetNewsFeed          func(ctx context.Context, userID int) (ta1 []entity.Tweet, err error)
+	inspectFuncGetNewsFeed   func(ctx context.Context, userID int)
+	afterGetNewsFeedCounter  uint64
+	beforeGetNewsFeedCounter uint64
+	GetNewsFeedMock          mFeedManagerMockGetNewsFeed
 
 	funcRemoveFollower          func(ctx context.Context, userID int, fromUserID int) (err error)
 	inspectFuncRemoveFollower   func(ctx context.Context, userID int, fromUserID int)
@@ -65,8 +65,8 @@ func NewFeedManagerMock(t minimock.Tester) *FeedManagerMock {
 	m.AddFollowerMock = mFeedManagerMockAddFollower{mock: m}
 	m.AddFollowerMock.callArgs = []*FeedManagerMockAddFollowerParams{}
 
-	m.AddNewTweetMock = mFeedManagerMockAddNewTweet{mock: m}
-	m.AddNewTweetMock.callArgs = []*FeedManagerMockAddNewTweetParams{}
+	m.AddTweetMock = mFeedManagerMockAddTweet{mock: m}
+	m.AddTweetMock.callArgs = []*FeedManagerMockAddTweetParams{}
 
 	m.EditCommentMock = mFeedManagerMockEditComment{mock: m}
 	m.EditCommentMock.callArgs = []*FeedManagerMockEditCommentParams{}
@@ -74,8 +74,8 @@ func NewFeedManagerMock(t minimock.Tester) *FeedManagerMock {
 	m.EditTweetMock = mFeedManagerMockEditTweet{mock: m}
 	m.EditTweetMock.callArgs = []*FeedManagerMockEditTweetParams{}
 
-	m.GiveNewsFeedMock = mFeedManagerMockGiveNewsFeed{mock: m}
-	m.GiveNewsFeedMock.callArgs = []*FeedManagerMockGiveNewsFeedParams{}
+	m.GetNewsFeedMock = mFeedManagerMockGetNewsFeed{mock: m}
+	m.GetNewsFeedMock.callArgs = []*FeedManagerMockGetNewsFeedParams{}
 
 	m.RemoveFollowerMock = mFeedManagerMockRemoveFollower{mock: m}
 	m.RemoveFollowerMock.callArgs = []*FeedManagerMockRemoveFollowerParams{}
@@ -300,220 +300,220 @@ func (m *FeedManagerMock) MinimockAddFollowerInspect() {
 	}
 }
 
-type mFeedManagerMockAddNewTweet struct {
+type mFeedManagerMockAddTweet struct {
 	mock               *FeedManagerMock
-	defaultExpectation *FeedManagerMockAddNewTweetExpectation
-	expectations       []*FeedManagerMockAddNewTweetExpectation
+	defaultExpectation *FeedManagerMockAddTweetExpectation
+	expectations       []*FeedManagerMockAddTweetExpectation
 
-	callArgs []*FeedManagerMockAddNewTweetParams
+	callArgs []*FeedManagerMockAddTweetParams
 	mutex    sync.RWMutex
 }
 
-// FeedManagerMockAddNewTweetExpectation specifies expectation struct of the FeedManager.AddNewTweet
-type FeedManagerMockAddNewTweetExpectation struct {
+// FeedManagerMockAddTweetExpectation specifies expectation struct of the FeedManager.AddTweet
+type FeedManagerMockAddTweetExpectation struct {
 	mock    *FeedManagerMock
-	params  *FeedManagerMockAddNewTweetParams
-	results *FeedManagerMockAddNewTweetResults
+	params  *FeedManagerMockAddTweetParams
+	results *FeedManagerMockAddTweetResults
 	Counter uint64
 }
 
-// FeedManagerMockAddNewTweetParams contains parameters of the FeedManager.AddNewTweet
-type FeedManagerMockAddNewTweetParams struct {
+// FeedManagerMockAddTweetParams contains parameters of the FeedManager.AddTweet
+type FeedManagerMockAddTweetParams struct {
 	ctx    context.Context
 	userID int
 	text   string
 }
 
-// FeedManagerMockAddNewTweetResults contains results of the FeedManager.AddNewTweet
-type FeedManagerMockAddNewTweetResults struct {
+// FeedManagerMockAddTweetResults contains results of the FeedManager.AddTweet
+type FeedManagerMockAddTweetResults struct {
 	err error
 }
 
-// Expect sets up expected params for FeedManager.AddNewTweet
-func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Expect(ctx context.Context, userID int, text string) *mFeedManagerMockAddNewTweet {
-	if mmAddNewTweet.mock.funcAddNewTweet != nil {
-		mmAddNewTweet.mock.t.Fatalf("FeedManagerMock.AddNewTweet mock is already set by Set")
+// Expect sets up expected params for FeedManager.AddTweet
+func (mmAddTweet *mFeedManagerMockAddTweet) Expect(ctx context.Context, userID int, text string) *mFeedManagerMockAddTweet {
+	if mmAddTweet.mock.funcAddTweet != nil {
+		mmAddTweet.mock.t.Fatalf("FeedManagerMock.AddTweet mock is already set by Set")
 	}
 
-	if mmAddNewTweet.defaultExpectation == nil {
-		mmAddNewTweet.defaultExpectation = &FeedManagerMockAddNewTweetExpectation{}
+	if mmAddTweet.defaultExpectation == nil {
+		mmAddTweet.defaultExpectation = &FeedManagerMockAddTweetExpectation{}
 	}
 
-	mmAddNewTweet.defaultExpectation.params = &FeedManagerMockAddNewTweetParams{ctx, userID, text}
-	for _, e := range mmAddNewTweet.expectations {
-		if minimock.Equal(e.params, mmAddNewTweet.defaultExpectation.params) {
-			mmAddNewTweet.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmAddNewTweet.defaultExpectation.params)
+	mmAddTweet.defaultExpectation.params = &FeedManagerMockAddTweetParams{ctx, userID, text}
+	for _, e := range mmAddTweet.expectations {
+		if minimock.Equal(e.params, mmAddTweet.defaultExpectation.params) {
+			mmAddTweet.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmAddTweet.defaultExpectation.params)
 		}
 	}
 
-	return mmAddNewTweet
+	return mmAddTweet
 }
 
-// Inspect accepts an inspector function that has same arguments as the FeedManager.AddNewTweet
-func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Inspect(f func(ctx context.Context, userID int, text string)) *mFeedManagerMockAddNewTweet {
-	if mmAddNewTweet.mock.inspectFuncAddNewTweet != nil {
-		mmAddNewTweet.mock.t.Fatalf("Inspect function is already set for FeedManagerMock.AddNewTweet")
+// Inspect accepts an inspector function that has same arguments as the FeedManager.AddTweet
+func (mmAddTweet *mFeedManagerMockAddTweet) Inspect(f func(ctx context.Context, userID int, text string)) *mFeedManagerMockAddTweet {
+	if mmAddTweet.mock.inspectFuncAddTweet != nil {
+		mmAddTweet.mock.t.Fatalf("Inspect function is already set for FeedManagerMock.AddTweet")
 	}
 
-	mmAddNewTweet.mock.inspectFuncAddNewTweet = f
+	mmAddTweet.mock.inspectFuncAddTweet = f
 
-	return mmAddNewTweet
+	return mmAddTweet
 }
 
-// Return sets up results that will be returned by FeedManager.AddNewTweet
-func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Return(err error) *FeedManagerMock {
-	if mmAddNewTweet.mock.funcAddNewTweet != nil {
-		mmAddNewTweet.mock.t.Fatalf("FeedManagerMock.AddNewTweet mock is already set by Set")
+// Return sets up results that will be returned by FeedManager.AddTweet
+func (mmAddTweet *mFeedManagerMockAddTweet) Return(err error) *FeedManagerMock {
+	if mmAddTweet.mock.funcAddTweet != nil {
+		mmAddTweet.mock.t.Fatalf("FeedManagerMock.AddTweet mock is already set by Set")
 	}
 
-	if mmAddNewTweet.defaultExpectation == nil {
-		mmAddNewTweet.defaultExpectation = &FeedManagerMockAddNewTweetExpectation{mock: mmAddNewTweet.mock}
+	if mmAddTweet.defaultExpectation == nil {
+		mmAddTweet.defaultExpectation = &FeedManagerMockAddTweetExpectation{mock: mmAddTweet.mock}
 	}
-	mmAddNewTweet.defaultExpectation.results = &FeedManagerMockAddNewTweetResults{err}
-	return mmAddNewTweet.mock
+	mmAddTweet.defaultExpectation.results = &FeedManagerMockAddTweetResults{err}
+	return mmAddTweet.mock
 }
 
-// Set uses given function f to mock the FeedManager.AddNewTweet method
-func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Set(f func(ctx context.Context, userID int, text string) (err error)) *FeedManagerMock {
-	if mmAddNewTweet.defaultExpectation != nil {
-		mmAddNewTweet.mock.t.Fatalf("Default expectation is already set for the FeedManager.AddNewTweet method")
+// Set uses given function f to mock the FeedManager.AddTweet method
+func (mmAddTweet *mFeedManagerMockAddTweet) Set(f func(ctx context.Context, userID int, text string) (err error)) *FeedManagerMock {
+	if mmAddTweet.defaultExpectation != nil {
+		mmAddTweet.mock.t.Fatalf("Default expectation is already set for the FeedManager.AddTweet method")
 	}
 
-	if len(mmAddNewTweet.expectations) > 0 {
-		mmAddNewTweet.mock.t.Fatalf("Some expectations are already set for the FeedManager.AddNewTweet method")
+	if len(mmAddTweet.expectations) > 0 {
+		mmAddTweet.mock.t.Fatalf("Some expectations are already set for the FeedManager.AddTweet method")
 	}
 
-	mmAddNewTweet.mock.funcAddNewTweet = f
-	return mmAddNewTweet.mock
+	mmAddTweet.mock.funcAddTweet = f
+	return mmAddTweet.mock
 }
 
-// When sets expectation for the FeedManager.AddNewTweet which will trigger the result defined by the following
+// When sets expectation for the FeedManager.AddTweet which will trigger the result defined by the following
 // Then helper
-func (mmAddNewTweet *mFeedManagerMockAddNewTweet) When(ctx context.Context, userID int, text string) *FeedManagerMockAddNewTweetExpectation {
-	if mmAddNewTweet.mock.funcAddNewTweet != nil {
-		mmAddNewTweet.mock.t.Fatalf("FeedManagerMock.AddNewTweet mock is already set by Set")
+func (mmAddTweet *mFeedManagerMockAddTweet) When(ctx context.Context, userID int, text string) *FeedManagerMockAddTweetExpectation {
+	if mmAddTweet.mock.funcAddTweet != nil {
+		mmAddTweet.mock.t.Fatalf("FeedManagerMock.AddTweet mock is already set by Set")
 	}
 
-	expectation := &FeedManagerMockAddNewTweetExpectation{
-		mock:   mmAddNewTweet.mock,
-		params: &FeedManagerMockAddNewTweetParams{ctx, userID, text},
+	expectation := &FeedManagerMockAddTweetExpectation{
+		mock:   mmAddTweet.mock,
+		params: &FeedManagerMockAddTweetParams{ctx, userID, text},
 	}
-	mmAddNewTweet.expectations = append(mmAddNewTweet.expectations, expectation)
+	mmAddTweet.expectations = append(mmAddTweet.expectations, expectation)
 	return expectation
 }
 
-// Then sets up FeedManager.AddNewTweet return parameters for the expectation previously defined by the When method
-func (e *FeedManagerMockAddNewTweetExpectation) Then(err error) *FeedManagerMock {
-	e.results = &FeedManagerMockAddNewTweetResults{err}
+// Then sets up FeedManager.AddTweet return parameters for the expectation previously defined by the When method
+func (e *FeedManagerMockAddTweetExpectation) Then(err error) *FeedManagerMock {
+	e.results = &FeedManagerMockAddTweetResults{err}
 	return e.mock
 }
 
-// AddNewTweet implements usecase.FeedManager
-func (mmAddNewTweet *FeedManagerMock) AddNewTweet(ctx context.Context, userID int, text string) (err error) {
-	mm_atomic.AddUint64(&mmAddNewTweet.beforeAddNewTweetCounter, 1)
-	defer mm_atomic.AddUint64(&mmAddNewTweet.afterAddNewTweetCounter, 1)
+// AddTweet implements usecase.FeedManager
+func (mmAddTweet *FeedManagerMock) AddTweet(ctx context.Context, userID int, text string) (err error) {
+	mm_atomic.AddUint64(&mmAddTweet.beforeAddTweetCounter, 1)
+	defer mm_atomic.AddUint64(&mmAddTweet.afterAddTweetCounter, 1)
 
-	if mmAddNewTweet.inspectFuncAddNewTweet != nil {
-		mmAddNewTweet.inspectFuncAddNewTweet(ctx, userID, text)
+	if mmAddTweet.inspectFuncAddTweet != nil {
+		mmAddTweet.inspectFuncAddTweet(ctx, userID, text)
 	}
 
-	mm_params := &FeedManagerMockAddNewTweetParams{ctx, userID, text}
+	mm_params := &FeedManagerMockAddTweetParams{ctx, userID, text}
 
 	// Record call args
-	mmAddNewTweet.AddNewTweetMock.mutex.Lock()
-	mmAddNewTweet.AddNewTweetMock.callArgs = append(mmAddNewTweet.AddNewTweetMock.callArgs, mm_params)
-	mmAddNewTweet.AddNewTweetMock.mutex.Unlock()
+	mmAddTweet.AddTweetMock.mutex.Lock()
+	mmAddTweet.AddTweetMock.callArgs = append(mmAddTweet.AddTweetMock.callArgs, mm_params)
+	mmAddTweet.AddTweetMock.mutex.Unlock()
 
-	for _, e := range mmAddNewTweet.AddNewTweetMock.expectations {
+	for _, e := range mmAddTweet.AddTweetMock.expectations {
 		if minimock.Equal(e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
 			return e.results.err
 		}
 	}
 
-	if mmAddNewTweet.AddNewTweetMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmAddNewTweet.AddNewTweetMock.defaultExpectation.Counter, 1)
-		mm_want := mmAddNewTweet.AddNewTweetMock.defaultExpectation.params
-		mm_got := FeedManagerMockAddNewTweetParams{ctx, userID, text}
+	if mmAddTweet.AddTweetMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmAddTweet.AddTweetMock.defaultExpectation.Counter, 1)
+		mm_want := mmAddTweet.AddTweetMock.defaultExpectation.params
+		mm_got := FeedManagerMockAddTweetParams{ctx, userID, text}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmAddNewTweet.t.Errorf("FeedManagerMock.AddNewTweet got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmAddTweet.t.Errorf("FeedManagerMock.AddTweet got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
-		mm_results := mmAddNewTweet.AddNewTweetMock.defaultExpectation.results
+		mm_results := mmAddTweet.AddTweetMock.defaultExpectation.results
 		if mm_results == nil {
-			mmAddNewTweet.t.Fatal("No results are set for the FeedManagerMock.AddNewTweet")
+			mmAddTweet.t.Fatal("No results are set for the FeedManagerMock.AddTweet")
 		}
 		return (*mm_results).err
 	}
-	if mmAddNewTweet.funcAddNewTweet != nil {
-		return mmAddNewTweet.funcAddNewTweet(ctx, userID, text)
+	if mmAddTweet.funcAddTweet != nil {
+		return mmAddTweet.funcAddTweet(ctx, userID, text)
 	}
-	mmAddNewTweet.t.Fatalf("Unexpected call to FeedManagerMock.AddNewTweet. %v %v %v", ctx, userID, text)
+	mmAddTweet.t.Fatalf("Unexpected call to FeedManagerMock.AddTweet. %v %v %v", ctx, userID, text)
 	return
 }
 
-// AddNewTweetAfterCounter returns a count of finished FeedManagerMock.AddNewTweet invocations
-func (mmAddNewTweet *FeedManagerMock) AddNewTweetAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmAddNewTweet.afterAddNewTweetCounter)
+// AddTweetAfterCounter returns a count of finished FeedManagerMock.AddTweet invocations
+func (mmAddTweet *FeedManagerMock) AddTweetAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmAddTweet.afterAddTweetCounter)
 }
 
-// AddNewTweetBeforeCounter returns a count of FeedManagerMock.AddNewTweet invocations
-func (mmAddNewTweet *FeedManagerMock) AddNewTweetBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmAddNewTweet.beforeAddNewTweetCounter)
+// AddTweetBeforeCounter returns a count of FeedManagerMock.AddTweet invocations
+func (mmAddTweet *FeedManagerMock) AddTweetBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmAddTweet.beforeAddTweetCounter)
 }
 
-// Calls returns a list of arguments used in each call to FeedManagerMock.AddNewTweet.
+// Calls returns a list of arguments used in each call to FeedManagerMock.AddTweet.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmAddNewTweet *mFeedManagerMockAddNewTweet) Calls() []*FeedManagerMockAddNewTweetParams {
-	mmAddNewTweet.mutex.RLock()
+func (mmAddTweet *mFeedManagerMockAddTweet) Calls() []*FeedManagerMockAddTweetParams {
+	mmAddTweet.mutex.RLock()
 
-	argCopy := make([]*FeedManagerMockAddNewTweetParams, len(mmAddNewTweet.callArgs))
-	copy(argCopy, mmAddNewTweet.callArgs)
+	argCopy := make([]*FeedManagerMockAddTweetParams, len(mmAddTweet.callArgs))
+	copy(argCopy, mmAddTweet.callArgs)
 
-	mmAddNewTweet.mutex.RUnlock()
+	mmAddTweet.mutex.RUnlock()
 
 	return argCopy
 }
 
-// MinimockAddNewTweetDone returns true if the count of the AddNewTweet invocations corresponds
+// MinimockAddTweetDone returns true if the count of the AddTweet invocations corresponds
 // the number of defined expectations
-func (m *FeedManagerMock) MinimockAddNewTweetDone() bool {
-	for _, e := range m.AddNewTweetMock.expectations {
+func (m *FeedManagerMock) MinimockAddTweetDone() bool {
+	for _, e := range m.AddTweetMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
 		}
 	}
 
 	// if default expectation was set then invocations count should be greater than zero
-	if m.AddNewTweetMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterAddNewTweetCounter) < 1 {
+	if m.AddTweetMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterAddTweetCounter) < 1 {
 		return false
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcAddNewTweet != nil && mm_atomic.LoadUint64(&m.afterAddNewTweetCounter) < 1 {
+	if m.funcAddTweet != nil && mm_atomic.LoadUint64(&m.afterAddTweetCounter) < 1 {
 		return false
 	}
 	return true
 }
 
-// MinimockAddNewTweetInspect logs each unmet expectation
-func (m *FeedManagerMock) MinimockAddNewTweetInspect() {
-	for _, e := range m.AddNewTweetMock.expectations {
+// MinimockAddTweetInspect logs each unmet expectation
+func (m *FeedManagerMock) MinimockAddTweetInspect() {
+	for _, e := range m.AddTweetMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to FeedManagerMock.AddNewTweet with params: %#v", *e.params)
+			m.t.Errorf("Expected call to FeedManagerMock.AddTweet with params: %#v", *e.params)
 		}
 	}
 
 	// if default expectation was set then invocations count should be greater than zero
-	if m.AddNewTweetMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterAddNewTweetCounter) < 1 {
-		if m.AddNewTweetMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to FeedManagerMock.AddNewTweet")
+	if m.AddTweetMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterAddTweetCounter) < 1 {
+		if m.AddTweetMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to FeedManagerMock.AddTweet")
 		} else {
-			m.t.Errorf("Expected call to FeedManagerMock.AddNewTweet with params: %#v", *m.AddNewTweetMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to FeedManagerMock.AddTweet with params: %#v", *m.AddTweetMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcAddNewTweet != nil && mm_atomic.LoadUint64(&m.afterAddNewTweetCounter) < 1 {
-		m.t.Error("Expected call to FeedManagerMock.AddNewTweet")
+	if m.funcAddTweet != nil && mm_atomic.LoadUint64(&m.afterAddTweetCounter) < 1 {
+		m.t.Error("Expected call to FeedManagerMock.AddTweet")
 	}
 }
 
@@ -951,220 +951,220 @@ func (m *FeedManagerMock) MinimockEditTweetInspect() {
 	}
 }
 
-type mFeedManagerMockGiveNewsFeed struct {
+type mFeedManagerMockGetNewsFeed struct {
 	mock               *FeedManagerMock
-	defaultExpectation *FeedManagerMockGiveNewsFeedExpectation
-	expectations       []*FeedManagerMockGiveNewsFeedExpectation
+	defaultExpectation *FeedManagerMockGetNewsFeedExpectation
+	expectations       []*FeedManagerMockGetNewsFeedExpectation
 
-	callArgs []*FeedManagerMockGiveNewsFeedParams
+	callArgs []*FeedManagerMockGetNewsFeedParams
 	mutex    sync.RWMutex
 }
 
-// FeedManagerMockGiveNewsFeedExpectation specifies expectation struct of the FeedManager.GiveNewsFeed
-type FeedManagerMockGiveNewsFeedExpectation struct {
+// FeedManagerMockGetNewsFeedExpectation specifies expectation struct of the FeedManager.GetNewsFeed
+type FeedManagerMockGetNewsFeedExpectation struct {
 	mock    *FeedManagerMock
-	params  *FeedManagerMockGiveNewsFeedParams
-	results *FeedManagerMockGiveNewsFeedResults
+	params  *FeedManagerMockGetNewsFeedParams
+	results *FeedManagerMockGetNewsFeedResults
 	Counter uint64
 }
 
-// FeedManagerMockGiveNewsFeedParams contains parameters of the FeedManager.GiveNewsFeed
-type FeedManagerMockGiveNewsFeedParams struct {
+// FeedManagerMockGetNewsFeedParams contains parameters of the FeedManager.GetNewsFeed
+type FeedManagerMockGetNewsFeedParams struct {
 	ctx    context.Context
 	userID int
 }
 
-// FeedManagerMockGiveNewsFeedResults contains results of the FeedManager.GiveNewsFeed
-type FeedManagerMockGiveNewsFeedResults struct {
+// FeedManagerMockGetNewsFeedResults contains results of the FeedManager.GetNewsFeed
+type FeedManagerMockGetNewsFeedResults struct {
 	ta1 []entity.Tweet
 	err error
 }
 
-// Expect sets up expected params for FeedManager.GiveNewsFeed
-func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Expect(ctx context.Context, userID int) *mFeedManagerMockGiveNewsFeed {
-	if mmGiveNewsFeed.mock.funcGiveNewsFeed != nil {
-		mmGiveNewsFeed.mock.t.Fatalf("FeedManagerMock.GiveNewsFeed mock is already set by Set")
+// Expect sets up expected params for FeedManager.GetNewsFeed
+func (mmGetNewsFeed *mFeedManagerMockGetNewsFeed) Expect(ctx context.Context, userID int) *mFeedManagerMockGetNewsFeed {
+	if mmGetNewsFeed.mock.funcGetNewsFeed != nil {
+		mmGetNewsFeed.mock.t.Fatalf("FeedManagerMock.GetNewsFeed mock is already set by Set")
 	}
 
-	if mmGiveNewsFeed.defaultExpectation == nil {
-		mmGiveNewsFeed.defaultExpectation = &FeedManagerMockGiveNewsFeedExpectation{}
+	if mmGetNewsFeed.defaultExpectation == nil {
+		mmGetNewsFeed.defaultExpectation = &FeedManagerMockGetNewsFeedExpectation{}
 	}
 
-	mmGiveNewsFeed.defaultExpectation.params = &FeedManagerMockGiveNewsFeedParams{ctx, userID}
-	for _, e := range mmGiveNewsFeed.expectations {
-		if minimock.Equal(e.params, mmGiveNewsFeed.defaultExpectation.params) {
-			mmGiveNewsFeed.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGiveNewsFeed.defaultExpectation.params)
+	mmGetNewsFeed.defaultExpectation.params = &FeedManagerMockGetNewsFeedParams{ctx, userID}
+	for _, e := range mmGetNewsFeed.expectations {
+		if minimock.Equal(e.params, mmGetNewsFeed.defaultExpectation.params) {
+			mmGetNewsFeed.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetNewsFeed.defaultExpectation.params)
 		}
 	}
 
-	return mmGiveNewsFeed
+	return mmGetNewsFeed
 }
 
-// Inspect accepts an inspector function that has same arguments as the FeedManager.GiveNewsFeed
-func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Inspect(f func(ctx context.Context, userID int)) *mFeedManagerMockGiveNewsFeed {
-	if mmGiveNewsFeed.mock.inspectFuncGiveNewsFeed != nil {
-		mmGiveNewsFeed.mock.t.Fatalf("Inspect function is already set for FeedManagerMock.GiveNewsFeed")
+// Inspect accepts an inspector function that has same arguments as the FeedManager.GetNewsFeed
+func (mmGetNewsFeed *mFeedManagerMockGetNewsFeed) Inspect(f func(ctx context.Context, userID int)) *mFeedManagerMockGetNewsFeed {
+	if mmGetNewsFeed.mock.inspectFuncGetNewsFeed != nil {
+		mmGetNewsFeed.mock.t.Fatalf("Inspect function is already set for FeedManagerMock.GetNewsFeed")
 	}
 
-	mmGiveNewsFeed.mock.inspectFuncGiveNewsFeed = f
+	mmGetNewsFeed.mock.inspectFuncGetNewsFeed = f
 
-	return mmGiveNewsFeed
+	return mmGetNewsFeed
 }
 
-// Return sets up results that will be returned by FeedManager.GiveNewsFeed
-func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Return(ta1 []entity.Tweet, err error) *FeedManagerMock {
-	if mmGiveNewsFeed.mock.funcGiveNewsFeed != nil {
-		mmGiveNewsFeed.mock.t.Fatalf("FeedManagerMock.GiveNewsFeed mock is already set by Set")
+// Return sets up results that will be returned by FeedManager.GetNewsFeed
+func (mmGetNewsFeed *mFeedManagerMockGetNewsFeed) Return(ta1 []entity.Tweet, err error) *FeedManagerMock {
+	if mmGetNewsFeed.mock.funcGetNewsFeed != nil {
+		mmGetNewsFeed.mock.t.Fatalf("FeedManagerMock.GetNewsFeed mock is already set by Set")
 	}
 
-	if mmGiveNewsFeed.defaultExpectation == nil {
-		mmGiveNewsFeed.defaultExpectation = &FeedManagerMockGiveNewsFeedExpectation{mock: mmGiveNewsFeed.mock}
+	if mmGetNewsFeed.defaultExpectation == nil {
+		mmGetNewsFeed.defaultExpectation = &FeedManagerMockGetNewsFeedExpectation{mock: mmGetNewsFeed.mock}
 	}
-	mmGiveNewsFeed.defaultExpectation.results = &FeedManagerMockGiveNewsFeedResults{ta1, err}
-	return mmGiveNewsFeed.mock
+	mmGetNewsFeed.defaultExpectation.results = &FeedManagerMockGetNewsFeedResults{ta1, err}
+	return mmGetNewsFeed.mock
 }
 
-// Set uses given function f to mock the FeedManager.GiveNewsFeed method
-func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Set(f func(ctx context.Context, userID int) (ta1 []entity.Tweet, err error)) *FeedManagerMock {
-	if mmGiveNewsFeed.defaultExpectation != nil {
-		mmGiveNewsFeed.mock.t.Fatalf("Default expectation is already set for the FeedManager.GiveNewsFeed method")
+// Set uses given function f to mock the FeedManager.GetNewsFeed method
+func (mmGetNewsFeed *mFeedManagerMockGetNewsFeed) Set(f func(ctx context.Context, userID int) (ta1 []entity.Tweet, err error)) *FeedManagerMock {
+	if mmGetNewsFeed.defaultExpectation != nil {
+		mmGetNewsFeed.mock.t.Fatalf("Default expectation is already set for the FeedManager.GetNewsFeed method")
 	}
 
-	if len(mmGiveNewsFeed.expectations) > 0 {
-		mmGiveNewsFeed.mock.t.Fatalf("Some expectations are already set for the FeedManager.GiveNewsFeed method")
+	if len(mmGetNewsFeed.expectations) > 0 {
+		mmGetNewsFeed.mock.t.Fatalf("Some expectations are already set for the FeedManager.GetNewsFeed method")
 	}
 
-	mmGiveNewsFeed.mock.funcGiveNewsFeed = f
-	return mmGiveNewsFeed.mock
+	mmGetNewsFeed.mock.funcGetNewsFeed = f
+	return mmGetNewsFeed.mock
 }
 
-// When sets expectation for the FeedManager.GiveNewsFeed which will trigger the result defined by the following
+// When sets expectation for the FeedManager.GetNewsFeed which will trigger the result defined by the following
 // Then helper
-func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) When(ctx context.Context, userID int) *FeedManagerMockGiveNewsFeedExpectation {
-	if mmGiveNewsFeed.mock.funcGiveNewsFeed != nil {
-		mmGiveNewsFeed.mock.t.Fatalf("FeedManagerMock.GiveNewsFeed mock is already set by Set")
+func (mmGetNewsFeed *mFeedManagerMockGetNewsFeed) When(ctx context.Context, userID int) *FeedManagerMockGetNewsFeedExpectation {
+	if mmGetNewsFeed.mock.funcGetNewsFeed != nil {
+		mmGetNewsFeed.mock.t.Fatalf("FeedManagerMock.GetNewsFeed mock is already set by Set")
 	}
 
-	expectation := &FeedManagerMockGiveNewsFeedExpectation{
-		mock:   mmGiveNewsFeed.mock,
-		params: &FeedManagerMockGiveNewsFeedParams{ctx, userID},
+	expectation := &FeedManagerMockGetNewsFeedExpectation{
+		mock:   mmGetNewsFeed.mock,
+		params: &FeedManagerMockGetNewsFeedParams{ctx, userID},
 	}
-	mmGiveNewsFeed.expectations = append(mmGiveNewsFeed.expectations, expectation)
+	mmGetNewsFeed.expectations = append(mmGetNewsFeed.expectations, expectation)
 	return expectation
 }
 
-// Then sets up FeedManager.GiveNewsFeed return parameters for the expectation previously defined by the When method
-func (e *FeedManagerMockGiveNewsFeedExpectation) Then(ta1 []entity.Tweet, err error) *FeedManagerMock {
-	e.results = &FeedManagerMockGiveNewsFeedResults{ta1, err}
+// Then sets up FeedManager.GetNewsFeed return parameters for the expectation previously defined by the When method
+func (e *FeedManagerMockGetNewsFeedExpectation) Then(ta1 []entity.Tweet, err error) *FeedManagerMock {
+	e.results = &FeedManagerMockGetNewsFeedResults{ta1, err}
 	return e.mock
 }
 
-// GiveNewsFeed implements usecase.FeedManager
-func (mmGiveNewsFeed *FeedManagerMock) GiveNewsFeed(ctx context.Context, userID int) (ta1 []entity.Tweet, err error) {
-	mm_atomic.AddUint64(&mmGiveNewsFeed.beforeGiveNewsFeedCounter, 1)
-	defer mm_atomic.AddUint64(&mmGiveNewsFeed.afterGiveNewsFeedCounter, 1)
+// GetNewsFeed implements usecase.FeedManager
+func (mmGetNewsFeed *FeedManagerMock) GetNewsFeed(ctx context.Context, userID int) (ta1 []entity.Tweet, err error) {
+	mm_atomic.AddUint64(&mmGetNewsFeed.beforeGetNewsFeedCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetNewsFeed.afterGetNewsFeedCounter, 1)
 
-	if mmGiveNewsFeed.inspectFuncGiveNewsFeed != nil {
-		mmGiveNewsFeed.inspectFuncGiveNewsFeed(ctx, userID)
+	if mmGetNewsFeed.inspectFuncGetNewsFeed != nil {
+		mmGetNewsFeed.inspectFuncGetNewsFeed(ctx, userID)
 	}
 
-	mm_params := &FeedManagerMockGiveNewsFeedParams{ctx, userID}
+	mm_params := &FeedManagerMockGetNewsFeedParams{ctx, userID}
 
 	// Record call args
-	mmGiveNewsFeed.GiveNewsFeedMock.mutex.Lock()
-	mmGiveNewsFeed.GiveNewsFeedMock.callArgs = append(mmGiveNewsFeed.GiveNewsFeedMock.callArgs, mm_params)
-	mmGiveNewsFeed.GiveNewsFeedMock.mutex.Unlock()
+	mmGetNewsFeed.GetNewsFeedMock.mutex.Lock()
+	mmGetNewsFeed.GetNewsFeedMock.callArgs = append(mmGetNewsFeed.GetNewsFeedMock.callArgs, mm_params)
+	mmGetNewsFeed.GetNewsFeedMock.mutex.Unlock()
 
-	for _, e := range mmGiveNewsFeed.GiveNewsFeedMock.expectations {
+	for _, e := range mmGetNewsFeed.GetNewsFeedMock.expectations {
 		if minimock.Equal(e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
 			return e.results.ta1, e.results.err
 		}
 	}
 
-	if mmGiveNewsFeed.GiveNewsFeedMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmGiveNewsFeed.GiveNewsFeedMock.defaultExpectation.Counter, 1)
-		mm_want := mmGiveNewsFeed.GiveNewsFeedMock.defaultExpectation.params
-		mm_got := FeedManagerMockGiveNewsFeedParams{ctx, userID}
+	if mmGetNewsFeed.GetNewsFeedMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetNewsFeed.GetNewsFeedMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetNewsFeed.GetNewsFeedMock.defaultExpectation.params
+		mm_got := FeedManagerMockGetNewsFeedParams{ctx, userID}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmGiveNewsFeed.t.Errorf("FeedManagerMock.GiveNewsFeed got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmGetNewsFeed.t.Errorf("FeedManagerMock.GetNewsFeed got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
-		mm_results := mmGiveNewsFeed.GiveNewsFeedMock.defaultExpectation.results
+		mm_results := mmGetNewsFeed.GetNewsFeedMock.defaultExpectation.results
 		if mm_results == nil {
-			mmGiveNewsFeed.t.Fatal("No results are set for the FeedManagerMock.GiveNewsFeed")
+			mmGetNewsFeed.t.Fatal("No results are set for the FeedManagerMock.GetNewsFeed")
 		}
 		return (*mm_results).ta1, (*mm_results).err
 	}
-	if mmGiveNewsFeed.funcGiveNewsFeed != nil {
-		return mmGiveNewsFeed.funcGiveNewsFeed(ctx, userID)
+	if mmGetNewsFeed.funcGetNewsFeed != nil {
+		return mmGetNewsFeed.funcGetNewsFeed(ctx, userID)
 	}
-	mmGiveNewsFeed.t.Fatalf("Unexpected call to FeedManagerMock.GiveNewsFeed. %v %v", ctx, userID)
+	mmGetNewsFeed.t.Fatalf("Unexpected call to FeedManagerMock.GetNewsFeed. %v %v", ctx, userID)
 	return
 }
 
-// GiveNewsFeedAfterCounter returns a count of finished FeedManagerMock.GiveNewsFeed invocations
-func (mmGiveNewsFeed *FeedManagerMock) GiveNewsFeedAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmGiveNewsFeed.afterGiveNewsFeedCounter)
+// GetNewsFeedAfterCounter returns a count of finished FeedManagerMock.GetNewsFeed invocations
+func (mmGetNewsFeed *FeedManagerMock) GetNewsFeedAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetNewsFeed.afterGetNewsFeedCounter)
 }
 
-// GiveNewsFeedBeforeCounter returns a count of FeedManagerMock.GiveNewsFeed invocations
-func (mmGiveNewsFeed *FeedManagerMock) GiveNewsFeedBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmGiveNewsFeed.beforeGiveNewsFeedCounter)
+// GetNewsFeedBeforeCounter returns a count of FeedManagerMock.GetNewsFeed invocations
+func (mmGetNewsFeed *FeedManagerMock) GetNewsFeedBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetNewsFeed.beforeGetNewsFeedCounter)
 }
 
-// Calls returns a list of arguments used in each call to FeedManagerMock.GiveNewsFeed.
+// Calls returns a list of arguments used in each call to FeedManagerMock.GetNewsFeed.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmGiveNewsFeed *mFeedManagerMockGiveNewsFeed) Calls() []*FeedManagerMockGiveNewsFeedParams {
-	mmGiveNewsFeed.mutex.RLock()
+func (mmGetNewsFeed *mFeedManagerMockGetNewsFeed) Calls() []*FeedManagerMockGetNewsFeedParams {
+	mmGetNewsFeed.mutex.RLock()
 
-	argCopy := make([]*FeedManagerMockGiveNewsFeedParams, len(mmGiveNewsFeed.callArgs))
-	copy(argCopy, mmGiveNewsFeed.callArgs)
+	argCopy := make([]*FeedManagerMockGetNewsFeedParams, len(mmGetNewsFeed.callArgs))
+	copy(argCopy, mmGetNewsFeed.callArgs)
 
-	mmGiveNewsFeed.mutex.RUnlock()
+	mmGetNewsFeed.mutex.RUnlock()
 
 	return argCopy
 }
 
-// MinimockGiveNewsFeedDone returns true if the count of the GiveNewsFeed invocations corresponds
+// MinimockGetNewsFeedDone returns true if the count of the GetNewsFeed invocations corresponds
 // the number of defined expectations
-func (m *FeedManagerMock) MinimockGiveNewsFeedDone() bool {
-	for _, e := range m.GiveNewsFeedMock.expectations {
+func (m *FeedManagerMock) MinimockGetNewsFeedDone() bool {
+	for _, e := range m.GetNewsFeedMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
 		}
 	}
 
 	// if default expectation was set then invocations count should be greater than zero
-	if m.GiveNewsFeedMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGiveNewsFeedCounter) < 1 {
+	if m.GetNewsFeedMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetNewsFeedCounter) < 1 {
 		return false
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcGiveNewsFeed != nil && mm_atomic.LoadUint64(&m.afterGiveNewsFeedCounter) < 1 {
+	if m.funcGetNewsFeed != nil && mm_atomic.LoadUint64(&m.afterGetNewsFeedCounter) < 1 {
 		return false
 	}
 	return true
 }
 
-// MinimockGiveNewsFeedInspect logs each unmet expectation
-func (m *FeedManagerMock) MinimockGiveNewsFeedInspect() {
-	for _, e := range m.GiveNewsFeedMock.expectations {
+// MinimockGetNewsFeedInspect logs each unmet expectation
+func (m *FeedManagerMock) MinimockGetNewsFeedInspect() {
+	for _, e := range m.GetNewsFeedMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to FeedManagerMock.GiveNewsFeed with params: %#v", *e.params)
+			m.t.Errorf("Expected call to FeedManagerMock.GetNewsFeed with params: %#v", *e.params)
 		}
 	}
 
 	// if default expectation was set then invocations count should be greater than zero
-	if m.GiveNewsFeedMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGiveNewsFeedCounter) < 1 {
-		if m.GiveNewsFeedMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to FeedManagerMock.GiveNewsFeed")
+	if m.GetNewsFeedMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetNewsFeedCounter) < 1 {
+		if m.GetNewsFeedMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to FeedManagerMock.GetNewsFeed")
 		} else {
-			m.t.Errorf("Expected call to FeedManagerMock.GiveNewsFeed with params: %#v", *m.GiveNewsFeedMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to FeedManagerMock.GetNewsFeed with params: %#v", *m.GetNewsFeedMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcGiveNewsFeed != nil && mm_atomic.LoadUint64(&m.afterGiveNewsFeedCounter) < 1 {
-		m.t.Error("Expected call to FeedManagerMock.GiveNewsFeed")
+	if m.funcGetNewsFeed != nil && mm_atomic.LoadUint64(&m.afterGetNewsFeedCounter) < 1 {
+		m.t.Error("Expected call to FeedManagerMock.GetNewsFeed")
 	}
 }
 
@@ -1390,13 +1390,13 @@ func (m *FeedManagerMock) MinimockFinish() {
 	if !m.minimockDone() {
 		m.MinimockAddFollowerInspect()
 
-		m.MinimockAddNewTweetInspect()
+		m.MinimockAddTweetInspect()
 
 		m.MinimockEditCommentInspect()
 
 		m.MinimockEditTweetInspect()
 
-		m.MinimockGiveNewsFeedInspect()
+		m.MinimockGetNewsFeedInspect()
 
 		m.MinimockRemoveFollowerInspect()
 		m.t.FailNow()
@@ -1423,9 +1423,9 @@ func (m *FeedManagerMock) minimockDone() bool {
 	done := true
 	return done &&
 		m.MinimockAddFollowerDone() &&
-		m.MinimockAddNewTweetDone() &&
+		m.MinimockAddTweetDone() &&
 		m.MinimockEditCommentDone() &&
 		m.MinimockEditTweetDone() &&
-		m.MinimockGiveNewsFeedDone() &&
+		m.MinimockGetNewsFeedDone() &&
 		m.MinimockRemoveFollowerDone()
 }

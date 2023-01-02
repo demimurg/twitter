@@ -157,4 +157,3 @@ type prometheusRoutine struct {
 	// embed to change routine type in logging (%T used)
 	httpRoutine
 }
-

@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-    "errors"
+	"errors"
 	"time"
 
 	"github.com/demimurg/twitter/internal/entity"
@@ -18,9 +18,9 @@ type UserRepository interface {
 
 type TweetRepository interface {
 	Add(ctx context.Context, userID int, tweetText string) error
-    AddComment(ctx context.Context, userID int, tweetID, commentText string) error
+	AddComment(ctx context.Context, userID int, tweetID, commentText string) error
 	Update(ctx context.Context, tweetID int, newText string) error
-    UpdateComment(ctx context.Context, commentID int, newText string) error
+	UpdateComment(ctx context.Context, commentID int, newText string) error
 	GetLatest(ctx context.Context, userID int, limit int) ([]entity.Tweet, error)
 }
 

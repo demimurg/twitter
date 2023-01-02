@@ -2,10 +2,11 @@ package inmem
 
 import (
 	"context"
-	"github.com/demimurg/twitter/internal/entity"
-	"github.com/demimurg/twitter/internal/usecase"
 	"sort"
 	"time"
+
+	"github.com/demimurg/twitter/internal/entity"
+	"github.com/demimurg/twitter/internal/usecase"
 )
 
 func NewTweetRepository() usecase.TweetRepository {
@@ -27,7 +28,7 @@ func (t *tweetRepo) Add(_ context.Context, userID int, tweetText string) error {
 	return nil
 }
 
-func (t *tweetRepo) GetLatestFromUser(_ context.Context, userID int, limit int) ([]entity.Tweet, error) {
+func (t *tweetRepo) GetLatest(_ context.Context, userID int, limit int) ([]entity.Tweet, error) {
 	var userTweets []entity.Tweet
 	for _, tweet := range t.storage {
 		if tweet.UserID == userID {

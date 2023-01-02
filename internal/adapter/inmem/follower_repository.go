@@ -2,6 +2,7 @@ package inmem
 
 import (
 	"context"
+
 	"github.com/demimurg/twitter/internal/usecase"
 )
 

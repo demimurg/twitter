@@ -15,8 +15,8 @@ type FeedManager interface {
 	// RemoveFollower will unsubscribe follower from new tweets of the user
 	RemoveFollower(ctx context.Context, userID, fromUserID int) error
 
-	AddNewTweet(ctx context.Context, userID int, text string) error
-	GiveNewsFeed(ctx context.Context, userID int) ([]entity.Tweet, error)
+	AddTweet(ctx context.Context, userID int, text string) error
+	GetNewsFeed(ctx context.Context, userID int) ([]entity.Tweet, error)
 
 	EditTweet(ctx context.Context, tweetID int, text string) error
 	EditComment(ctx context.Context, commentID int, text string) error
@@ -29,8 +29,8 @@ var (
 // NewFeedManager returns usecase for work with user news feed
 func NewFeedManager(
 	usersRepo UserRepository,
-    followersRepo FollowerRepository,
-    tweetsRepo TweetRepository,
+	followersRepo FollowerRepository,
+	tweetsRepo TweetRepository,
 ) FeedManager {
 	return &feedManager{usersRepo, followersRepo, tweetsRepo}
 }
@@ -49,11 +49,11 @@ func (fm *feedManager) RemoveFollower(ctx context.Context, userID, fromUserID in
 	return fm.followersRepo.Remove(ctx, userID, fromUserID)
 }
 
-func (fm *feedManager) AddNewTweet(ctx context.Context, userID int, text string) error {
-	if len(text) > 70 {
+func (fm *feedManager) AddTweet(ctx context.Context, userID int, text string) error {
+	if len(text) > entity.MaxAllowedSymbols {
 		return fmt.Errorf(
 			"%w: tweet length %d more than allowed %d",
-			ErrValidationFailed, len(text), 70,
+			ErrValidationFailed, len(text), entity.MaxAllowedSymbols,
 		)
 	}
 
@@ -68,7 +68,7 @@ func (fm *feedManager) AddNewTweet(ctx context.Context, userID int, text string)
 	return fm.tweetsRepo.Add(ctx, userID, text)
 }
 
-func (fm *feedManager) GiveNewsFeed(ctx context.Context, userID int) ([]entity.Tweet, error) {
+func (fm *feedManager) GetNewsFeed(ctx context.Context, userID int) ([]entity.Tweet, error) {
 	following, err := fm.followersRepo.GetFollowing(ctx, userID, 10)
 	if err != nil {
 		return nil, err

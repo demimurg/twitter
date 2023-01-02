@@ -64,7 +64,7 @@ func TestFeedManager_AddNewTweet(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			feedManager := newFeedManager(t, tc.expect)
-			err := feedManager.AddNewTweet(ctx, fakeUserID, tc.tweetText)
+			err := feedManager.AddTweet(ctx, fakeUserID, tc.tweetText)
 
 			assert.Equal(t, tc.wantError, err != nil, "not expected error: %v", err)
 		})
@@ -115,7 +115,7 @@ func TestFeedManager_GiveNewsFeed(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			feedManager := newFeedManager(t, tc.expect)
-			feed, err := feedManager.GiveNewsFeed(ctx, fakeUserID)
+			feed, err := feedManager.GetNewsFeed(ctx, fakeUserID)
 
 			assert.Equal(t, tc.wantError, err != nil, "not expected error: %v", err)
 			assert.Equal(t, tc.wantFeed, feed)

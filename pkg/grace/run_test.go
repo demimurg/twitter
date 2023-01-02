@@ -41,8 +41,8 @@ func TestRun(t *testing.T) {
 			grpcPort, httpPort := getPort(), getPort()
 			go func() {
 				Run(
-                    GRPC(grpcSrv, grpcPort),
-                    HTTP(httpSrv, httpPort),
+					GRPC(grpcSrv, grpcPort),
+					HTTP(httpSrv, httpPort),
 				)
 				close(waitForExecute)
 			}()
@@ -54,7 +54,7 @@ func TestRun(t *testing.T) {
 			select {
 			case <-waitForExecute:
 				for _, port := range []string{grpcPort, httpPort} {
-                    // if server isn't stop, it will "address already in use" error
+					// if server isn't stop, it will "address already in use" error
 					_, err := net.Listen("tcp", port)
 					require.NoError(t, err)
 				}
@@ -80,7 +80,7 @@ func getPort() string {
 
 func TestGetPort(t *testing.T) {
 	for i := 0; i < 10; i++ {
-        port := getPort()
+		port := getPort()
 		t.Log("Available port ", port)
 		lis, err := net.Listen("tcp", port)
 		require.NoError(t, err)
