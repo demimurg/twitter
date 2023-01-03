@@ -3,17 +3,14 @@
 You should mock dependencies using following way with minimock library:
 ```go
 func Test_Template(t *testing.T) {
+    var (
+        _ = "fake variable"
+    )
+
 	type mocks struct {
 		// *mock.OneMock
 		// *mock.TwoMock
 	}
-	// you need to create feed manager and mocks for each testcase
-
-
-	var (
-		_ = "fake variable"
-	)
-
 	testCases := []struct {
 		name string
 		// your args
@@ -29,7 +26,7 @@ func Test_Template(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
             mc := minimock.NewController(t)
-            defer mc.Finish
+            defer mc.Finish()
             m := mocks{
                 // mock.NewOneMock(mc), mock.NewTwoMock(mc),
             }
