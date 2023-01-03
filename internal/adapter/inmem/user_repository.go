@@ -37,3 +37,14 @@ func (u *userRepo) Get(_ context.Context, userID int) (*entity.User, error) {
 
 	return u.storage[userID], nil
 }
+
+func (u *userRepo) GetByEmail(_ context.Context, email string) (*entity.User, error) {
+    for _, user := range u.storage {
+        if user.Email == email {
+            return user, nil
+        }
+    }
+    
+    return nil, fmt.Errorf("there is no such user email %q", email)
+}
+

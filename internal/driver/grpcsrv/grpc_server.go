@@ -3,7 +3,8 @@ package grpcsrv
 import (
 	"context"
 	"errors"
-	"strings"
+    "google.golang.org/protobuf/types/known/timestamppb"
+    "strings"
 
 	"github.com/demimurg/twitter/internal/usecase"
 	"github.com/demimurg/twitter/pkg/log"
@@ -67,6 +68,22 @@ func (t *twitter) Register(ctx context.Context, req *proto.UserProfile) (*proto.
 		return nil, err
 	}
 	return &proto.RegisterResponse{UserId: int64(user.ID)}, nil
+}
+
+func (t *twitter) Login(ctx context.Context, req *proto.LoginRequest) (*proto.LoginResponse, error) {
+    user, err := t.ur.Login(ctx, req.Email)
+    if err != nil {
+        return nil, err
+    }
+
+    return &proto.LoginResponse{
+        UserId:      int64(user.ID),
+        UserProfile: &proto.UserProfile{
+            FullName:    user.FullName,
+            Email:       user.Email,
+            DateOfBirth: timestamppb.New(user.BirthDate),
+        },
+    }, nil
 }
 
 func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*emptypb.Empty, error) {

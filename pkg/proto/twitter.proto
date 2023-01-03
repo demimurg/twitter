@@ -38,7 +38,7 @@ message FollowRequest {
 };
 
 message LoginRequest {
-    int64 email = 1;
+    string email = 1;
 };
 
 message LoginResponse {

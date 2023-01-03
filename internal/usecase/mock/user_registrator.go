@@ -25,6 +25,12 @@ type UserRegistratorMock struct {
 	beforeDeactivateCounter uint64
 	DeactivateMock          mUserRegistratorMockDeactivate
 
+	funcLogin          func(ctx context.Context, email string) (up1 *entity.User, err error)
+	inspectFuncLogin   func(ctx context.Context, email string)
+	afterLoginCounter  uint64
+	beforeLoginCounter uint64
+	LoginMock          mUserRegistratorMockLogin
+
 	funcRegister          func(ctx context.Context, name string, email string, birthDate time.Time) (up1 *entity.User, err error)
 	inspectFuncRegister   func(ctx context.Context, name string, email string, birthDate time.Time)
 	afterRegisterCounter  uint64
@@ -41,6 +47,9 @@ func NewUserRegistratorMock(t minimock.Tester) *UserRegistratorMock {
 
 	m.DeactivateMock = mUserRegistratorMockDeactivate{mock: m}
 	m.DeactivateMock.callArgs = []*UserRegistratorMockDeactivateParams{}
+
+	m.LoginMock = mUserRegistratorMockLogin{mock: m}
+	m.LoginMock.callArgs = []*UserRegistratorMockLoginParams{}
 
 	m.RegisterMock = mUserRegistratorMockRegister{mock: m}
 	m.RegisterMock.callArgs = []*UserRegistratorMockRegisterParams{}
@@ -261,6 +270,223 @@ func (m *UserRegistratorMock) MinimockDeactivateInspect() {
 	// if func was set then invocations count should be greater than zero
 	if m.funcDeactivate != nil && mm_atomic.LoadUint64(&m.afterDeactivateCounter) < 1 {
 		m.t.Error("Expected call to UserRegistratorMock.Deactivate")
+	}
+}
+
+type mUserRegistratorMockLogin struct {
+	mock               *UserRegistratorMock
+	defaultExpectation *UserRegistratorMockLoginExpectation
+	expectations       []*UserRegistratorMockLoginExpectation
+
+	callArgs []*UserRegistratorMockLoginParams
+	mutex    sync.RWMutex
+}
+
+// UserRegistratorMockLoginExpectation specifies expectation struct of the UserRegistrator.Login
+type UserRegistratorMockLoginExpectation struct {
+	mock    *UserRegistratorMock
+	params  *UserRegistratorMockLoginParams
+	results *UserRegistratorMockLoginResults
+	Counter uint64
+}
+
+// UserRegistratorMockLoginParams contains parameters of the UserRegistrator.Login
+type UserRegistratorMockLoginParams struct {
+	ctx   context.Context
+	email string
+}
+
+// UserRegistratorMockLoginResults contains results of the UserRegistrator.Login
+type UserRegistratorMockLoginResults struct {
+	up1 *entity.User
+	err error
+}
+
+// Expect sets up expected params for UserRegistrator.Login
+func (mmLogin *mUserRegistratorMockLogin) Expect(ctx context.Context, email string) *mUserRegistratorMockLogin {
+	if mmLogin.mock.funcLogin != nil {
+		mmLogin.mock.t.Fatalf("UserRegistratorMock.Login mock is already set by Set")
+	}
+
+	if mmLogin.defaultExpectation == nil {
+		mmLogin.defaultExpectation = &UserRegistratorMockLoginExpectation{}
+	}
+
+	mmLogin.defaultExpectation.params = &UserRegistratorMockLoginParams{ctx, email}
+	for _, e := range mmLogin.expectations {
+		if minimock.Equal(e.params, mmLogin.defaultExpectation.params) {
+			mmLogin.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmLogin.defaultExpectation.params)
+		}
+	}
+
+	return mmLogin
+}
+
+// Inspect accepts an inspector function that has same arguments as the UserRegistrator.Login
+func (mmLogin *mUserRegistratorMockLogin) Inspect(f func(ctx context.Context, email string)) *mUserRegistratorMockLogin {
+	if mmLogin.mock.inspectFuncLogin != nil {
+		mmLogin.mock.t.Fatalf("Inspect function is already set for UserRegistratorMock.Login")
+	}
+
+	mmLogin.mock.inspectFuncLogin = f
+
+	return mmLogin
+}
+
+// Return sets up results that will be returned by UserRegistrator.Login
+func (mmLogin *mUserRegistratorMockLogin) Return(up1 *entity.User, err error) *UserRegistratorMock {
+	if mmLogin.mock.funcLogin != nil {
+		mmLogin.mock.t.Fatalf("UserRegistratorMock.Login mock is already set by Set")
+	}
+
+	if mmLogin.defaultExpectation == nil {
+		mmLogin.defaultExpectation = &UserRegistratorMockLoginExpectation{mock: mmLogin.mock}
+	}
+	mmLogin.defaultExpectation.results = &UserRegistratorMockLoginResults{up1, err}
+	return mmLogin.mock
+}
+
+// Set uses given function f to mock the UserRegistrator.Login method
+func (mmLogin *mUserRegistratorMockLogin) Set(f func(ctx context.Context, email string) (up1 *entity.User, err error)) *UserRegistratorMock {
+	if mmLogin.defaultExpectation != nil {
+		mmLogin.mock.t.Fatalf("Default expectation is already set for the UserRegistrator.Login method")
+	}
+
+	if len(mmLogin.expectations) > 0 {
+		mmLogin.mock.t.Fatalf("Some expectations are already set for the UserRegistrator.Login method")
+	}
+
+	mmLogin.mock.funcLogin = f
+	return mmLogin.mock
+}
+
+// When sets expectation for the UserRegistrator.Login which will trigger the result defined by the following
+// Then helper
+func (mmLogin *mUserRegistratorMockLogin) When(ctx context.Context, email string) *UserRegistratorMockLoginExpectation {
+	if mmLogin.mock.funcLogin != nil {
+		mmLogin.mock.t.Fatalf("UserRegistratorMock.Login mock is already set by Set")
+	}
+
+	expectation := &UserRegistratorMockLoginExpectation{
+		mock:   mmLogin.mock,
+		params: &UserRegistratorMockLoginParams{ctx, email},
+	}
+	mmLogin.expectations = append(mmLogin.expectations, expectation)
+	return expectation
+}
+
+// Then sets up UserRegistrator.Login return parameters for the expectation previously defined by the When method
+func (e *UserRegistratorMockLoginExpectation) Then(up1 *entity.User, err error) *UserRegistratorMock {
+	e.results = &UserRegistratorMockLoginResults{up1, err}
+	return e.mock
+}
+
+// Login implements usecase.UserRegistrator
+func (mmLogin *UserRegistratorMock) Login(ctx context.Context, email string) (up1 *entity.User, err error) {
+	mm_atomic.AddUint64(&mmLogin.beforeLoginCounter, 1)
+	defer mm_atomic.AddUint64(&mmLogin.afterLoginCounter, 1)
+
+	if mmLogin.inspectFuncLogin != nil {
+		mmLogin.inspectFuncLogin(ctx, email)
+	}
+
+	mm_params := &UserRegistratorMockLoginParams{ctx, email}
+
+	// Record call args
+	mmLogin.LoginMock.mutex.Lock()
+	mmLogin.LoginMock.callArgs = append(mmLogin.LoginMock.callArgs, mm_params)
+	mmLogin.LoginMock.mutex.Unlock()
+
+	for _, e := range mmLogin.LoginMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.up1, e.results.err
+		}
+	}
+
+	if mmLogin.LoginMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmLogin.LoginMock.defaultExpectation.Counter, 1)
+		mm_want := mmLogin.LoginMock.defaultExpectation.params
+		mm_got := UserRegistratorMockLoginParams{ctx, email}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmLogin.t.Errorf("UserRegistratorMock.Login got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmLogin.LoginMock.defaultExpectation.results
+		if mm_results == nil {
+			mmLogin.t.Fatal("No results are set for the UserRegistratorMock.Login")
+		}
+		return (*mm_results).up1, (*mm_results).err
+	}
+	if mmLogin.funcLogin != nil {
+		return mmLogin.funcLogin(ctx, email)
+	}
+	mmLogin.t.Fatalf("Unexpected call to UserRegistratorMock.Login. %v %v", ctx, email)
+	return
+}
+
+// LoginAfterCounter returns a count of finished UserRegistratorMock.Login invocations
+func (mmLogin *UserRegistratorMock) LoginAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmLogin.afterLoginCounter)
+}
+
+// LoginBeforeCounter returns a count of UserRegistratorMock.Login invocations
+func (mmLogin *UserRegistratorMock) LoginBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmLogin.beforeLoginCounter)
+}
+
+// Calls returns a list of arguments used in each call to UserRegistratorMock.Login.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmLogin *mUserRegistratorMockLogin) Calls() []*UserRegistratorMockLoginParams {
+	mmLogin.mutex.RLock()
+
+	argCopy := make([]*UserRegistratorMockLoginParams, len(mmLogin.callArgs))
+	copy(argCopy, mmLogin.callArgs)
+
+	mmLogin.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockLoginDone returns true if the count of the Login invocations corresponds
+// the number of defined expectations
+func (m *UserRegistratorMock) MinimockLoginDone() bool {
+	for _, e := range m.LoginMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.LoginMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterLoginCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcLogin != nil && mm_atomic.LoadUint64(&m.afterLoginCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockLoginInspect logs each unmet expectation
+func (m *UserRegistratorMock) MinimockLoginInspect() {
+	for _, e := range m.LoginMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to UserRegistratorMock.Login with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.LoginMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterLoginCounter) < 1 {
+		if m.LoginMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to UserRegistratorMock.Login")
+		} else {
+			m.t.Errorf("Expected call to UserRegistratorMock.Login with params: %#v", *m.LoginMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcLogin != nil && mm_atomic.LoadUint64(&m.afterLoginCounter) < 1 {
+		m.t.Error("Expected call to UserRegistratorMock.Login")
 	}
 }
 
@@ -488,6 +714,8 @@ func (m *UserRegistratorMock) MinimockFinish() {
 	if !m.minimockDone() {
 		m.MinimockDeactivateInspect()
 
+		m.MinimockLoginInspect()
+
 		m.MinimockRegisterInspect()
 		m.t.FailNow()
 	}
@@ -513,5 +741,6 @@ func (m *UserRegistratorMock) minimockDone() bool {
 	done := true
 	return done &&
 		m.MinimockDeactivateDone() &&
+		m.MinimockLoginDone() &&
 		m.MinimockRegisterDone()
 }
