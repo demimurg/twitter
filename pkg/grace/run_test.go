@@ -68,22 +68,24 @@ func TestRun(t *testing.T) {
 // getPort guaranteed to return open port in ":8080" format
 func getPort() string {
 	// if "0" port automatically chosen
-	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	lis, err := net.Listen("tcp", ":0")
 	if err != nil {
 		panic(err)
 	}
+    // close listener because this port should be free to use
+    defer lis.Close()
 
 	addr := lis.Addr().String()
-	index := strings.Index(addr, ":")
-	return addr[index:]
+	i := strings.LastIndex(addr, ":")
+	return addr[i:]
 }
 
 func TestGetPort(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		port := getPort()
-		t.Log("Available port ", port)
-		lis, err := net.Listen("tcp", port)
+		_, err := net.Listen("tcp", port)
 		require.NoError(t, err)
-		require.NoError(t, lis.Close())
+
+		t.Log("Available port", port)
 	}
 }
