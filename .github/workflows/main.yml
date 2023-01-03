@@ -39,7 +39,7 @@ jobs:
         with:
           context: .
           push: true
-          platforms: linux/amd64 # add ",linux/arm64" for apple m1 build, buth it will slow down job
+          platforms: linux/amd64 # add ",linux/arm64" for apple m1 build, but it will slow down job
           tags: ghcr.io/${{ github.repository }}:latest
   deploy-kube:
     name: Deploy Image to Kubernetes
