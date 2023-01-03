@@ -18,7 +18,7 @@ type userRepo struct {
 	storage []*entity.User
 }
 
-func (u *userRepo) Add(_ context.Context, name, email string, birthDate *time.Time) (int, error) {
+func (u *userRepo) Add(_ context.Context, name, email string, birthDate time.Time) (int, error) {
 	id := len(u.storage)
 	u.storage = append(u.storage, &entity.User{
 		ID:        id,

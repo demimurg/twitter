@@ -8,7 +8,6 @@ package proto
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -26,7 +25,8 @@ const _ = grpc.SupportPackageIsVersion7
 type TwitterClient interface {
 	AddTweet(ctx context.Context, in *AddTweetRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest, opts ...grpc.CallOption) (*GetNewsFeedResponse, error)
-	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+	Register(ctx context.Context, in *UserProfile, opts ...grpc.CallOption) (*RegisterResponse, error)
+	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	Follow(ctx context.Context, in *FollowRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -56,9 +56,18 @@ func (c *twitterClient) GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest,
 	return out, nil
 }
 
-func (c *twitterClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
+func (c *twitterClient) Register(ctx context.Context, in *UserProfile, opts ...grpc.CallOption) (*RegisterResponse, error) {
 	out := new(RegisterResponse)
 	err := c.cc.Invoke(ctx, "/Twitter/Register", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *twitterClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, "/Twitter/Login", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +89,8 @@ func (c *twitterClient) Follow(ctx context.Context, in *FollowRequest, opts ...g
 type TwitterServer interface {
 	AddTweet(context.Context, *AddTweetRequest) (*emptypb.Empty, error)
 	GetNewsFeed(context.Context, *GetNewsFeedRequest) (*GetNewsFeedResponse, error)
-	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
+	Register(context.Context, *UserProfile) (*RegisterResponse, error)
+	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	Follow(context.Context, *FollowRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedTwitterServer()
 }
@@ -95,8 +105,11 @@ func (UnimplementedTwitterServer) AddTweet(context.Context, *AddTweetRequest) (*
 func (UnimplementedTwitterServer) GetNewsFeed(context.Context, *GetNewsFeedRequest) (*GetNewsFeedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewsFeed not implemented")
 }
-func (UnimplementedTwitterServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
+func (UnimplementedTwitterServer) Register(context.Context, *UserProfile) (*RegisterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedTwitterServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
 func (UnimplementedTwitterServer) Follow(context.Context, *FollowRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Follow not implemented")
@@ -151,7 +164,7 @@ func _Twitter_GetNewsFeed_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 func _Twitter_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterRequest)
+	in := new(UserProfile)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -163,7 +176,25 @@ func _Twitter_Register_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: "/Twitter/Register",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TwitterServer).Register(ctx, req.(*RegisterRequest))
+		return srv.(TwitterServer).Register(ctx, req.(*UserProfile))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Twitter_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TwitterServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Twitter/Login",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TwitterServer).Login(ctx, req.(*LoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -204,6 +235,10 @@ var Twitter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Register",
 			Handler:    _Twitter_Register_Handler,
+		},
+		{
+			MethodName: "Login",
+			Handler:    _Twitter_Login_Handler,
 		},
 		{
 			MethodName: "Follow",

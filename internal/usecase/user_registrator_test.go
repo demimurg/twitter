@@ -19,7 +19,7 @@ func TestUserRegistrator_Register(t *testing.T) {
 		name      string
 		userName  string
 		email     string
-		birthDate string
+		birthDate time.Time
 		expect    func(urmocks)
 		wantUser  *entity.User
 		wantError bool
@@ -28,7 +28,7 @@ func TestUserRegistrator_Register(t *testing.T) {
 			name:      "create user without problems",
 			userName:  "Elon Musk",
 			email:     "elon.musk@twitter.com",
-			birthDate: "1971-06-28",
+            birthDate: date(1971, 06, 28),
 			expect: func(m urmocks) {
 				m.ScamDetectorClientMock.CheckEmailMock.
 					Expect(ctx, "elon.musk@twitter.com").
@@ -40,18 +40,10 @@ func TestUserRegistrator_Register(t *testing.T) {
 			wantUser: &entity.User{ID: 1, FullName: "Elon Musk", Email: "elon.musk@twitter.com", BirthDate: date(1971, 6, 28)},
 		},
 		{
-			name:      "birth date is not valid",
-			userName:  "Elon Musk",
-			email:     "elon.musk@twitter.com",
-			birthDate: "28.06.1971 birth", // wrong format
-			expect:    func(urmocks) {},
-			wantError: true,
-		},
-		{
 			name:      "registration with fake email",
 			userName:  "Elon Musk",
 			email:     "real-elon-musk@twittor.org",
-			birthDate: "1971-06-28",
+            birthDate: date(1971, 06, 28),
 			expect: func(m urmocks) {
 				m.ScamDetectorClientMock.CheckEmailMock.
 					Expect(ctx, "real-elon-musk@twittor.org").
@@ -63,7 +55,7 @@ func TestUserRegistrator_Register(t *testing.T) {
 			name:      "register even if scam client broken",
 			userName:  "Elon Musk",
 			email:     "elon.musk@twitter.com",
-			birthDate: "1971-06-28",
+            birthDate: date(1971, 06, 28),
 			expect: func(m urmocks) {
 				// client may return any error, but not ErrFakeEmail
 				m.ScamDetectorClientMock.CheckEmailMock.
@@ -89,9 +81,8 @@ func TestUserRegistrator_Register(t *testing.T) {
 	}
 }
 
-func date(year, month, day int) *time.Time {
-	d := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
-	return &d
+func date(year, month, day int) time.Time {
+    return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 }
 
 func TestUserRegistrator_Deactivate(t *testing.T) {
@@ -117,7 +108,7 @@ type urmocks struct {
 // newUserRegistrator will create user registrator with mocked dependencies ans set expectations to them
 func newUserRegistrator(t *testing.T, expect func(urmocks)) UserRegistrator {
 	mc := minimock.NewController(t)
-	t.Cleanup(mc.Finish)
+    t.Cleanup(mc.Finish)
 
 	m := urmocks{
 		mock.NewUserRepositoryMock(mc),

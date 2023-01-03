@@ -2,7 +2,8 @@ package tests
 
 import (
 	"context"
-	"testing"
+    "google.golang.org/protobuf/types/known/timestamppb"
+    "testing"
 	"time"
 
 	"github.com/demimurg/twitter/internal/adapter/inmem"
@@ -48,10 +49,10 @@ type endToEndTestSuite struct {
 func (s *endToEndTestSuite) TestBasic() {
 	var elonID int64
 	s.Run("register elonID musk", func() {
-		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{
+		resp, err := s.cli.Register(ctx, &proto.UserProfile{
 			FullName:    "Elon Musk",
 			Email:       "elonID@tesla.us",
-			DateOfBirth: "1971-06-28",
+            DateOfBirth: date(1971, 06, 28),
 		})
 		s.NoError(err)
 		elonID = resp.UserId
@@ -68,10 +69,10 @@ func (s *endToEndTestSuite) TestBasic() {
 
 	var amberID int64
 	s.Run("elonID have new follower", func() {
-		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{
+		resp, err := s.cli.Register(ctx, &proto.UserProfile{
 			FullName:    "Amber Heard",
 			Email:       "beach@club.com",
-			DateOfBirth: "1986-04-22",
+            DateOfBirth: date(1986, 04, 22),
 		})
 		s.NoError(err)
 		amberID = resp.UserId
@@ -106,4 +107,8 @@ func (s *endToEndTestSuite) TestNegative() {
 		s.Error(err)
 	})
 
+}
+
+func date(year, month, day int) *timestamppb.Timestamp {
+    return timestamppb.New(time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC))
 }

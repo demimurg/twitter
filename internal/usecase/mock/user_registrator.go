@@ -8,6 +8,7 @@ import (
 	"context"
 	"sync"
 	mm_atomic "sync/atomic"
+	"time"
 	mm_time "time"
 
 	"github.com/demimurg/twitter/internal/entity"
@@ -24,8 +25,8 @@ type UserRegistratorMock struct {
 	beforeDeactivateCounter uint64
 	DeactivateMock          mUserRegistratorMockDeactivate
 
-	funcRegister          func(ctx context.Context, name string, email string, birthDate string) (up1 *entity.User, err error)
-	inspectFuncRegister   func(ctx context.Context, name string, email string, birthDate string)
+	funcRegister          func(ctx context.Context, name string, email string, birthDate time.Time) (up1 *entity.User, err error)
+	inspectFuncRegister   func(ctx context.Context, name string, email string, birthDate time.Time)
 	afterRegisterCounter  uint64
 	beforeRegisterCounter uint64
 	RegisterMock          mUserRegistratorMockRegister
@@ -285,7 +286,7 @@ type UserRegistratorMockRegisterParams struct {
 	ctx       context.Context
 	name      string
 	email     string
-	birthDate string
+	birthDate time.Time
 }
 
 // UserRegistratorMockRegisterResults contains results of the UserRegistrator.Register
@@ -295,7 +296,7 @@ type UserRegistratorMockRegisterResults struct {
 }
 
 // Expect sets up expected params for UserRegistrator.Register
-func (mmRegister *mUserRegistratorMockRegister) Expect(ctx context.Context, name string, email string, birthDate string) *mUserRegistratorMockRegister {
+func (mmRegister *mUserRegistratorMockRegister) Expect(ctx context.Context, name string, email string, birthDate time.Time) *mUserRegistratorMockRegister {
 	if mmRegister.mock.funcRegister != nil {
 		mmRegister.mock.t.Fatalf("UserRegistratorMock.Register mock is already set by Set")
 	}
@@ -315,7 +316,7 @@ func (mmRegister *mUserRegistratorMockRegister) Expect(ctx context.Context, name
 }
 
 // Inspect accepts an inspector function that has same arguments as the UserRegistrator.Register
-func (mmRegister *mUserRegistratorMockRegister) Inspect(f func(ctx context.Context, name string, email string, birthDate string)) *mUserRegistratorMockRegister {
+func (mmRegister *mUserRegistratorMockRegister) Inspect(f func(ctx context.Context, name string, email string, birthDate time.Time)) *mUserRegistratorMockRegister {
 	if mmRegister.mock.inspectFuncRegister != nil {
 		mmRegister.mock.t.Fatalf("Inspect function is already set for UserRegistratorMock.Register")
 	}
@@ -339,7 +340,7 @@ func (mmRegister *mUserRegistratorMockRegister) Return(up1 *entity.User, err err
 }
 
 // Set uses given function f to mock the UserRegistrator.Register method
-func (mmRegister *mUserRegistratorMockRegister) Set(f func(ctx context.Context, name string, email string, birthDate string) (up1 *entity.User, err error)) *UserRegistratorMock {
+func (mmRegister *mUserRegistratorMockRegister) Set(f func(ctx context.Context, name string, email string, birthDate time.Time) (up1 *entity.User, err error)) *UserRegistratorMock {
 	if mmRegister.defaultExpectation != nil {
 		mmRegister.mock.t.Fatalf("Default expectation is already set for the UserRegistrator.Register method")
 	}
@@ -354,7 +355,7 @@ func (mmRegister *mUserRegistratorMockRegister) Set(f func(ctx context.Context, 
 
 // When sets expectation for the UserRegistrator.Register which will trigger the result defined by the following
 // Then helper
-func (mmRegister *mUserRegistratorMockRegister) When(ctx context.Context, name string, email string, birthDate string) *UserRegistratorMockRegisterExpectation {
+func (mmRegister *mUserRegistratorMockRegister) When(ctx context.Context, name string, email string, birthDate time.Time) *UserRegistratorMockRegisterExpectation {
 	if mmRegister.mock.funcRegister != nil {
 		mmRegister.mock.t.Fatalf("UserRegistratorMock.Register mock is already set by Set")
 	}
@@ -374,7 +375,7 @@ func (e *UserRegistratorMockRegisterExpectation) Then(up1 *entity.User, err erro
 }
 
 // Register implements usecase.UserRegistrator
-func (mmRegister *UserRegistratorMock) Register(ctx context.Context, name string, email string, birthDate string) (up1 *entity.User, err error) {
+func (mmRegister *UserRegistratorMock) Register(ctx context.Context, name string, email string, birthDate time.Time) (up1 *entity.User, err error) {
 	mm_atomic.AddUint64(&mmRegister.beforeRegisterCounter, 1)
 	defer mm_atomic.AddUint64(&mmRegister.afterRegisterCounter, 1)
 

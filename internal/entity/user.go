@@ -8,6 +8,6 @@ type User struct {
 	FullName  string
 	Caption   string
 	Followers int
-	BirthDate *time.Time
+	BirthDate time.Time
 	DeletedAt *time.Time
 }
