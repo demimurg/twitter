@@ -5,11 +5,13 @@ jobs:
   go-test:
     name: Run Unit Tests
     runs-on: ubuntu-latest
-    container: golang:1.19-alpine
     steps:
       - uses: actions/checkout@v3
-      - name: Run unit tests
-        run: CGO_ENABLED=0 go test -coverpkg=./... ./...
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 'stable'
+      - name: Start testing
+        run: go test -coverpkg=./... ./...
   golangci-lint:
     name: Run Linter
     runs-on: ubuntu-latest
