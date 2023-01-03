@@ -2,11 +2,14 @@ package grace
 
 import (
 	"context"
-	"net"
+    "fmt"
+    "google.golang.org/grpc/credentials/insecure"
+    "net"
 	"net/http"
 	"sync"
 	"time"
 
+	"github.com/fullstorydev/grpcui/standalone"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 )
@@ -156,4 +159,43 @@ func PromHTTP(addr string) Routine {
 type prometheusRoutine struct {
 	// embed to change routine type in logging (%T used)
 	httpRoutine
+}
+
+// ------------------------ GRPC UI ------------------------
+
+// GRPCUI routine will create http server that serve front-end
+// for grpc requests to application (analogue swagger)
+//
+// Read more: https://github.com/fullstorydev/grpcui
+func GRPCUI(addr, appServerAddr string) Routine {
+	return &grpcuiRoutine{
+        appServerAddr: appServerAddr,
+		httpRoutine: httpRoutine{
+            // will init handler in Run
+			Server: &http.Server{},
+			addr:   addr,
+		},
+    }
+}
+
+type grpcuiRoutine struct {
+	httpRoutine
+	appServerAddr string
+}
+
+func (r *grpcuiRoutine) Run() error {
+	ctx := context.Background()
+    creds := grpc.WithTransportCredentials(insecure.NewCredentials())
+	cc, err := grpc.DialContext(ctx, r.appServerAddr, creds)
+	if err != nil {
+		return fmt.Errorf("can't dial app server: %w", err)
+	}
+
+	handler, err := standalone.HandlerViaReflection(ctx, cc, cc.Target())
+	if err != nil {
+        return fmt.Errorf("grpcui can't init handler")
+	}
+    r.Server.Handler = handler
+
+    return r.httpRoutine.Run()
 }

@@ -17,13 +17,9 @@ spec:
         - name: app
           image: ghcr.io/demimurg/twitter
           ports:
-            - containerPort: 80
-        - name: ui
-          image: fullstorydev/grpcui
-          ports:
-            - containerPort: 8080
-          # should bind to all ips (0.0.0.0) to be able to expose port
-          command: ["grpcui", "-bind=0.0.0.0", "-port=8080", "-plaintext", "localhost:80"]
+            - containerPort: 80 # app server
+            - containerPort: 81 # grpc ui
+            - containerPort: 82 # prometheus
 ---
 apiVersion: v1
 kind: Service
@@ -34,5 +30,5 @@ spec:
   selector:
     app: twitter
   ports:
-    - port: 8080
+    - port: 81
       nodePort: 30000
