@@ -46,39 +46,40 @@ type endToEndTestSuite struct {
 }
 
 func (s *endToEndTestSuite) TestBasic() {
-	var (
-		elon, amber int64 = 0, 1
-		elonTweet         = "hey guys, should i buy twitter?"
-	)
-
-	s.Run("register elon musk", func() {
-		_, err := s.cli.Register(ctx, &proto.RegisterRequest{
+	var elonID int64
+	s.Run("register elonID musk", func() {
+		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{
 			FullName:    "Elon Musk",
-			Email:       "elon@tesla.us",
+			Email:       "elonID@tesla.us",
 			DateOfBirth: "1971-06-28",
 		})
 		s.NoError(err)
+		elonID = resp.UserId
 	})
 
-	s.Run("first elon tweet", func() {
+	elonTweet := "hey guys, should i buy twitter?"
+	s.Run("first elonID tweet", func() {
 		_, err := s.cli.AddTweet(ctx, &proto.AddTweetRequest{
 			Text:   elonTweet,
-			UserId: elon,
+			UserId: elonID,
 		})
 		s.NoError(err)
 	})
 
-	s.Run("elon have new follower", func() {
-		_, err := s.cli.Register(ctx, &proto.RegisterRequest{
+	var amberID int64
+	s.Run("elonID have new follower", func() {
+		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{
 			FullName:    "Amber Heard",
 			Email:       "beach@club.com",
 			DateOfBirth: "1986-04-22",
 		})
 		s.NoError(err)
+		amberID = resp.UserId
+		s.NotEqual(elonID, amberID, "different users should have different ids")
 
 		_, err = s.cli.Follow(ctx, &proto.FollowRequest{
-			UserId:        elon,
-			NewFollowerId: amber,
+			UserId:        elonID,
+			NewFollowerId: amberID,
 		})
 		s.NoError(err)
 	})
@@ -87,7 +88,7 @@ func (s *endToEndTestSuite) TestBasic() {
 		resp, err := s.cli.GetNewsFeed(ctx, &proto.GetNewsFeedRequest{
 			Limit:  10,
 			Offset: 0,
-			UserId: amber,
+			UserId: amberID,
 		})
 		s.NoError(err)
 

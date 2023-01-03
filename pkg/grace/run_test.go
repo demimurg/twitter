@@ -72,8 +72,8 @@ func getPort() string {
 	if err != nil {
 		panic(err)
 	}
-    // close listener because this port should be free to use
-    defer lis.Close()
+	// close listener because this port should be free to use
+	defer lis.Close()
 
 	addr := lis.Addr().String()
 	i := strings.LastIndex(addr, ":")

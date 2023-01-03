@@ -26,7 +26,7 @@ const _ = grpc.SupportPackageIsVersion7
 type TwitterClient interface {
 	AddTweet(ctx context.Context, in *AddTweetRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest, opts ...grpc.CallOption) (*GetNewsFeedResponse, error)
-	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
 	Follow(ctx context.Context, in *FollowRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -56,8 +56,8 @@ func (c *twitterClient) GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest,
 	return out, nil
 }
 
-func (c *twitterClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *twitterClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
+	out := new(RegisterResponse)
 	err := c.cc.Invoke(ctx, "/Twitter/Register", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func (c *twitterClient) Follow(ctx context.Context, in *FollowRequest, opts ...g
 type TwitterServer interface {
 	AddTweet(context.Context, *AddTweetRequest) (*emptypb.Empty, error)
 	GetNewsFeed(context.Context, *GetNewsFeedRequest) (*GetNewsFeedResponse, error)
-	Register(context.Context, *RegisterRequest) (*emptypb.Empty, error)
+	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
 	Follow(context.Context, *FollowRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedTwitterServer()
 }
@@ -95,7 +95,7 @@ func (UnimplementedTwitterServer) AddTweet(context.Context, *AddTweetRequest) (*
 func (UnimplementedTwitterServer) GetNewsFeed(context.Context, *GetNewsFeedRequest) (*GetNewsFeedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewsFeed not implemented")
 }
-func (UnimplementedTwitterServer) Register(context.Context, *RegisterRequest) (*emptypb.Empty, error) {
+func (UnimplementedTwitterServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
 func (UnimplementedTwitterServer) Follow(context.Context, *FollowRequest) (*emptypb.Empty, error) {

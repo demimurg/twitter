@@ -58,14 +58,15 @@ func (t *twitter) GetNewsFeed(ctx context.Context, req *proto.GetNewsFeedRequest
 	return resp, nil
 }
 
-func (t *twitter) Register(ctx context.Context, req *proto.RegisterRequest) (*emptypb.Empty, error) {
-	_, err := t.ur.Register(ctx, req.FullName, req.Email, req.DateOfBirth)
+func (t *twitter) Register(ctx context.Context, req *proto.RegisterRequest) (*proto.RegisterResponse, error) {
+	user, err := t.ur.Register(ctx, req.FullName, req.Email, req.DateOfBirth)
 	if err != nil {
 		if errors.Is(err, usecase.ErrValidationFailed) {
-			return &emptypb.Empty{}, status.Error(codes.InvalidArgument, err.Error())
+			err = status.Error(codes.InvalidArgument, err.Error())
 		}
+		return nil, err
 	}
-	return &emptypb.Empty{}, nil
+	return &proto.RegisterResponse{UserId: int64(user.ID)}, nil
 }
 
 func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*emptypb.Empty, error) {
