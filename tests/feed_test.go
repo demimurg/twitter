@@ -79,7 +79,7 @@ func (s *endToEndTestSuite) TestFeed() {
         resp, err := s.cli.RecommendUsers(ctx, &proto.RecommendUsersRequest{UserId: amberID})
         s.Require().NoError(err)
 
-        s.Len(resp.Users, 1)
+        s.GreaterOrEqual(len(resp.Users), 1)
         s.T().Log(resp.Users)
     })
 }

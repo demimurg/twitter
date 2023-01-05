@@ -48,6 +48,12 @@ type FeedManagerMock struct {
 	beforeGetNewsFeedCounter uint64
 	GetNewsFeedMock          mFeedManagerMockGetNewsFeed
 
+	funcGetRecommendedUsers          func(ctx context.Context, userID int) (ua1 []entity.User, err error)
+	inspectFuncGetRecommendedUsers   func(ctx context.Context, userID int)
+	afterGetRecommendedUsersCounter  uint64
+	beforeGetRecommendedUsersCounter uint64
+	GetRecommendedUsersMock          mFeedManagerMockGetRecommendedUsers
+
 	funcRemoveFollower          func(ctx context.Context, userID int, fromUserID int) (err error)
 	inspectFuncRemoveFollower   func(ctx context.Context, userID int, fromUserID int)
 	afterRemoveFollowerCounter  uint64
@@ -76,6 +82,9 @@ func NewFeedManagerMock(t minimock.Tester) *FeedManagerMock {
 
 	m.GetNewsFeedMock = mFeedManagerMockGetNewsFeed{mock: m}
 	m.GetNewsFeedMock.callArgs = []*FeedManagerMockGetNewsFeedParams{}
+
+	m.GetRecommendedUsersMock = mFeedManagerMockGetRecommendedUsers{mock: m}
+	m.GetRecommendedUsersMock.callArgs = []*FeedManagerMockGetRecommendedUsersParams{}
 
 	m.RemoveFollowerMock = mFeedManagerMockRemoveFollower{mock: m}
 	m.RemoveFollowerMock.callArgs = []*FeedManagerMockRemoveFollowerParams{}
@@ -1168,6 +1177,223 @@ func (m *FeedManagerMock) MinimockGetNewsFeedInspect() {
 	}
 }
 
+type mFeedManagerMockGetRecommendedUsers struct {
+	mock               *FeedManagerMock
+	defaultExpectation *FeedManagerMockGetRecommendedUsersExpectation
+	expectations       []*FeedManagerMockGetRecommendedUsersExpectation
+
+	callArgs []*FeedManagerMockGetRecommendedUsersParams
+	mutex    sync.RWMutex
+}
+
+// FeedManagerMockGetRecommendedUsersExpectation specifies expectation struct of the FeedManager.GetRecommendedUsers
+type FeedManagerMockGetRecommendedUsersExpectation struct {
+	mock    *FeedManagerMock
+	params  *FeedManagerMockGetRecommendedUsersParams
+	results *FeedManagerMockGetRecommendedUsersResults
+	Counter uint64
+}
+
+// FeedManagerMockGetRecommendedUsersParams contains parameters of the FeedManager.GetRecommendedUsers
+type FeedManagerMockGetRecommendedUsersParams struct {
+	ctx    context.Context
+	userID int
+}
+
+// FeedManagerMockGetRecommendedUsersResults contains results of the FeedManager.GetRecommendedUsers
+type FeedManagerMockGetRecommendedUsersResults struct {
+	ua1 []entity.User
+	err error
+}
+
+// Expect sets up expected params for FeedManager.GetRecommendedUsers
+func (mmGetRecommendedUsers *mFeedManagerMockGetRecommendedUsers) Expect(ctx context.Context, userID int) *mFeedManagerMockGetRecommendedUsers {
+	if mmGetRecommendedUsers.mock.funcGetRecommendedUsers != nil {
+		mmGetRecommendedUsers.mock.t.Fatalf("FeedManagerMock.GetRecommendedUsers mock is already set by Set")
+	}
+
+	if mmGetRecommendedUsers.defaultExpectation == nil {
+		mmGetRecommendedUsers.defaultExpectation = &FeedManagerMockGetRecommendedUsersExpectation{}
+	}
+
+	mmGetRecommendedUsers.defaultExpectation.params = &FeedManagerMockGetRecommendedUsersParams{ctx, userID}
+	for _, e := range mmGetRecommendedUsers.expectations {
+		if minimock.Equal(e.params, mmGetRecommendedUsers.defaultExpectation.params) {
+			mmGetRecommendedUsers.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetRecommendedUsers.defaultExpectation.params)
+		}
+	}
+
+	return mmGetRecommendedUsers
+}
+
+// Inspect accepts an inspector function that has same arguments as the FeedManager.GetRecommendedUsers
+func (mmGetRecommendedUsers *mFeedManagerMockGetRecommendedUsers) Inspect(f func(ctx context.Context, userID int)) *mFeedManagerMockGetRecommendedUsers {
+	if mmGetRecommendedUsers.mock.inspectFuncGetRecommendedUsers != nil {
+		mmGetRecommendedUsers.mock.t.Fatalf("Inspect function is already set for FeedManagerMock.GetRecommendedUsers")
+	}
+
+	mmGetRecommendedUsers.mock.inspectFuncGetRecommendedUsers = f
+
+	return mmGetRecommendedUsers
+}
+
+// Return sets up results that will be returned by FeedManager.GetRecommendedUsers
+func (mmGetRecommendedUsers *mFeedManagerMockGetRecommendedUsers) Return(ua1 []entity.User, err error) *FeedManagerMock {
+	if mmGetRecommendedUsers.mock.funcGetRecommendedUsers != nil {
+		mmGetRecommendedUsers.mock.t.Fatalf("FeedManagerMock.GetRecommendedUsers mock is already set by Set")
+	}
+
+	if mmGetRecommendedUsers.defaultExpectation == nil {
+		mmGetRecommendedUsers.defaultExpectation = &FeedManagerMockGetRecommendedUsersExpectation{mock: mmGetRecommendedUsers.mock}
+	}
+	mmGetRecommendedUsers.defaultExpectation.results = &FeedManagerMockGetRecommendedUsersResults{ua1, err}
+	return mmGetRecommendedUsers.mock
+}
+
+// Set uses given function f to mock the FeedManager.GetRecommendedUsers method
+func (mmGetRecommendedUsers *mFeedManagerMockGetRecommendedUsers) Set(f func(ctx context.Context, userID int) (ua1 []entity.User, err error)) *FeedManagerMock {
+	if mmGetRecommendedUsers.defaultExpectation != nil {
+		mmGetRecommendedUsers.mock.t.Fatalf("Default expectation is already set for the FeedManager.GetRecommendedUsers method")
+	}
+
+	if len(mmGetRecommendedUsers.expectations) > 0 {
+		mmGetRecommendedUsers.mock.t.Fatalf("Some expectations are already set for the FeedManager.GetRecommendedUsers method")
+	}
+
+	mmGetRecommendedUsers.mock.funcGetRecommendedUsers = f
+	return mmGetRecommendedUsers.mock
+}
+
+// When sets expectation for the FeedManager.GetRecommendedUsers which will trigger the result defined by the following
+// Then helper
+func (mmGetRecommendedUsers *mFeedManagerMockGetRecommendedUsers) When(ctx context.Context, userID int) *FeedManagerMockGetRecommendedUsersExpectation {
+	if mmGetRecommendedUsers.mock.funcGetRecommendedUsers != nil {
+		mmGetRecommendedUsers.mock.t.Fatalf("FeedManagerMock.GetRecommendedUsers mock is already set by Set")
+	}
+
+	expectation := &FeedManagerMockGetRecommendedUsersExpectation{
+		mock:   mmGetRecommendedUsers.mock,
+		params: &FeedManagerMockGetRecommendedUsersParams{ctx, userID},
+	}
+	mmGetRecommendedUsers.expectations = append(mmGetRecommendedUsers.expectations, expectation)
+	return expectation
+}
+
+// Then sets up FeedManager.GetRecommendedUsers return parameters for the expectation previously defined by the When method
+func (e *FeedManagerMockGetRecommendedUsersExpectation) Then(ua1 []entity.User, err error) *FeedManagerMock {
+	e.results = &FeedManagerMockGetRecommendedUsersResults{ua1, err}
+	return e.mock
+}
+
+// GetRecommendedUsers implements usecase.FeedManager
+func (mmGetRecommendedUsers *FeedManagerMock) GetRecommendedUsers(ctx context.Context, userID int) (ua1 []entity.User, err error) {
+	mm_atomic.AddUint64(&mmGetRecommendedUsers.beforeGetRecommendedUsersCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetRecommendedUsers.afterGetRecommendedUsersCounter, 1)
+
+	if mmGetRecommendedUsers.inspectFuncGetRecommendedUsers != nil {
+		mmGetRecommendedUsers.inspectFuncGetRecommendedUsers(ctx, userID)
+	}
+
+	mm_params := &FeedManagerMockGetRecommendedUsersParams{ctx, userID}
+
+	// Record call args
+	mmGetRecommendedUsers.GetRecommendedUsersMock.mutex.Lock()
+	mmGetRecommendedUsers.GetRecommendedUsersMock.callArgs = append(mmGetRecommendedUsers.GetRecommendedUsersMock.callArgs, mm_params)
+	mmGetRecommendedUsers.GetRecommendedUsersMock.mutex.Unlock()
+
+	for _, e := range mmGetRecommendedUsers.GetRecommendedUsersMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.ua1, e.results.err
+		}
+	}
+
+	if mmGetRecommendedUsers.GetRecommendedUsersMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetRecommendedUsers.GetRecommendedUsersMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetRecommendedUsers.GetRecommendedUsersMock.defaultExpectation.params
+		mm_got := FeedManagerMockGetRecommendedUsersParams{ctx, userID}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetRecommendedUsers.t.Errorf("FeedManagerMock.GetRecommendedUsers got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetRecommendedUsers.GetRecommendedUsersMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetRecommendedUsers.t.Fatal("No results are set for the FeedManagerMock.GetRecommendedUsers")
+		}
+		return (*mm_results).ua1, (*mm_results).err
+	}
+	if mmGetRecommendedUsers.funcGetRecommendedUsers != nil {
+		return mmGetRecommendedUsers.funcGetRecommendedUsers(ctx, userID)
+	}
+	mmGetRecommendedUsers.t.Fatalf("Unexpected call to FeedManagerMock.GetRecommendedUsers. %v %v", ctx, userID)
+	return
+}
+
+// GetRecommendedUsersAfterCounter returns a count of finished FeedManagerMock.GetRecommendedUsers invocations
+func (mmGetRecommendedUsers *FeedManagerMock) GetRecommendedUsersAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetRecommendedUsers.afterGetRecommendedUsersCounter)
+}
+
+// GetRecommendedUsersBeforeCounter returns a count of FeedManagerMock.GetRecommendedUsers invocations
+func (mmGetRecommendedUsers *FeedManagerMock) GetRecommendedUsersBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetRecommendedUsers.beforeGetRecommendedUsersCounter)
+}
+
+// Calls returns a list of arguments used in each call to FeedManagerMock.GetRecommendedUsers.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetRecommendedUsers *mFeedManagerMockGetRecommendedUsers) Calls() []*FeedManagerMockGetRecommendedUsersParams {
+	mmGetRecommendedUsers.mutex.RLock()
+
+	argCopy := make([]*FeedManagerMockGetRecommendedUsersParams, len(mmGetRecommendedUsers.callArgs))
+	copy(argCopy, mmGetRecommendedUsers.callArgs)
+
+	mmGetRecommendedUsers.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetRecommendedUsersDone returns true if the count of the GetRecommendedUsers invocations corresponds
+// the number of defined expectations
+func (m *FeedManagerMock) MinimockGetRecommendedUsersDone() bool {
+	for _, e := range m.GetRecommendedUsersMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetRecommendedUsersMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetRecommendedUsersCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetRecommendedUsers != nil && mm_atomic.LoadUint64(&m.afterGetRecommendedUsersCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetRecommendedUsersInspect logs each unmet expectation
+func (m *FeedManagerMock) MinimockGetRecommendedUsersInspect() {
+	for _, e := range m.GetRecommendedUsersMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to FeedManagerMock.GetRecommendedUsers with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetRecommendedUsersMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetRecommendedUsersCounter) < 1 {
+		if m.GetRecommendedUsersMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to FeedManagerMock.GetRecommendedUsers")
+		} else {
+			m.t.Errorf("Expected call to FeedManagerMock.GetRecommendedUsers with params: %#v", *m.GetRecommendedUsersMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetRecommendedUsers != nil && mm_atomic.LoadUint64(&m.afterGetRecommendedUsersCounter) < 1 {
+		m.t.Error("Expected call to FeedManagerMock.GetRecommendedUsers")
+	}
+}
+
 type mFeedManagerMockRemoveFollower struct {
 	mock               *FeedManagerMock
 	defaultExpectation *FeedManagerMockRemoveFollowerExpectation
@@ -1398,6 +1624,8 @@ func (m *FeedManagerMock) MinimockFinish() {
 
 		m.MinimockGetNewsFeedInspect()
 
+		m.MinimockGetRecommendedUsersInspect()
+
 		m.MinimockRemoveFollowerInspect()
 		m.t.FailNow()
 	}
@@ -1427,5 +1655,6 @@ func (m *FeedManagerMock) minimockDone() bool {
 		m.MinimockEditCommentDone() &&
 		m.MinimockEditTweetDone() &&
 		m.MinimockGetNewsFeedDone() &&
+		m.MinimockGetRecommendedUsersDone() &&
 		m.MinimockRemoveFollowerDone()
 }

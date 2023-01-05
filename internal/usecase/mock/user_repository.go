@@ -37,6 +37,12 @@ type UserRepositoryMock struct {
 	beforeGetCounter uint64
 	GetMock          mUserRepositoryMockGet
 
+	funcGetAll          func(ctx context.Context, limit int) (ua1 []entity.User, err error)
+	inspectFuncGetAll   func(ctx context.Context, limit int)
+	afterGetAllCounter  uint64
+	beforeGetAllCounter uint64
+	GetAllMock          mUserRepositoryMockGetAll
+
 	funcGetByEmail          func(ctx context.Context, email string) (up1 *entity.User, err error)
 	inspectFuncGetByEmail   func(ctx context.Context, email string)
 	afterGetByEmailCounter  uint64
@@ -65,6 +71,9 @@ func NewUserRepositoryMock(t minimock.Tester) *UserRepositoryMock {
 
 	m.GetMock = mUserRepositoryMockGet{mock: m}
 	m.GetMock.callArgs = []*UserRepositoryMockGetParams{}
+
+	m.GetAllMock = mUserRepositoryMockGetAll{mock: m}
+	m.GetAllMock.callArgs = []*UserRepositoryMockGetAllParams{}
 
 	m.GetByEmailMock = mUserRepositoryMockGetByEmail{mock: m}
 	m.GetByEmailMock.callArgs = []*UserRepositoryMockGetByEmailParams{}
@@ -727,6 +736,223 @@ func (m *UserRepositoryMock) MinimockGetInspect() {
 	}
 }
 
+type mUserRepositoryMockGetAll struct {
+	mock               *UserRepositoryMock
+	defaultExpectation *UserRepositoryMockGetAllExpectation
+	expectations       []*UserRepositoryMockGetAllExpectation
+
+	callArgs []*UserRepositoryMockGetAllParams
+	mutex    sync.RWMutex
+}
+
+// UserRepositoryMockGetAllExpectation specifies expectation struct of the UserRepository.GetAll
+type UserRepositoryMockGetAllExpectation struct {
+	mock    *UserRepositoryMock
+	params  *UserRepositoryMockGetAllParams
+	results *UserRepositoryMockGetAllResults
+	Counter uint64
+}
+
+// UserRepositoryMockGetAllParams contains parameters of the UserRepository.GetAll
+type UserRepositoryMockGetAllParams struct {
+	ctx   context.Context
+	limit int
+}
+
+// UserRepositoryMockGetAllResults contains results of the UserRepository.GetAll
+type UserRepositoryMockGetAllResults struct {
+	ua1 []entity.User
+	err error
+}
+
+// Expect sets up expected params for UserRepository.GetAll
+func (mmGetAll *mUserRepositoryMockGetAll) Expect(ctx context.Context, limit int) *mUserRepositoryMockGetAll {
+	if mmGetAll.mock.funcGetAll != nil {
+		mmGetAll.mock.t.Fatalf("UserRepositoryMock.GetAll mock is already set by Set")
+	}
+
+	if mmGetAll.defaultExpectation == nil {
+		mmGetAll.defaultExpectation = &UserRepositoryMockGetAllExpectation{}
+	}
+
+	mmGetAll.defaultExpectation.params = &UserRepositoryMockGetAllParams{ctx, limit}
+	for _, e := range mmGetAll.expectations {
+		if minimock.Equal(e.params, mmGetAll.defaultExpectation.params) {
+			mmGetAll.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetAll.defaultExpectation.params)
+		}
+	}
+
+	return mmGetAll
+}
+
+// Inspect accepts an inspector function that has same arguments as the UserRepository.GetAll
+func (mmGetAll *mUserRepositoryMockGetAll) Inspect(f func(ctx context.Context, limit int)) *mUserRepositoryMockGetAll {
+	if mmGetAll.mock.inspectFuncGetAll != nil {
+		mmGetAll.mock.t.Fatalf("Inspect function is already set for UserRepositoryMock.GetAll")
+	}
+
+	mmGetAll.mock.inspectFuncGetAll = f
+
+	return mmGetAll
+}
+
+// Return sets up results that will be returned by UserRepository.GetAll
+func (mmGetAll *mUserRepositoryMockGetAll) Return(ua1 []entity.User, err error) *UserRepositoryMock {
+	if mmGetAll.mock.funcGetAll != nil {
+		mmGetAll.mock.t.Fatalf("UserRepositoryMock.GetAll mock is already set by Set")
+	}
+
+	if mmGetAll.defaultExpectation == nil {
+		mmGetAll.defaultExpectation = &UserRepositoryMockGetAllExpectation{mock: mmGetAll.mock}
+	}
+	mmGetAll.defaultExpectation.results = &UserRepositoryMockGetAllResults{ua1, err}
+	return mmGetAll.mock
+}
+
+// Set uses given function f to mock the UserRepository.GetAll method
+func (mmGetAll *mUserRepositoryMockGetAll) Set(f func(ctx context.Context, limit int) (ua1 []entity.User, err error)) *UserRepositoryMock {
+	if mmGetAll.defaultExpectation != nil {
+		mmGetAll.mock.t.Fatalf("Default expectation is already set for the UserRepository.GetAll method")
+	}
+
+	if len(mmGetAll.expectations) > 0 {
+		mmGetAll.mock.t.Fatalf("Some expectations are already set for the UserRepository.GetAll method")
+	}
+
+	mmGetAll.mock.funcGetAll = f
+	return mmGetAll.mock
+}
+
+// When sets expectation for the UserRepository.GetAll which will trigger the result defined by the following
+// Then helper
+func (mmGetAll *mUserRepositoryMockGetAll) When(ctx context.Context, limit int) *UserRepositoryMockGetAllExpectation {
+	if mmGetAll.mock.funcGetAll != nil {
+		mmGetAll.mock.t.Fatalf("UserRepositoryMock.GetAll mock is already set by Set")
+	}
+
+	expectation := &UserRepositoryMockGetAllExpectation{
+		mock:   mmGetAll.mock,
+		params: &UserRepositoryMockGetAllParams{ctx, limit},
+	}
+	mmGetAll.expectations = append(mmGetAll.expectations, expectation)
+	return expectation
+}
+
+// Then sets up UserRepository.GetAll return parameters for the expectation previously defined by the When method
+func (e *UserRepositoryMockGetAllExpectation) Then(ua1 []entity.User, err error) *UserRepositoryMock {
+	e.results = &UserRepositoryMockGetAllResults{ua1, err}
+	return e.mock
+}
+
+// GetAll implements usecase.UserRepository
+func (mmGetAll *UserRepositoryMock) GetAll(ctx context.Context, limit int) (ua1 []entity.User, err error) {
+	mm_atomic.AddUint64(&mmGetAll.beforeGetAllCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetAll.afterGetAllCounter, 1)
+
+	if mmGetAll.inspectFuncGetAll != nil {
+		mmGetAll.inspectFuncGetAll(ctx, limit)
+	}
+
+	mm_params := &UserRepositoryMockGetAllParams{ctx, limit}
+
+	// Record call args
+	mmGetAll.GetAllMock.mutex.Lock()
+	mmGetAll.GetAllMock.callArgs = append(mmGetAll.GetAllMock.callArgs, mm_params)
+	mmGetAll.GetAllMock.mutex.Unlock()
+
+	for _, e := range mmGetAll.GetAllMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.ua1, e.results.err
+		}
+	}
+
+	if mmGetAll.GetAllMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetAll.GetAllMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetAll.GetAllMock.defaultExpectation.params
+		mm_got := UserRepositoryMockGetAllParams{ctx, limit}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetAll.t.Errorf("UserRepositoryMock.GetAll got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetAll.GetAllMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetAll.t.Fatal("No results are set for the UserRepositoryMock.GetAll")
+		}
+		return (*mm_results).ua1, (*mm_results).err
+	}
+	if mmGetAll.funcGetAll != nil {
+		return mmGetAll.funcGetAll(ctx, limit)
+	}
+	mmGetAll.t.Fatalf("Unexpected call to UserRepositoryMock.GetAll. %v %v", ctx, limit)
+	return
+}
+
+// GetAllAfterCounter returns a count of finished UserRepositoryMock.GetAll invocations
+func (mmGetAll *UserRepositoryMock) GetAllAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetAll.afterGetAllCounter)
+}
+
+// GetAllBeforeCounter returns a count of UserRepositoryMock.GetAll invocations
+func (mmGetAll *UserRepositoryMock) GetAllBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetAll.beforeGetAllCounter)
+}
+
+// Calls returns a list of arguments used in each call to UserRepositoryMock.GetAll.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetAll *mUserRepositoryMockGetAll) Calls() []*UserRepositoryMockGetAllParams {
+	mmGetAll.mutex.RLock()
+
+	argCopy := make([]*UserRepositoryMockGetAllParams, len(mmGetAll.callArgs))
+	copy(argCopy, mmGetAll.callArgs)
+
+	mmGetAll.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetAllDone returns true if the count of the GetAll invocations corresponds
+// the number of defined expectations
+func (m *UserRepositoryMock) MinimockGetAllDone() bool {
+	for _, e := range m.GetAllMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetAllMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetAllCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetAll != nil && mm_atomic.LoadUint64(&m.afterGetAllCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetAllInspect logs each unmet expectation
+func (m *UserRepositoryMock) MinimockGetAllInspect() {
+	for _, e := range m.GetAllMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to UserRepositoryMock.GetAll with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetAllMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetAllCounter) < 1 {
+		if m.GetAllMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to UserRepositoryMock.GetAll")
+		} else {
+			m.t.Errorf("Expected call to UserRepositoryMock.GetAll with params: %#v", *m.GetAllMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetAll != nil && mm_atomic.LoadUint64(&m.afterGetAllCounter) < 1 {
+		m.t.Error("Expected call to UserRepositoryMock.GetAll")
+	}
+}
+
 type mUserRepositoryMockGetByEmail struct {
 	mock               *UserRepositoryMock
 	defaultExpectation *UserRepositoryMockGetByEmailExpectation
@@ -1170,6 +1396,8 @@ func (m *UserRepositoryMock) MinimockFinish() {
 
 		m.MinimockGetInspect()
 
+		m.MinimockGetAllInspect()
+
 		m.MinimockGetByEmailInspect()
 
 		m.MinimockUpdateCaptionInspect()
@@ -1199,6 +1427,7 @@ func (m *UserRepositoryMock) minimockDone() bool {
 		m.MinimockAddDone() &&
 		m.MinimockDeleteDone() &&
 		m.MinimockGetDone() &&
+		m.MinimockGetAllDone() &&
 		m.MinimockGetByEmailDone() &&
 		m.MinimockUpdateCaptionDone()
 }
