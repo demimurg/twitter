@@ -3,6 +3,7 @@ package grpcsrv
 import (
 	"context"
 	"errors"
+    "github.com/demimurg/twitter/internal/entity"
     "google.golang.org/protobuf/types/known/timestamppb"
     "strings"
 
@@ -78,12 +79,17 @@ func (t *twitter) Login(ctx context.Context, req *proto.LoginRequest) (*proto.Lo
 
     return &proto.LoginResponse{
         UserId:      int64(user.ID),
-        UserProfile: &proto.UserProfile{
-            FullName:    user.FullName,
-            Email:       user.Email,
-            DateOfBirth: timestamppb.New(user.BirthDate),
-        },
+        UserProfile: convertToUserProfile(user),
     }, nil
+}
+
+func convertToUserProfile(user *entity.User) *proto.UserProfile {
+    return &proto.UserProfile{
+        Email:       user.Email,
+        FullName:    user.FullName,
+        Caption:     user.Caption,
+        DateOfBirth: timestamppb.New(user.BirthDate),
+    }
 }
 
 func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*emptypb.Empty, error) {
@@ -100,6 +106,19 @@ func (t *twitter) Unfollow(ctx context.Context, req *proto.UnfollowRequest) (*em
         return &emptypb.Empty{}, err
     }
     return &emptypb.Empty{}, nil
+}
+
+func (t *twitter) RecommendUsers(ctx context.Context, req *proto.RecommendUsersRequest) (*proto.RecommendUsersResponse, error) {
+    users, err := t.fm.GetRecommendedUsers(ctx, int(req.UserId))
+    if err != nil {
+        return nil, err
+    }
+
+    protoUsers := make([]*proto.UserProfile, 0, len(users))
+    for _, user := range users {
+        protoUsers = append(protoUsers, convertToUserProfile(&user))
+    }
+    return &proto.RecommendUsersResponse{Users: protoUsers}, nil
 }
 
 func logRequest(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {

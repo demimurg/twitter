@@ -74,4 +74,12 @@ func (s *endToEndTestSuite) TestFeed() {
         s.Require().NoError(err)
         s.Len(resp.Tweets, 0) // amber have no friends😢
     })
+
+    s.Run("amber checks user recommendations", func() {
+        resp, err := s.cli.RecommendUsers(ctx, &proto.RecommendUsersRequest{UserId: amberID})
+        s.Require().NoError(err)
+
+        s.Len(resp.Users, 1)
+        s.T().Log(resp.Users)
+    })
 }

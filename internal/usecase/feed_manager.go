@@ -20,6 +20,8 @@ type FeedManager interface {
 
 	EditTweet(ctx context.Context, tweetID int, text string) error
 	EditComment(ctx context.Context, commentID int, text string) error
+
+	GetRecommendedUsers(ctx context.Context, userID int) ([]entity.User, error)
 }
 
 var (
@@ -96,4 +98,20 @@ func (fm *feedManager) EditTweet(ctx context.Context, tweetID int, text string) 
 
 func (fm *feedManager) EditComment(ctx context.Context, commentID int, text string) error {
 	return fm.tweetsRepo.UpdateComment(ctx, commentID, text)
+}
+
+func (fm *feedManager) GetRecommendedUsers(ctx context.Context, userID int) ([]entity.User, error) {
+	users, err := fm.usersRepo.GetAll(ctx, 10)
+	if err != nil {
+		return nil, err
+	}
+
+    // very naive realisation, recommend all without user himself
+    recommended := make([]entity.User, 0, len(users))
+    for _, user := range users {
+        if user.ID != userID {
+            recommended = append(recommended, user)
+        }
+    }
+    return recommended, nil
 }

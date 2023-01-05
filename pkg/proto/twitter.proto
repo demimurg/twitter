@@ -10,6 +10,7 @@ service Twitter {
     rpc Login(LoginRequest) returns (LoginResponse);
     rpc Follow(FollowRequest) returns (google.protobuf.Empty);
     rpc Unfollow(UnfollowRequest) returns (google.protobuf.Empty);
+    rpc RecommendUsers(RecommendUsersRequest) returns (RecommendUsersResponse);
 }
 
 message AddTweetRequest {
@@ -53,7 +54,16 @@ message LoginResponse {
 };
 
 message UserProfile {
-    string full_name = 1;
-    string email = 2;
-    google.protobuf.Timestamp date_of_birth = 3;
+    string email = 1;
+    string full_name = 2;
+    string caption = 3;
+    google.protobuf.Timestamp date_of_birth = 4;
+};
+
+message RecommendUsersRequest {
+    int64 user_id = 1;
+};
+
+message RecommendUsersResponse {
+    repeated UserProfile users = 1;
 };

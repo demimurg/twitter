@@ -12,6 +12,7 @@ type UserRepository interface {
 	// Add will creates new user in repo and returns id assigned to it
 	Add(ctx context.Context, name, email string, birthDate time.Time) (int, error)
 	Get(ctx context.Context, userID int) (*entity.User, error)
+    GetAll(ctx context.Context, limit int) ([]entity.User, error)
     GetByEmail(ctx context.Context, email string) (*entity.User, error)
 	UpdateCaption(ctx context.Context, userID int, caption string) error
 	Delete(ctx context.Context, userID int) error
@@ -19,8 +20,8 @@ type UserRepository interface {
 
 type TweetRepository interface {
 	Add(ctx context.Context, userID int, tweetText string) error
-	AddComment(ctx context.Context, userID int, tweetID, commentText string) error
 	Update(ctx context.Context, tweetID int, newText string) error
+	AddComment(ctx context.Context, userID int, tweetID, commentText string) error
 	UpdateComment(ctx context.Context, commentID int, newText string) error
 	GetLatest(ctx context.Context, userID int, limit int) ([]entity.Tweet, error)
 }
