@@ -122,11 +122,23 @@ func (t *twitter) RecommendUsers(ctx context.Context, req *proto.RecommendUsersR
 }
 
 func logRequest(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	uniq := strings.Split(uuid.NewString(), "-")
-	ctx = log.With(ctx, "trace_id", uniq[len(uniq)-1])
-	log.Info(ctx, "received request",
-		"method", info.FullMethod)
-	return handler(ctx, req)
+	uuidParts := strings.Split(uuid.NewString(), "-")
+    ctx = log.With(ctx, "trace_id", uuidParts[len(uuidParts)-1])
+
+    method := info.FullMethod
+    if i := strings.LastIndex(info.FullMethod, "/"); i != -1 && i != len(info.FullMethod) - 1 {
+        method = info.FullMethod[i+1:]
+    }
+    log.Info(ctx, "received request",
+		"method", method)
+
+	resp, err = handler(ctx, req)
+    if err != nil {
+        log.Error(ctx, "returned error in response",
+            "method", method,
+            "error", err)
+    }
+    return resp, err
 }
 
 func recoverPanic(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
