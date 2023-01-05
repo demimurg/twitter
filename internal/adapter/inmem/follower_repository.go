@@ -25,6 +25,35 @@ func (f *followerRepo) Add(_ context.Context, followerID, toUserID int) error {
 	return nil
 }
 
+func (f *followerRepo) Remove(_ context.Context, followerID, fromUserID int) error {
+    f.followersStorage[fromUserID] = filter(f.followersStorage[fromUserID], followerID)
+    f.followingStorage[followerID] = filter(f.followingStorage[followerID], fromUserID)
+    return nil
+}
+
+// filter only first entrance of exculde value, order can be changed!
+func filter(values []int, exclude int) []int {
+    for i, val := range values {
+        if val != exclude {
+            continue
+        }
+
+        lastI := len(values)-1
+        switch {
+        case i == 0 && len(values) == 1:
+            return []int{}
+        case i == 0 && len(values) > 1:
+            return values[1:]
+        case i == len(values) - 1:
+            return values[:lastI]
+        default:
+            values[i] = values[lastI]
+            return values[:lastI]
+        }
+    }
+    return values
+}
+
 func (f *followerRepo) GetFollowing(_ context.Context, userID, topN int) ([]int, error) {
 	following, ok := f.followingStorage[userID]
 	if !ok {

@@ -28,6 +28,7 @@ type TwitterClient interface {
 	Register(ctx context.Context, in *UserProfile, opts ...grpc.CallOption) (*RegisterResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	Follow(ctx context.Context, in *FollowRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Unfollow(ctx context.Context, in *UnfollowRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type twitterClient struct {
@@ -83,6 +84,15 @@ func (c *twitterClient) Follow(ctx context.Context, in *FollowRequest, opts ...g
 	return out, nil
 }
 
+func (c *twitterClient) Unfollow(ctx context.Context, in *UnfollowRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/Twitter/Unfollow", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TwitterServer is the server API for Twitter service.
 // All implementations must embed UnimplementedTwitterServer
 // for forward compatibility
@@ -92,6 +102,7 @@ type TwitterServer interface {
 	Register(context.Context, *UserProfile) (*RegisterResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	Follow(context.Context, *FollowRequest) (*emptypb.Empty, error)
+	Unfollow(context.Context, *UnfollowRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedTwitterServer()
 }
 
@@ -113,6 +124,9 @@ func (UnimplementedTwitterServer) Login(context.Context, *LoginRequest) (*LoginR
 }
 func (UnimplementedTwitterServer) Follow(context.Context, *FollowRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Follow not implemented")
+}
+func (UnimplementedTwitterServer) Unfollow(context.Context, *UnfollowRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Unfollow not implemented")
 }
 func (UnimplementedTwitterServer) mustEmbedUnimplementedTwitterServer() {}
 
@@ -217,6 +231,24 @@ func _Twitter_Follow_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Twitter_Unfollow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnfollowRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TwitterServer).Unfollow(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Twitter/Unfollow",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TwitterServer).Unfollow(ctx, req.(*UnfollowRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Twitter_ServiceDesc is the grpc.ServiceDesc for Twitter service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -243,6 +275,10 @@ var Twitter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Follow",
 			Handler:    _Twitter_Follow_Handler,
+		},
+		{
+			MethodName: "Unfollow",
+			Handler:    _Twitter_Unfollow_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

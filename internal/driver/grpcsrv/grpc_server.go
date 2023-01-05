@@ -94,6 +94,14 @@ func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*emptyp
 	return &emptypb.Empty{}, nil
 }
 
+func (t *twitter) Unfollow(ctx context.Context, req *proto.UnfollowRequest) (*emptypb.Empty, error) {
+    err := t.fm.RemoveFollower(ctx, int(req.OldFollowerId), int(req.UserId))
+    if err != nil {
+        return &emptypb.Empty{}, err
+    }
+    return &emptypb.Empty{}, nil
+}
+
 func logRequest(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	uniq := strings.Split(uuid.NewString(), "-")
 	ctx = log.With(ctx, "trace_id", uniq[len(uniq)-1])
