@@ -1,7 +1,7 @@
 package tests
 
 import (
-    "github.com/demimurg/twitter/pkg/proto"
+	"github.com/demimurg/twitter/pkg/proto"
 )
 
 func (s *endToEndTestSuite) TestFeed() {
@@ -17,7 +17,7 @@ func (s *endToEndTestSuite) TestFeed() {
 	})
 
 	elonTweet := "hey guys, should i buy twitter?"
-	s.Run("first elonID tweet", func() {
+	s.Run("first elon tweet", func() {
 		_, err := s.cli.AddTweet(ctx, &proto.AddTweetRequest{
 			Text:   elonTweet,
 			UserId: elonID,
@@ -34,7 +34,7 @@ func (s *endToEndTestSuite) TestFeed() {
 	})
 
 	var amberID int64
-	s.Run("elonID have new follower", func() {
+	s.Run("elon have new follower", func() {
 		resp, err := s.cli.Register(ctx, &proto.UserProfile{
 			FullName:    "Amber Heard",
 			Email:       "beach@club.com",
@@ -53,7 +53,7 @@ func (s *endToEndTestSuite) TestFeed() {
 
 	s.Run("amber checks the news feed", func() {
 		resp, err := s.cli.GetNewsFeed(ctx, &proto.GetNewsFeedRequest{
-			UserId: amberID, Limit:  10,
+			UserId: amberID, Limit: 10,
 		})
 		s.NoError(err)
 
@@ -61,25 +61,25 @@ func (s *endToEndTestSuite) TestFeed() {
 		s.Equal(elonTweet, resp.Tweets[0])
 	})
 
-    s.Run("amber wants to unfollow elon", func() {
-        _, err := s.cli.Unfollow(ctx, &proto.UnfollowRequest{
-            UserId: elonID,
-            OldFollowerId: amberID,
-       })
-        s.Require().NoError(err)
+	s.Run("amber wants to unfollow elon", func() {
+		_, err := s.cli.Unfollow(ctx, &proto.UnfollowRequest{
+			UserId:        elonID,
+			OldFollowerId: amberID,
+		})
+		s.Require().NoError(err)
 
-        resp, err := s.cli.GetNewsFeed(ctx, &proto.GetNewsFeedRequest{
-            UserId: amberID, Limit:  10,
-            })
-        s.Require().NoError(err)
-        s.Len(resp.Tweets, 0) // amber have no friends😢
-    })
+		resp, err := s.cli.GetNewsFeed(ctx, &proto.GetNewsFeedRequest{
+			UserId: amberID, Limit: 10,
+		})
+		s.Require().NoError(err)
+		s.Len(resp.Tweets, 0) // amber have no friends😢
+	})
 
-    s.Run("amber checks user recommendations", func() {
-        resp, err := s.cli.RecommendUsers(ctx, &proto.RecommendUsersRequest{UserId: amberID})
-        s.Require().NoError(err)
+	s.Run("amber checks user recommendations", func() {
+		resp, err := s.cli.RecommendUsers(ctx, &proto.RecommendUsersRequest{UserId: amberID})
+		s.Require().NoError(err)
 
-        s.GreaterOrEqual(len(resp.Users), 1)
-        s.T().Log(resp.Users)
-    })
+		s.GreaterOrEqual(len(resp.Users), 1)
+		s.T().Log(resp.Users)
+	})
 }

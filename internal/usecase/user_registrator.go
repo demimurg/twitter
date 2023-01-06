@@ -14,7 +14,7 @@ type UserRegistrator interface {
 	Register(ctx context.Context, name, email string, birthDate time.Time) (*entity.User, error)
 	Deactivate(ctx context.Context, userID int) error
 
-    Login(ctx context.Context, email string) (*entity.User, error)
+	Login(ctx context.Context, email string) (*entity.User, error)
 }
 
 var ErrValidationFailed = errors.New("validation failed")
@@ -29,7 +29,7 @@ type userRegistrator struct {
 }
 
 func (ur *userRegistrator) Register(ctx context.Context, name, email string, birthDate time.Time) (*entity.User, error) {
-    err := ur.scamClient.CheckEmail(ctx, email)
+	err := ur.scamClient.CheckEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, ErrFakeEmail) {
 			return nil, fmt.Errorf("%s can't be registered: %w", name, err)
@@ -37,19 +37,19 @@ func (ur *userRegistrator) Register(ctx context.Context, name, email string, bir
 		log.Error(ctx, "scam client returned error", err)
 	}
 
-    id, err := ur.userRepo.Add(ctx, name, email, birthDate)
+	id, err := ur.userRepo.Add(ctx, name, email, birthDate)
 	if err != nil {
 		return nil, err
 	}
 
 	return &entity.User{
 		ID: id, Email: email,
-        FullName: name, BirthDate: birthDate,
+		FullName: name, BirthDate: birthDate,
 	}, nil
 }
 
 func (ur *userRegistrator) Login(ctx context.Context, email string) (*entity.User, error) {
-    return ur.userRepo.GetByEmail(ctx, email)
+	return ur.userRepo.GetByEmail(ctx, email)
 }
 
 func (ur *userRegistrator) Deactivate(ctx context.Context, userID int) error {

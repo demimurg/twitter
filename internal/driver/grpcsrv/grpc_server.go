@@ -3,9 +3,10 @@ package grpcsrv
 import (
 	"context"
 	"errors"
-    "github.com/demimurg/twitter/internal/entity"
-    "google.golang.org/protobuf/types/known/timestamppb"
-    "strings"
+	"strings"
+
+	"github.com/demimurg/twitter/internal/entity"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/demimurg/twitter/internal/usecase"
 	"github.com/demimurg/twitter/pkg/log"
@@ -61,7 +62,7 @@ func (t *twitter) GetNewsFeed(ctx context.Context, req *proto.GetNewsFeedRequest
 }
 
 func (t *twitter) Register(ctx context.Context, req *proto.UserProfile) (*proto.RegisterResponse, error) {
-    user, err := t.ur.Register(ctx, req.FullName, req.Email, req.DateOfBirth.AsTime())
+	user, err := t.ur.Register(ctx, req.FullName, req.Email, req.DateOfBirth.AsTime())
 	if err != nil {
 		if errors.Is(err, usecase.ErrValidationFailed) {
 			err = status.Error(codes.InvalidArgument, err.Error())
@@ -72,24 +73,24 @@ func (t *twitter) Register(ctx context.Context, req *proto.UserProfile) (*proto.
 }
 
 func (t *twitter) Login(ctx context.Context, req *proto.LoginRequest) (*proto.LoginResponse, error) {
-    user, err := t.ur.Login(ctx, req.Email)
-    if err != nil {
-        return nil, err
-    }
+	user, err := t.ur.Login(ctx, req.Email)
+	if err != nil {
+		return nil, err
+	}
 
-    return &proto.LoginResponse{
-        UserId:      int64(user.ID),
-        UserProfile: convertToUserProfile(user),
-    }, nil
+	return &proto.LoginResponse{
+		UserId:      int64(user.ID),
+		UserProfile: convertToUserProfile(user),
+	}, nil
 }
 
 func convertToUserProfile(user *entity.User) *proto.UserProfile {
-    return &proto.UserProfile{
-        Email:       user.Email,
-        FullName:    user.FullName,
-        Caption:     user.Caption,
-        DateOfBirth: timestamppb.New(user.BirthDate),
-    }
+	return &proto.UserProfile{
+		Email:       user.Email,
+		FullName:    user.FullName,
+		Caption:     user.Caption,
+		DateOfBirth: timestamppb.New(user.BirthDate),
+	}
 }
 
 func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*emptypb.Empty, error) {
@@ -101,44 +102,44 @@ func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*emptyp
 }
 
 func (t *twitter) Unfollow(ctx context.Context, req *proto.UnfollowRequest) (*emptypb.Empty, error) {
-    err := t.fm.RemoveFollower(ctx, int(req.OldFollowerId), int(req.UserId))
-    if err != nil {
-        return &emptypb.Empty{}, err
-    }
-    return &emptypb.Empty{}, nil
+	err := t.fm.RemoveFollower(ctx, int(req.OldFollowerId), int(req.UserId))
+	if err != nil {
+		return &emptypb.Empty{}, err
+	}
+	return &emptypb.Empty{}, nil
 }
 
 func (t *twitter) RecommendUsers(ctx context.Context, req *proto.RecommendUsersRequest) (*proto.RecommendUsersResponse, error) {
-    users, err := t.fm.GetRecommendedUsers(ctx, int(req.UserId))
-    if err != nil {
-        return nil, err
-    }
+	users, err := t.fm.GetRecommendedUsers(ctx, int(req.UserId))
+	if err != nil {
+		return nil, err
+	}
 
-    protoUsers := make([]*proto.UserProfile, 0, len(users))
-    for _, user := range users {
-        protoUsers = append(protoUsers, convertToUserProfile(&user))
-    }
-    return &proto.RecommendUsersResponse{Users: protoUsers}, nil
+	protoUsers := make([]*proto.UserProfile, 0, len(users))
+	for _, user := range users {
+		protoUsers = append(protoUsers, convertToUserProfile(&user))
+	}
+	return &proto.RecommendUsersResponse{Users: protoUsers}, nil
 }
 
 func logRequest(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	uuidParts := strings.Split(uuid.NewString(), "-")
-    ctx = log.With(ctx, "trace_id", uuidParts[len(uuidParts)-1])
+	ctx = log.With(ctx, "trace_id", uuidParts[len(uuidParts)-1])
 
-    method := info.FullMethod
-    if i := strings.LastIndex(info.FullMethod, "/"); i != -1 && i != len(info.FullMethod) - 1 {
-        method = info.FullMethod[i+1:]
-    }
-    log.Info(ctx, "received request",
+	method := info.FullMethod
+	if i := strings.LastIndex(info.FullMethod, "/"); i != -1 && i != len(info.FullMethod)-1 {
+		method = info.FullMethod[i+1:]
+	}
+	log.Info(ctx, "received request",
 		"method", method)
 
 	resp, err = handler(ctx, req)
-    if err != nil {
-        log.Error(ctx, "returned error in response",
-            "method", method,
-            "error", err)
-    }
-    return resp, err
+	if err != nil {
+		log.Error(ctx, "returned error in response",
+			"method", method,
+			"error", err)
+	}
+	return resp, err
 }
 
 func recoverPanic(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {

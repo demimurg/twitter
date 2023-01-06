@@ -106,12 +106,12 @@ func (fm *feedManager) GetRecommendedUsers(ctx context.Context, userID int) ([]e
 		return nil, err
 	}
 
-    // very naive realisation, recommend all without user himself
-    recommended := make([]entity.User, 0, len(users))
-    for _, user := range users {
-        if user.ID != userID {
-            recommended = append(recommended, user)
-        }
-    }
-    return recommended, nil
+	// very naive realisation, recommend all without user himself
+	recommended := make([]entity.User, 0, len(users))
+	for _, user := range users {
+		if user.ID != userID {
+			recommended = append(recommended, user)
+		}
+	}
+	return recommended, nil
 }
