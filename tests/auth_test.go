@@ -2,6 +2,7 @@ package tests
 
 import "github.com/demimurg/twitter/pkg/proto"
 
+// TestAuth for basic operations, subtests can't be run separate
 func (s *endToEndTestSuite) TestAuth() {
 	var (
 		gretaID      int64

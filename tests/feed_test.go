@@ -4,9 +4,14 @@ import (
 	"github.com/demimurg/twitter/pkg/proto"
 )
 
+// TestFeed for basic operations, subtests can't be run separate
+// it should be understand like one related story
 func (s *endToEndTestSuite) TestFeed() {
-	var elonID int64
-	s.Run("register elon musk", func() {
+	var (
+		elonID    int64
+		elonTweet = "hey guys, should i buy twitter?"
+	)
+	s.Run("first elon musk tweet", func() {
 		resp, err := s.cli.Register(ctx, &proto.UserProfile{
 			FullName:    "Elon Musk",
 			Email:       "elonID@tesla.us",
@@ -14,21 +19,16 @@ func (s *endToEndTestSuite) TestFeed() {
 		})
 		s.NoError(err)
 		elonID = resp.UserId
-	})
 
-	elonTweet := "hey guys, should i buy twitter?"
-	s.Run("first elon tweet", func() {
-		_, err := s.cli.AddTweet(ctx, &proto.AddTweetRequest{
-			Text:   elonTweet,
-			UserId: elonID,
+		_, err = s.cli.AddTweet(ctx, &proto.AddTweetRequest{
+			Text: elonTweet, UserId: elonID,
 		})
 		s.NoError(err)
 	})
 
 	s.Run("unregistered user can't send tweet", func() {
 		_, err := s.cli.AddTweet(ctx, &proto.AddTweetRequest{
-			Text:   "scam message",
-			UserId: -1, // who the f*ck are you??
+			Text: "scam message", UserId: -1, // who the f*ck are you??
 		})
 		s.Error(err)
 	})
