@@ -31,8 +31,8 @@ type UserRegistratorMock struct {
 	beforeLoginCounter uint64
 	LoginMock          mUserRegistratorMockLogin
 
-	funcRegister          func(ctx context.Context, name string, email string, birthDate time.Time) (up1 *entity.User, err error)
-	inspectFuncRegister   func(ctx context.Context, name string, email string, birthDate time.Time)
+	funcRegister          func(ctx context.Context, name string, email string, caption string, birthDate time.Time) (up1 *entity.User, err error)
+	inspectFuncRegister   func(ctx context.Context, name string, email string, caption string, birthDate time.Time)
 	afterRegisterCounter  uint64
 	beforeRegisterCounter uint64
 	RegisterMock          mUserRegistratorMockRegister
@@ -512,6 +512,7 @@ type UserRegistratorMockRegisterParams struct {
 	ctx       context.Context
 	name      string
 	email     string
+	caption   string
 	birthDate time.Time
 }
 
@@ -522,7 +523,7 @@ type UserRegistratorMockRegisterResults struct {
 }
 
 // Expect sets up expected params for UserRegistrator.Register
-func (mmRegister *mUserRegistratorMockRegister) Expect(ctx context.Context, name string, email string, birthDate time.Time) *mUserRegistratorMockRegister {
+func (mmRegister *mUserRegistratorMockRegister) Expect(ctx context.Context, name string, email string, caption string, birthDate time.Time) *mUserRegistratorMockRegister {
 	if mmRegister.mock.funcRegister != nil {
 		mmRegister.mock.t.Fatalf("UserRegistratorMock.Register mock is already set by Set")
 	}
@@ -531,7 +532,7 @@ func (mmRegister *mUserRegistratorMockRegister) Expect(ctx context.Context, name
 		mmRegister.defaultExpectation = &UserRegistratorMockRegisterExpectation{}
 	}
 
-	mmRegister.defaultExpectation.params = &UserRegistratorMockRegisterParams{ctx, name, email, birthDate}
+	mmRegister.defaultExpectation.params = &UserRegistratorMockRegisterParams{ctx, name, email, caption, birthDate}
 	for _, e := range mmRegister.expectations {
 		if minimock.Equal(e.params, mmRegister.defaultExpectation.params) {
 			mmRegister.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmRegister.defaultExpectation.params)
@@ -542,7 +543,7 @@ func (mmRegister *mUserRegistratorMockRegister) Expect(ctx context.Context, name
 }
 
 // Inspect accepts an inspector function that has same arguments as the UserRegistrator.Register
-func (mmRegister *mUserRegistratorMockRegister) Inspect(f func(ctx context.Context, name string, email string, birthDate time.Time)) *mUserRegistratorMockRegister {
+func (mmRegister *mUserRegistratorMockRegister) Inspect(f func(ctx context.Context, name string, email string, caption string, birthDate time.Time)) *mUserRegistratorMockRegister {
 	if mmRegister.mock.inspectFuncRegister != nil {
 		mmRegister.mock.t.Fatalf("Inspect function is already set for UserRegistratorMock.Register")
 	}
@@ -566,7 +567,7 @@ func (mmRegister *mUserRegistratorMockRegister) Return(up1 *entity.User, err err
 }
 
 // Set uses given function f to mock the UserRegistrator.Register method
-func (mmRegister *mUserRegistratorMockRegister) Set(f func(ctx context.Context, name string, email string, birthDate time.Time) (up1 *entity.User, err error)) *UserRegistratorMock {
+func (mmRegister *mUserRegistratorMockRegister) Set(f func(ctx context.Context, name string, email string, caption string, birthDate time.Time) (up1 *entity.User, err error)) *UserRegistratorMock {
 	if mmRegister.defaultExpectation != nil {
 		mmRegister.mock.t.Fatalf("Default expectation is already set for the UserRegistrator.Register method")
 	}
@@ -581,14 +582,14 @@ func (mmRegister *mUserRegistratorMockRegister) Set(f func(ctx context.Context, 
 
 // When sets expectation for the UserRegistrator.Register which will trigger the result defined by the following
 // Then helper
-func (mmRegister *mUserRegistratorMockRegister) When(ctx context.Context, name string, email string, birthDate time.Time) *UserRegistratorMockRegisterExpectation {
+func (mmRegister *mUserRegistratorMockRegister) When(ctx context.Context, name string, email string, caption string, birthDate time.Time) *UserRegistratorMockRegisterExpectation {
 	if mmRegister.mock.funcRegister != nil {
 		mmRegister.mock.t.Fatalf("UserRegistratorMock.Register mock is already set by Set")
 	}
 
 	expectation := &UserRegistratorMockRegisterExpectation{
 		mock:   mmRegister.mock,
-		params: &UserRegistratorMockRegisterParams{ctx, name, email, birthDate},
+		params: &UserRegistratorMockRegisterParams{ctx, name, email, caption, birthDate},
 	}
 	mmRegister.expectations = append(mmRegister.expectations, expectation)
 	return expectation
@@ -601,15 +602,15 @@ func (e *UserRegistratorMockRegisterExpectation) Then(up1 *entity.User, err erro
 }
 
 // Register implements usecase.UserRegistrator
-func (mmRegister *UserRegistratorMock) Register(ctx context.Context, name string, email string, birthDate time.Time) (up1 *entity.User, err error) {
+func (mmRegister *UserRegistratorMock) Register(ctx context.Context, name string, email string, caption string, birthDate time.Time) (up1 *entity.User, err error) {
 	mm_atomic.AddUint64(&mmRegister.beforeRegisterCounter, 1)
 	defer mm_atomic.AddUint64(&mmRegister.afterRegisterCounter, 1)
 
 	if mmRegister.inspectFuncRegister != nil {
-		mmRegister.inspectFuncRegister(ctx, name, email, birthDate)
+		mmRegister.inspectFuncRegister(ctx, name, email, caption, birthDate)
 	}
 
-	mm_params := &UserRegistratorMockRegisterParams{ctx, name, email, birthDate}
+	mm_params := &UserRegistratorMockRegisterParams{ctx, name, email, caption, birthDate}
 
 	// Record call args
 	mmRegister.RegisterMock.mutex.Lock()
@@ -626,7 +627,7 @@ func (mmRegister *UserRegistratorMock) Register(ctx context.Context, name string
 	if mmRegister.RegisterMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmRegister.RegisterMock.defaultExpectation.Counter, 1)
 		mm_want := mmRegister.RegisterMock.defaultExpectation.params
-		mm_got := UserRegistratorMockRegisterParams{ctx, name, email, birthDate}
+		mm_got := UserRegistratorMockRegisterParams{ctx, name, email, caption, birthDate}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
 			mmRegister.t.Errorf("UserRegistratorMock.Register got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
@@ -638,9 +639,9 @@ func (mmRegister *UserRegistratorMock) Register(ctx context.Context, name string
 		return (*mm_results).up1, (*mm_results).err
 	}
 	if mmRegister.funcRegister != nil {
-		return mmRegister.funcRegister(ctx, name, email, birthDate)
+		return mmRegister.funcRegister(ctx, name, email, caption, birthDate)
 	}
-	mmRegister.t.Fatalf("Unexpected call to UserRegistratorMock.Register. %v %v %v %v", ctx, name, email, birthDate)
+	mmRegister.t.Fatalf("Unexpected call to UserRegistratorMock.Register. %v %v %v %v %v", ctx, name, email, caption, birthDate)
 	return
 }
 

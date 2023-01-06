@@ -11,7 +11,7 @@ import (
 )
 
 type UserRegistrator interface {
-	Register(ctx context.Context, name, email string, birthDate time.Time) (*entity.User, error)
+	Register(ctx context.Context, name, email, caption string, birthDate time.Time) (*entity.User, error)
 	Deactivate(ctx context.Context, userID int) error
 
 	Login(ctx context.Context, email string) (*entity.User, error)
@@ -28,7 +28,7 @@ type userRegistrator struct {
 	scamClient ScamDetectorClient
 }
 
-func (ur *userRegistrator) Register(ctx context.Context, name, email string, birthDate time.Time) (*entity.User, error) {
+func (ur *userRegistrator) Register(ctx context.Context, name, email, caption string, birthDate time.Time) (*entity.User, error) {
 	err := ur.scamClient.CheckEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, ErrFakeEmail) {
@@ -37,13 +37,13 @@ func (ur *userRegistrator) Register(ctx context.Context, name, email string, bir
 		log.Error(ctx, "scam client returned error", err)
 	}
 
-	id, err := ur.userRepo.Add(ctx, name, email, birthDate)
+	id, err := ur.userRepo.Add(ctx, name, email, caption, birthDate)
 	if err != nil {
 		return nil, err
 	}
 
 	return &entity.User{
-		ID: id, Email: email,
+		ID: id, Email: email, Caption: caption,
 		FullName: name, BirthDate: birthDate,
 	}, nil
 }

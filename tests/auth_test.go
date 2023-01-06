@@ -9,6 +9,7 @@ func (s *endToEndTestSuite) TestAuth() {
 		gretaProfile = &proto.UserProfile{
 			FullName:    "Greta Thunberg",
 			Email:       "smalldickenergy@getalife.com",
+			Caption:     "How dare you are?🤬",
 			DateOfBirth: date(2003, 01, 03),
 		}
 	)
@@ -35,6 +36,7 @@ func (s *endToEndTestSuite) TestAuth() {
 		s.Equal(gretaID, resp.UserId)
 		s.Equal(gretaProfile.FullName, resp.UserProfile.FullName)
 		s.Equal(gretaProfile.Email, resp.UserProfile.Email)
+		s.Equal(gretaProfile.Caption, resp.UserProfile.Caption)
 		s.Equal(gretaProfile.DateOfBirth.AsTime(), resp.UserProfile.DateOfBirth.AsTime())
 	})
 }

@@ -19,6 +19,7 @@ func TestUserRegistrator_Register(t *testing.T) {
 		name      string
 		userName  string
 		email     string
+		caption   string
 		birthDate time.Time
 		expect    func(urmocks)
 		wantUser  *entity.User
@@ -28,16 +29,21 @@ func TestUserRegistrator_Register(t *testing.T) {
 			name:      "create user without problems",
 			userName:  "Elon Musk",
 			email:     "elon.musk@twitter.com",
+			caption:   "billionaire, philanthropist",
 			birthDate: date(1971, 06, 28),
 			expect: func(m urmocks) {
 				m.ScamDetectorClientMock.CheckEmailMock.
 					Expect(ctx, "elon.musk@twitter.com").
 					Return(nil)
-				m.UserRepositoryMock.AddMock.
-					Expect(ctx, "Elon Musk", "elon.musk@twitter.com", date(1971, 6, 28)).
-					Return(1, nil)
+				m.UserRepositoryMock.AddMock.Expect(
+					ctx, "Elon Musk", "elon.musk@twitter.com",
+					"billionaire, philanthropist", date(1971, 6, 28),
+				).Return(1, nil)
 			},
-			wantUser: &entity.User{ID: 1, FullName: "Elon Musk", Email: "elon.musk@twitter.com", BirthDate: date(1971, 6, 28)},
+			wantUser: &entity.User{
+				ID: 1, FullName: "Elon Musk", Email: "elon.musk@twitter.com",
+				Caption: "billionaire, philanthropist", BirthDate: date(1971, 6, 28),
+			},
 		},
 		{
 			name:      "registration with fake email",
@@ -64,7 +70,7 @@ func TestUserRegistrator_Register(t *testing.T) {
 				// problem with scam client doesn't stop us to go here
 				// it's called gracefull degradation
 				m.UserRepositoryMock.AddMock.
-					Expect(ctx, "Elon Musk", "elon.musk@twitter.com", date(1971, 6, 28)).
+					Expect(ctx, "Elon Musk", "elon.musk@twitter.com", "", date(1971, 6, 28)).
 					Return(1, nil)
 			},
 			wantUser: &entity.User{ID: 1, FullName: "Elon Musk", Email: "elon.musk@twitter.com", BirthDate: date(1971, 6, 28)},
@@ -74,7 +80,7 @@ func TestUserRegistrator_Register(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ur := newUserRegistrator(t, tc.expect)
-			user, err := ur.Register(ctx, tc.userName, tc.email, tc.birthDate)
+			user, err := ur.Register(ctx, tc.userName, tc.email, tc.caption, tc.birthDate)
 			assert.Equal(t, tc.wantError, err != nil, "not expected error: %v", err)
 			assert.Equal(t, tc.wantUser, user)
 		})

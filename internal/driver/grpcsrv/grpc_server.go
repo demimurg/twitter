@@ -62,7 +62,7 @@ func (t *twitter) GetNewsFeed(ctx context.Context, req *proto.GetNewsFeedRequest
 }
 
 func (t *twitter) Register(ctx context.Context, req *proto.UserProfile) (*proto.RegisterResponse, error) {
-	user, err := t.ur.Register(ctx, req.FullName, req.Email, req.DateOfBirth.AsTime())
+	user, err := t.ur.Register(ctx, req.FullName, req.Email, req.Caption, req.DateOfBirth.AsTime())
 	if err != nil {
 		if errors.Is(err, usecase.ErrValidationFailed) {
 			err = status.Error(codes.InvalidArgument, err.Error())

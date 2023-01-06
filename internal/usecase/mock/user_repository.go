@@ -19,8 +19,8 @@ import (
 type UserRepositoryMock struct {
 	t minimock.Tester
 
-	funcAdd          func(ctx context.Context, name string, email string, birthDate time.Time) (i1 int, err error)
-	inspectFuncAdd   func(ctx context.Context, name string, email string, birthDate time.Time)
+	funcAdd          func(ctx context.Context, name string, email string, caption string, birthDate time.Time) (i1 int, err error)
+	inspectFuncAdd   func(ctx context.Context, name string, email string, caption string, birthDate time.Time)
 	afterAddCounter  uint64
 	beforeAddCounter uint64
 	AddMock          mUserRepositoryMockAdd
@@ -106,6 +106,7 @@ type UserRepositoryMockAddParams struct {
 	ctx       context.Context
 	name      string
 	email     string
+	caption   string
 	birthDate time.Time
 }
 
@@ -116,7 +117,7 @@ type UserRepositoryMockAddResults struct {
 }
 
 // Expect sets up expected params for UserRepository.Add
-func (mmAdd *mUserRepositoryMockAdd) Expect(ctx context.Context, name string, email string, birthDate time.Time) *mUserRepositoryMockAdd {
+func (mmAdd *mUserRepositoryMockAdd) Expect(ctx context.Context, name string, email string, caption string, birthDate time.Time) *mUserRepositoryMockAdd {
 	if mmAdd.mock.funcAdd != nil {
 		mmAdd.mock.t.Fatalf("UserRepositoryMock.Add mock is already set by Set")
 	}
@@ -125,7 +126,7 @@ func (mmAdd *mUserRepositoryMockAdd) Expect(ctx context.Context, name string, em
 		mmAdd.defaultExpectation = &UserRepositoryMockAddExpectation{}
 	}
 
-	mmAdd.defaultExpectation.params = &UserRepositoryMockAddParams{ctx, name, email, birthDate}
+	mmAdd.defaultExpectation.params = &UserRepositoryMockAddParams{ctx, name, email, caption, birthDate}
 	for _, e := range mmAdd.expectations {
 		if minimock.Equal(e.params, mmAdd.defaultExpectation.params) {
 			mmAdd.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmAdd.defaultExpectation.params)
@@ -136,7 +137,7 @@ func (mmAdd *mUserRepositoryMockAdd) Expect(ctx context.Context, name string, em
 }
 
 // Inspect accepts an inspector function that has same arguments as the UserRepository.Add
-func (mmAdd *mUserRepositoryMockAdd) Inspect(f func(ctx context.Context, name string, email string, birthDate time.Time)) *mUserRepositoryMockAdd {
+func (mmAdd *mUserRepositoryMockAdd) Inspect(f func(ctx context.Context, name string, email string, caption string, birthDate time.Time)) *mUserRepositoryMockAdd {
 	if mmAdd.mock.inspectFuncAdd != nil {
 		mmAdd.mock.t.Fatalf("Inspect function is already set for UserRepositoryMock.Add")
 	}
@@ -160,7 +161,7 @@ func (mmAdd *mUserRepositoryMockAdd) Return(i1 int, err error) *UserRepositoryMo
 }
 
 // Set uses given function f to mock the UserRepository.Add method
-func (mmAdd *mUserRepositoryMockAdd) Set(f func(ctx context.Context, name string, email string, birthDate time.Time) (i1 int, err error)) *UserRepositoryMock {
+func (mmAdd *mUserRepositoryMockAdd) Set(f func(ctx context.Context, name string, email string, caption string, birthDate time.Time) (i1 int, err error)) *UserRepositoryMock {
 	if mmAdd.defaultExpectation != nil {
 		mmAdd.mock.t.Fatalf("Default expectation is already set for the UserRepository.Add method")
 	}
@@ -175,14 +176,14 @@ func (mmAdd *mUserRepositoryMockAdd) Set(f func(ctx context.Context, name string
 
 // When sets expectation for the UserRepository.Add which will trigger the result defined by the following
 // Then helper
-func (mmAdd *mUserRepositoryMockAdd) When(ctx context.Context, name string, email string, birthDate time.Time) *UserRepositoryMockAddExpectation {
+func (mmAdd *mUserRepositoryMockAdd) When(ctx context.Context, name string, email string, caption string, birthDate time.Time) *UserRepositoryMockAddExpectation {
 	if mmAdd.mock.funcAdd != nil {
 		mmAdd.mock.t.Fatalf("UserRepositoryMock.Add mock is already set by Set")
 	}
 
 	expectation := &UserRepositoryMockAddExpectation{
 		mock:   mmAdd.mock,
-		params: &UserRepositoryMockAddParams{ctx, name, email, birthDate},
+		params: &UserRepositoryMockAddParams{ctx, name, email, caption, birthDate},
 	}
 	mmAdd.expectations = append(mmAdd.expectations, expectation)
 	return expectation
@@ -195,15 +196,15 @@ func (e *UserRepositoryMockAddExpectation) Then(i1 int, err error) *UserReposito
 }
 
 // Add implements usecase.UserRepository
-func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string, email string, birthDate time.Time) (i1 int, err error) {
+func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string, email string, caption string, birthDate time.Time) (i1 int, err error) {
 	mm_atomic.AddUint64(&mmAdd.beforeAddCounter, 1)
 	defer mm_atomic.AddUint64(&mmAdd.afterAddCounter, 1)
 
 	if mmAdd.inspectFuncAdd != nil {
-		mmAdd.inspectFuncAdd(ctx, name, email, birthDate)
+		mmAdd.inspectFuncAdd(ctx, name, email, caption, birthDate)
 	}
 
-	mm_params := &UserRepositoryMockAddParams{ctx, name, email, birthDate}
+	mm_params := &UserRepositoryMockAddParams{ctx, name, email, caption, birthDate}
 
 	// Record call args
 	mmAdd.AddMock.mutex.Lock()
@@ -220,7 +221,7 @@ func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string, email str
 	if mmAdd.AddMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmAdd.AddMock.defaultExpectation.Counter, 1)
 		mm_want := mmAdd.AddMock.defaultExpectation.params
-		mm_got := UserRepositoryMockAddParams{ctx, name, email, birthDate}
+		mm_got := UserRepositoryMockAddParams{ctx, name, email, caption, birthDate}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
 			mmAdd.t.Errorf("UserRepositoryMock.Add got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
@@ -232,9 +233,9 @@ func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string, email str
 		return (*mm_results).i1, (*mm_results).err
 	}
 	if mmAdd.funcAdd != nil {
-		return mmAdd.funcAdd(ctx, name, email, birthDate)
+		return mmAdd.funcAdd(ctx, name, email, caption, birthDate)
 	}
-	mmAdd.t.Fatalf("Unexpected call to UserRepositoryMock.Add. %v %v %v %v", ctx, name, email, birthDate)
+	mmAdd.t.Fatalf("Unexpected call to UserRepositoryMock.Add. %v %v %v %v %v", ctx, name, email, caption, birthDate)
 	return
 }
 
