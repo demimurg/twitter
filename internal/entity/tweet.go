@@ -6,15 +6,17 @@ import "time"
 const MaxAllowedSymbols = 140
 
 type Tweet struct {
-	ID, UserID int
-	Text       string
-	Likes      int
+	ID         int    `sql:"id"`
+	UserID     int    `sql:"user_id"`
+	Text       string `sql:"text"`
+	Likes      int    `sql:"likes"`
 	CommentIDs []string
-	CreatedAt  time.Time
+	CreatedAt  time.Time `sql:"created_at"`
 }
 
 type Comment struct {
-	ID, UserID int
-	Text       string
-	Likes      int
+	ID     int    `sql:"id"`
+	UserID int    `sql:"user_id"`
+	Text   string `sql:"text"`
+	Likes  int    `sql:"likes"`
 }
