@@ -24,8 +24,8 @@ type TweetRepositoryMock struct {
 	beforeAddCounter uint64
 	AddMock          mTweetRepositoryMockAdd
 
-	funcAddComment          func(ctx context.Context, userID int, tweetID string, commentText string) (err error)
-	inspectFuncAddComment   func(ctx context.Context, userID int, tweetID string, commentText string)
+	funcAddComment          func(ctx context.Context, userID int, tweetID int, commentText string) (err error)
+	inspectFuncAddComment   func(ctx context.Context, userID int, tweetID int, commentText string)
 	afterAddCommentCounter  uint64
 	beforeAddCommentCounter uint64
 	AddCommentMock          mTweetRepositoryMockAddComment
@@ -312,7 +312,7 @@ type TweetRepositoryMockAddCommentExpectation struct {
 type TweetRepositoryMockAddCommentParams struct {
 	ctx         context.Context
 	userID      int
-	tweetID     string
+	tweetID     int
 	commentText string
 }
 
@@ -322,7 +322,7 @@ type TweetRepositoryMockAddCommentResults struct {
 }
 
 // Expect sets up expected params for TweetRepository.AddComment
-func (mmAddComment *mTweetRepositoryMockAddComment) Expect(ctx context.Context, userID int, tweetID string, commentText string) *mTweetRepositoryMockAddComment {
+func (mmAddComment *mTweetRepositoryMockAddComment) Expect(ctx context.Context, userID int, tweetID int, commentText string) *mTweetRepositoryMockAddComment {
 	if mmAddComment.mock.funcAddComment != nil {
 		mmAddComment.mock.t.Fatalf("TweetRepositoryMock.AddComment mock is already set by Set")
 	}
@@ -342,7 +342,7 @@ func (mmAddComment *mTweetRepositoryMockAddComment) Expect(ctx context.Context, 
 }
 
 // Inspect accepts an inspector function that has same arguments as the TweetRepository.AddComment
-func (mmAddComment *mTweetRepositoryMockAddComment) Inspect(f func(ctx context.Context, userID int, tweetID string, commentText string)) *mTweetRepositoryMockAddComment {
+func (mmAddComment *mTweetRepositoryMockAddComment) Inspect(f func(ctx context.Context, userID int, tweetID int, commentText string)) *mTweetRepositoryMockAddComment {
 	if mmAddComment.mock.inspectFuncAddComment != nil {
 		mmAddComment.mock.t.Fatalf("Inspect function is already set for TweetRepositoryMock.AddComment")
 	}
@@ -366,7 +366,7 @@ func (mmAddComment *mTweetRepositoryMockAddComment) Return(err error) *TweetRepo
 }
 
 // Set uses given function f to mock the TweetRepository.AddComment method
-func (mmAddComment *mTweetRepositoryMockAddComment) Set(f func(ctx context.Context, userID int, tweetID string, commentText string) (err error)) *TweetRepositoryMock {
+func (mmAddComment *mTweetRepositoryMockAddComment) Set(f func(ctx context.Context, userID int, tweetID int, commentText string) (err error)) *TweetRepositoryMock {
 	if mmAddComment.defaultExpectation != nil {
 		mmAddComment.mock.t.Fatalf("Default expectation is already set for the TweetRepository.AddComment method")
 	}
@@ -381,7 +381,7 @@ func (mmAddComment *mTweetRepositoryMockAddComment) Set(f func(ctx context.Conte
 
 // When sets expectation for the TweetRepository.AddComment which will trigger the result defined by the following
 // Then helper
-func (mmAddComment *mTweetRepositoryMockAddComment) When(ctx context.Context, userID int, tweetID string, commentText string) *TweetRepositoryMockAddCommentExpectation {
+func (mmAddComment *mTweetRepositoryMockAddComment) When(ctx context.Context, userID int, tweetID int, commentText string) *TweetRepositoryMockAddCommentExpectation {
 	if mmAddComment.mock.funcAddComment != nil {
 		mmAddComment.mock.t.Fatalf("TweetRepositoryMock.AddComment mock is already set by Set")
 	}
@@ -401,7 +401,7 @@ func (e *TweetRepositoryMockAddCommentExpectation) Then(err error) *TweetReposit
 }
 
 // AddComment implements usecase.TweetRepository
-func (mmAddComment *TweetRepositoryMock) AddComment(ctx context.Context, userID int, tweetID string, commentText string) (err error) {
+func (mmAddComment *TweetRepositoryMock) AddComment(ctx context.Context, userID int, tweetID int, commentText string) (err error) {
 	mm_atomic.AddUint64(&mmAddComment.beforeAddCommentCounter, 1)
 	defer mm_atomic.AddUint64(&mmAddComment.afterAddCommentCounter, 1)
 

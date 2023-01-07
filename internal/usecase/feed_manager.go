@@ -71,7 +71,7 @@ func (fm *feedManager) AddTweet(ctx context.Context, userID int, text string) er
 }
 
 func (fm *feedManager) GetNewsFeed(ctx context.Context, userID int) ([]entity.Tweet, error) {
-	following, err := fm.followersRepo.GetFollowing(ctx, userID, 10)
+	following, err := fm.followersRepo.GetFollowee(ctx, userID, 10)
 	if err != nil {
 		return nil, err
 	}

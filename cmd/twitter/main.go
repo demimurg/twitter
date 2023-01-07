@@ -1,16 +1,17 @@
 package main
 
 import (
-    "context"
-    "database/sql"
-    "github.com/demimurg/twitter/internal/adapter/inmem"
+	"context"
+	"database/sql"
+
+	"github.com/demimurg/twitter/internal/adapter/inmem"
 	"github.com/demimurg/twitter/internal/adapter/scamdetector"
 	"github.com/demimurg/twitter/internal/driver/grpcsrv"
 	"github.com/demimurg/twitter/internal/usecase"
 	"github.com/demimurg/twitter/pkg/grace"
-    "github.com/demimurg/twitter/pkg/log"
-    _ "github.com/jackc/pgx/v5/stdlib"
-    "github.com/pressly/goose/v3"
+	"github.com/demimurg/twitter/pkg/log"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/pressly/goose/v3"
 )
 
 func main() {
@@ -38,8 +39,8 @@ func main() {
 }
 
 func handle(err error, msg string) {
-    if err != nil {
-        log.Panic(context.Background(), msg,
-            "error", err)
-    }
+	if err != nil {
+		log.Panic(context.Background(), msg,
+			"error", err)
+	}
 }

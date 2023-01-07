@@ -54,7 +54,7 @@ func filter(values []int, exclude int) []int {
 	return values
 }
 
-func (f *followerRepo) GetFollowing(_ context.Context, userID, topN int) ([]int, error) {
+func (f *followerRepo) GetFollowee(_ context.Context, userID, topN int) ([]int, error) {
 	following, ok := f.followingStorage[userID]
 	if !ok {
 		return []int{}, nil

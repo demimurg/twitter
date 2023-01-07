@@ -104,3 +104,8 @@ func Fatal(ctx context.Context, msg string, keyVal ...any) {
 func Panic(ctx context.Context, msg string, keyVal ...any) {
 	from(ctx).Panicw(msg, keyVal...)
 }
+
+// Print is very simple func that can print any value as json, can be used for temprorary debug
+func Print(val any) {
+	l.Infow("temprorary debug log", "value", val)
+}

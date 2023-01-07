@@ -83,7 +83,7 @@ func TestFeedManager_GiveNewsFeed(t *testing.T) {
 			expect: func(m fmmocks) {
 				// get following users
 				friend1, friend2 := 1, 2
-				m.FollowerRepositoryMock.GetFollowingMock.
+				m.FollowerRepositoryMock.GetFolloweeMock.
 					Expect(ctx, fakeUserID, 10).
 					Return([]int{friend1, friend2}, nil)
 				// fetch their latest tweets
@@ -104,7 +104,7 @@ func TestFeedManager_GiveNewsFeed(t *testing.T) {
 		{
 			name: "database with followers is not available",
 			expect: func(m fmmocks) {
-				m.FollowerRepositoryMock.GetFollowingMock.
+				m.FollowerRepositoryMock.GetFolloweeMock.
 					Expect(ctx, fakeUserID, 10).
 					Return(nil, errors.New("sorry guys, i'have drop off database"))
 			},

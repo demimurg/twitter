@@ -21,7 +21,7 @@ type UserRepository interface {
 type TweetRepository interface {
 	Add(ctx context.Context, userID int, tweetText string) error
 	Update(ctx context.Context, tweetID int, newText string) error
-	AddComment(ctx context.Context, userID int, tweetID, commentText string) error
+	AddComment(ctx context.Context, userID, tweetID int, commentText string) error
 	UpdateComment(ctx context.Context, commentID int, newText string) error
 	GetLatest(ctx context.Context, userID int, limit int) ([]entity.Tweet, error)
 }
@@ -31,8 +31,8 @@ type FollowerRepository interface {
 	Add(ctx context.Context, followerID, toUserID int) error
 	// Remove follower from some user
 	Remove(ctx context.Context, followerID, fromUserID int) error
-	// GetFollowing users with topN limit
-	GetFollowing(ctx context.Context, userID, topN int) ([]int, error)
+	// 	GetFollowee users with topN limit
+	GetFollowee(ctx context.Context, userID, topN int) ([]int, error)
 	// GetFollowers give subscribed users ids
 	GetFollowers(ctx context.Context, userID, topN int) ([]int, error)
 }
