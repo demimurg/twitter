@@ -20,7 +20,7 @@ type userRepo struct {
 
 func (u *userRepo) Add(ctx context.Context, name, email, caption string, birthDate time.Time) (int, error) {
 	row := u.db.QueryRowContext(ctx, `
-        INSERT INTO "user" (full_name, email, caption, birth_date, created_at)
+        INSERT INTO users (full_name, email, caption, birth_date, created_at)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id
     `, name, email, caption, birthDate, time.Now())
@@ -35,7 +35,7 @@ func (u *userRepo) Add(ctx context.Context, name, email, caption string, birthDa
 func (u *userRepo) Get(ctx context.Context, userID int) (*entity.User, error) {
 	row := u.db.QueryRowContext(ctx, `
         SELECT id, full_name, email, caption, birth_date, deleted_at
-        FROM "user"
+        FROM users
         WHERE id = $1 AND deleted_at IS NULL
     `, userID)
 
@@ -53,7 +53,7 @@ func (u *userRepo) Get(ctx context.Context, userID int) (*entity.User, error) {
 func (u *userRepo) GetAll(ctx context.Context, limit int) ([]entity.User, error) {
 	rows, err := u.db.QueryContext(ctx, `
         SELECT id, full_name, email, caption, birth_date, deleted_at
-        FROM "user"
+        FROM users
         WHERE deleted_at IS NULL
         LIMIT $1
     `, limit)
@@ -82,7 +82,7 @@ func (u *userRepo) GetAll(ctx context.Context, limit int) ([]entity.User, error)
 func (u *userRepo) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
 	row := u.db.QueryRowContext(ctx, `
         SELECT id, full_name, email, caption, birth_date, deleted_at
-        FROM "user"
+        FROM users
         WHERE email = $1 AND deleted_at IS NULL
     `, email)
 
@@ -99,7 +99,7 @@ func (u *userRepo) GetByEmail(ctx context.Context, email string) (*entity.User, 
 
 func (u *userRepo) UpdateCaption(ctx context.Context, userID int, caption string) error {
 	_, err := u.db.ExecContext(ctx, `
-        UPDATE "user"
+        UPDATE users
         SET caption = $1
         WHERE id = $2 AND deleted_at IS NULL
     `, caption, userID)
@@ -111,7 +111,7 @@ func (u *userRepo) UpdateCaption(ctx context.Context, userID int, caption string
 
 func (u *userRepo) Delete(ctx context.Context, userID int) error {
 	_, err := u.db.ExecContext(ctx, `
-        UPDATE "user"
+        UPDATE users
         SET deleted_at = $1
         WHERE id = $2 AND deleted_at IS NULL
     `, time.Now(), userID)
