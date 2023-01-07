@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/demimurg/twitter/internal/adapter/inmem"
+	"github.com/demimurg/twitter/internal/adapter/postgres"
 	"github.com/demimurg/twitter/internal/adapter/scamdetector"
 	"github.com/demimurg/twitter/internal/driver/grpcsrv"
 	"github.com/demimurg/twitter/internal/usecase"
@@ -19,13 +19,13 @@ func main() {
 	handle(err, "connect to postgres")
 	defer db.Close()
 
-	err = goose.Up(db, "../../migrations", goose.WithAllowMissing())
+	err = goose.Up(db, "/migrations", goose.WithAllowMissing())
 	handle(err, "can't migrate to last schema")
 
 	scamClient := scamdetector.NewDummyClient()
-	userRepo := inmem.NewUserRepository()
-	tweetRepo := inmem.NewTweetRepository()
-	followerRepo := inmem.NewFollowerRepository()
+	userRepo := postgres.NewUserRepository(db)
+	tweetRepo := postgres.NewTweetRepository(db)
+	followerRepo := postgres.NewFollowerRepository(db)
 
 	feedManager := usecase.NewFeedManager(userRepo, followerRepo, tweetRepo)
 	userRegistrator := usecase.NewUserRegistrator(userRepo, scamClient)
