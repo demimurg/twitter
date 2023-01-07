@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/demimurg/twitter/internal/entity"
 	"github.com/demimurg/twitter/internal/usecase"
@@ -20,9 +19,9 @@ type tweetRepo struct {
 
 func (t *tweetRepo) Add(ctx context.Context, userID int, tweetText string) error {
 	_, err := t.db.ExecContext(ctx, `
-        INSERT INTO tweet (user_id, text, created_at)
-        VALUES ($1, $2, $3)
-    `, userID, tweetText, time.Now())
+        INSERT INTO tweet (user_id, text)
+        VALUES ($1, $2)
+    `, userID, tweetText)
 	if err != nil {
 		return fmt.Errorf("insert tweet to db: %w", err)
 	}
@@ -43,9 +42,9 @@ func (t *tweetRepo) Update(ctx context.Context, tweetID int, newText string) err
 
 func (t *tweetRepo) AddComment(ctx context.Context, userID, tweetID int, commentText string) error {
 	_, err := t.db.ExecContext(ctx, `
-        INSERT INTO comment (user_id, tweet_id, text, created_at)
-        VALUES ($1, $2, $3, $4)
-    `, userID, tweetID, commentText, time.Now())
+        INSERT INTO comment (user_id, tweet_id, text)
+        VALUES ($1, $2, $3)
+    `, userID, tweetID, commentText)
 	if err != nil {
 		return fmt.Errorf("insert comment to db: %w", err)
 	}

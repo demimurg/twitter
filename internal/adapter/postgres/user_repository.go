@@ -20,10 +20,10 @@ type userRepo struct {
 
 func (u *userRepo) Add(ctx context.Context, name, email, caption string, birthDate time.Time) (int, error) {
 	row := u.db.QueryRowContext(ctx, `
-        INSERT INTO users (full_name, email, caption, birth_date, created_at)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO users (full_name, email, caption, birth_date)
+        VALUES ($1, $2, $3, $4)
         RETURNING id
-    `, name, email, caption, birthDate, time.Now())
+    `, name, email, caption, birthDate)
 
 	var userID int
 	if err := row.Scan(&userID); err != nil {
@@ -112,9 +112,9 @@ func (u *userRepo) UpdateCaption(ctx context.Context, userID int, caption string
 func (u *userRepo) Delete(ctx context.Context, userID int) error {
 	_, err := u.db.ExecContext(ctx, `
         UPDATE users
-        SET deleted_at = $1
+        SET deleted_at = now()
         WHERE id = $2 AND deleted_at IS NULL
-    `, time.Now(), userID)
+    `, userID)
 	if err != nil {
 		return fmt.Errorf("delete user from db: %w", err)
 	}

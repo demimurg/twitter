@@ -2,11 +2,7 @@ package grpcsrv
 
 import (
 	"context"
-	"errors"
 	"strings"
-
-	"github.com/demimurg/twitter/internal/entity"
-	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/demimurg/twitter/internal/usecase"
 	"github.com/demimurg/twitter/pkg/log"
@@ -14,10 +10,7 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func NewTwitter(feedManager usecase.FeedManager, userRegistrator usecase.UserRegistrator) *grpc.Server {

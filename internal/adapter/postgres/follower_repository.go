@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/demimurg/twitter/internal/usecase"
 )
@@ -19,9 +18,9 @@ type followerRepo struct {
 
 func (f *followerRepo) Add(ctx context.Context, followerID, toUserID int) error {
 	_, err := f.db.ExecContext(ctx, `
-        INSERT INTO follower (follower_id, followee_id, created_at)
-        VALUES ($1, $2, $3)
-    `, followerID, toUserID, time.Now())
+        INSERT INTO follower (follower_id, followee_id)
+        VALUES ($1, $2)
+    `, followerID, toUserID)
 	if err != nil {
 		return fmt.Errorf("insert follower to db: %w", err)
 	}
