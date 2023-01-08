@@ -8,18 +8,17 @@ import (
 	"github.com/demimurg/twitter/pkg/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (t *twitter) AddTweet(ctx context.Context, req *proto.AddTweetRequest) (*emptypb.Empty, error) {
+func (t *twitter) AddTweet(ctx context.Context, req *proto.AddTweetRequest) (*proto.AddTweetResponse, error) {
 	err := t.fm.AddTweet(ctx, int(req.UserId), req.Text)
 	if err != nil {
 		if errors.Is(err, usecase.ErrValidationFailed) {
-			return &emptypb.Empty{}, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
-		return &emptypb.Empty{}, err
+		return nil, err
 	}
-	return &emptypb.Empty{}, nil
+	return &proto.AddTweetResponse{}, nil
 }
 
 func (t *twitter) GetNewsFeed(ctx context.Context, req *proto.GetNewsFeedRequest) (*proto.GetNewsFeedResponse, error) {
@@ -35,20 +34,20 @@ func (t *twitter) GetNewsFeed(ctx context.Context, req *proto.GetNewsFeedRequest
 	return resp, nil
 }
 
-func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*emptypb.Empty, error) {
+func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*proto.FollowResponse, error) {
 	err := t.fm.AddFollower(ctx, int(req.NewFollowerId), int(req.UserId))
 	if err != nil {
-		return &emptypb.Empty{}, err
+		return nil, err
 	}
-	return &emptypb.Empty{}, nil
+	return &proto.FollowResponse{}, nil
 }
 
-func (t *twitter) Unfollow(ctx context.Context, req *proto.UnfollowRequest) (*emptypb.Empty, error) {
+func (t *twitter) Unfollow(ctx context.Context, req *proto.UnfollowRequest) (*proto.UnfollowResponse, error) {
 	err := t.fm.RemoveFollower(ctx, int(req.OldFollowerId), int(req.UserId))
 	if err != nil {
-		return &emptypb.Empty{}, err
+		return nil, err
 	}
-	return &emptypb.Empty{}, nil
+	return &proto.UnfollowResponse{}, nil
 }
 
 func (t *twitter) RecommendUsers(ctx context.Context, req *proto.RecommendUsersRequest) (*proto.RecommendUsersResponse, error) {

@@ -12,8 +12,11 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (t *twitter) Register(ctx context.Context, req *proto.UserProfile) (*proto.RegisterResponse, error) {
-	user, err := t.ur.Register(ctx, req.FullName, req.Email, req.Caption, req.DateOfBirth.AsTime())
+func (t *twitter) Register(ctx context.Context, req *proto.RegisterRequest) (*proto.RegisterResponse, error) {
+	user, err := t.ur.Register(
+		ctx, req.User.FullName, req.User.Email,
+		req.User.Caption, req.User.DateOfBirth.AsTime(),
+	)
 	if err != nil {
 		if errors.Is(err, usecase.ErrValidationFailed) {
 			err = status.Error(codes.InvalidArgument, err.Error())

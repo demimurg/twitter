@@ -12,11 +12,11 @@ func (s *endToEndTestSuite) TestFeed() {
 		elonTweet = "hey guys, should i buy twitter?"
 	)
 	s.Run("first elon musk tweet", func() {
-		resp, err := s.cli.Register(ctx, &proto.UserProfile{
+		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{User: &proto.UserProfile{
 			FullName:    "Elon Musk",
 			Email:       "elonID@tesla.us",
 			DateOfBirth: date(1971, 06, 28),
-		})
+		}})
 		s.NoError(err)
 		elonID = resp.UserId
 
@@ -35,11 +35,11 @@ func (s *endToEndTestSuite) TestFeed() {
 
 	var amberID int64
 	s.Run("elon have new follower", func() {
-		resp, err := s.cli.Register(ctx, &proto.UserProfile{
+		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{User: &proto.UserProfile{
 			FullName:    "Amber Heard",
 			Email:       "beach@club.com",
 			DateOfBirth: date(1986, 04, 22),
-		})
+		}})
 		s.NoError(err)
 		amberID = resp.UserId
 		s.NotEqual(elonID, amberID, "different users should have different ids")

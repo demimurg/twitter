@@ -15,14 +15,14 @@ func (s *endToEndTestSuite) TestAuth() {
 	)
 
 	s.Run("register greta thunberg", func() {
-		resp, err := s.cli.Register(ctx, gretaProfile)
+		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{User: gretaProfile})
 		s.NoError(err)
 		gretaID = resp.UserId
 	})
 
 	s.Run("can't register second time", func() {
 		s.T().Skip("should fix repeatable registration")
-		_, err := s.cli.Register(ctx, gretaProfile)
+		_, err := s.cli.Register(ctx, &proto.RegisterRequest{User: gretaProfile})
 		s.Error(err)
 		s.T().Log("error on second time registration:", err)
 	})
