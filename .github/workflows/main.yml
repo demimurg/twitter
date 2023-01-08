@@ -9,17 +9,25 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: 'stable'
+          go-version: "stable"
       - name: Start testing
         run: go test -coverpkg=./... ./...
   golangci-lint:
-    name: Run Linter
+    name: Run Go Linter
     runs-on: ubuntu-latest
     container: golangci/golangci-lint:v1.50-alpine
     steps:
       - uses: actions/checkout@v3
       - name: Start check with golangci-lint
         run: golangci-lint run
+  protobuf-lint:
+    name: Run Protobuf and GRPC Linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: bufbuild/buf-setup-action@v1
+      - uses: bufbuild/buf-lint-action@v1
+      - uses: bufbuild/buf-breaking-action@v1
   docker-image:
     name: Build and Push Docker
     needs: [go-test]
@@ -52,4 +60,3 @@ jobs:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
           args: replace --force -f k8s.yaml
-            
