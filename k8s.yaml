@@ -20,13 +20,6 @@ spec:
             - containerPort: 80 # app server
             - containerPort: 81 # grpc ui
             - containerPort: 82 # prometheus
-        - name: db
-          image: postgres:alpine
-          ports:
-            - containerPort: 5432
-          env:
-            - name: POSTGRES_HOST_AUTH_METHOD
-              value: trust
 ---
 apiVersion: v1
 kind: Service

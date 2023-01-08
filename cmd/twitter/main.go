@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("pgx", "host=localhost user=postgres")
+    db, err := sql.Open("pgx", "host=10.152.183.130 user=postgres password=I0bE7OROzR")
 	handle(err, "connect to postgres")
 	defer db.Close()
 
