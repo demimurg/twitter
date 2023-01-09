@@ -6,3 +6,8 @@ plugins:
   - plugin: go-grpc
     out: .
     opt: paths=source_relative
+  - plugin: validate
+    out: .
+    opt:
+      - lang=go
+      - paths=source_relative

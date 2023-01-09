@@ -8,6 +8,7 @@ import (
 	"github.com/demimurg/twitter/pkg/log"
 	"github.com/demimurg/twitter/pkg/proto"
 	"github.com/google/uuid"
+	"github.com/grpc-ecosystem/go-grpc-middleware/validator"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -15,7 +16,7 @@ import (
 
 func NewTwitter(feedManager usecase.FeedManager, userRegistrator usecase.UserRegistrator) *grpc.Server {
 	srv := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(logRequest, recoverPanic),
+		grpc.ChainUnaryInterceptor(logRequest, recoverPanic, grpc_validator.UnaryServerInterceptor()),
 	)
 	proto.RegisterTwitterServer(srv, &twitter{
 		fm: feedManager, ur: userRegistrator,

@@ -1,6 +1,8 @@
 syntax = "proto3";
 option go_package = "github.com/demimurg/twitter/pkg/proto";
+
 import "google/protobuf/timestamp.proto";
+import "validate/validate.proto"; // examples: https://github.com/bufbuild/protoc-gen-validate
 
 service Twitter {
     rpc AddTweet(AddTweetRequest) returns (AddTweetResponse);
@@ -12,19 +14,19 @@ service Twitter {
     rpc RecommendUsers(RecommendUsersRequest) returns (RecommendUsersResponse);
 }
 
+// TODO: user id should be removed after auth with jwt will be implemented
+
 message AddTweetRequest {
-    string text = 1;
-    // TODO: remove after auth with jwt will be implemented
-    int64 user_id = 10;
+    string text = 1 [(validate.rules).string.max_bytes = 512];
+    int64 user_id = 10 [(validate.rules).int64.gt = 0];
 };
 
 message AddTweetResponse {};
 
 message GetNewsFeedRequest {
-    int64 limit = 1;
-    int64 offset = 2;
-    // TODO: remove after auth with jwt will be implemented
-    int64 user_id = 10;
+    int64 limit = 1 [(validate.rules).int64.gt = 0];
+    int64 offset = 2 [(validate.rules).int64.gte = 0];
+    int64 user_id = 10 [(validate.rules).int64.gt = 0];
 };
 
 message GetNewsFeedResponse {
@@ -32,14 +34,17 @@ message GetNewsFeedResponse {
 };
 
 message RegisterRequest {
-    UserProfile user = 1;
+    UserProfile user = 1 [(validate.rules).message.required = true];
 };
 
 message UserProfile {
-    string email = 1;
-    string full_name = 2;
-    string caption = 3;
-    google.protobuf.Timestamp date_of_birth = 4;
+    string email = 1 [(validate.rules).string.email = true];
+    string full_name = 2 [(validate.rules).string = {min_len: 2, max_len: 64}];
+    string caption = 3 [(validate.rules).string.max_bytes = 512];
+    // date_of_birth should be in range (now - 100 years, now)
+    google.protobuf.Timestamp date_of_birth = 4 [(validate.rules).timestamp = {
+        lt_now: true, within: {seconds: 3153600000} // 100 years in seconds
+    }];
 };
 
 message RegisterResponse {
@@ -47,21 +52,21 @@ message RegisterResponse {
 };
 
 message FollowRequest {
-    int64 user_id = 1;
-    int64 new_follower_id = 2;
+    int64 user_id = 1 [(validate.rules).int64.gt = 0];
+    int64 new_follower_id = 2 [(validate.rules).int64.gt = 0];
 };
 
 message FollowResponse {};
 
 message UnfollowRequest {
-    int64 user_id = 1;
-    int64 old_follower_id = 2;
+    int64 user_id = 1 [(validate.rules).int64.gt = 0];
+    int64 old_follower_id = 2 [(validate.rules).int64.gt = 0];
 };
 
 message UnfollowResponse {};
 
 message LoginRequest {
-    string email = 1;
+    string email = 1 [(validate.rules).string.email = true];
 };
 
 message LoginResponse {
@@ -70,7 +75,7 @@ message LoginResponse {
 };
 
 message RecommendUsersRequest {
-    int64 user_id = 1;
+    int64 user_id = 1 [(validate.rules).int64.gt = 0];
 };
 
 message RecommendUsersResponse {

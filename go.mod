@@ -3,8 +3,10 @@ module github.com/demimurg/twitter
 go 1.19
 
 require (
+	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	github.com/gojuno/minimock/v3 v3.0.10
 	github.com/google/uuid v1.3.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jackc/pgx/v5 v5.2.0
 	github.com/pressly/goose/v3 v3.7.0
 	github.com/stretchr/testify v1.8.1
