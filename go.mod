@@ -3,6 +3,7 @@ module github.com/demimurg/twitter
 go 1.19
 
 require (
+	github.com/caarlos0/env/v6 v6.10.1
 	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	github.com/gojuno/minimock/v3 v3.0.10
 	github.com/google/uuid v1.3.0
@@ -15,6 +16,7 @@ require (
 )
 
 require (
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect

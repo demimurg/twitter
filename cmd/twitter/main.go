@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"github.com/caarlos0/env/v6"
 
 	"github.com/demimurg/twitter/internal/adapter/postgres"
 	"github.com/demimurg/twitter/internal/adapter/scamdetector"
@@ -14,12 +15,20 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
+var cfg struct {
+	PostgresqlDSN string `env:"POSTGRESQL_DSN" envDefault:"host=localhost user=postgres"`
+	MigrationsDir string `env:"MIGRATIONS_DIR" envDefault:"./migrations"`
+}
+
 func main() {
-	db, err := sql.Open("pgx", "host=10.152.183.130 user=postgres password=I0bE7OROzR")
+	err := env.Parse(&cfg)
+	handle(err, "parse config")
+
+	db, err := sql.Open("pgx", cfg.PostgresqlDSN)
 	handle(err, "connect to postgres")
 	defer db.Close()
 
-	err = goose.Up(db, "/migrations", goose.WithAllowMissing())
+	err = goose.Up(db, cfg.MigrationsDir, goose.WithAllowMissing())
 	handle(err, "can't migrate to last schema")
 
 	scamClient := scamdetector.NewDummyClient()
@@ -40,7 +49,10 @@ func main() {
 
 func handle(err error, msg string) {
 	if err != nil {
+		// we use panic, to be able to stop execution
+		// and not break defer calls, as Fatal will did
 		log.Panic(context.Background(), msg,
-			"error", err)
+			"error", err,
+			"config", cfg)
 	}
 }
