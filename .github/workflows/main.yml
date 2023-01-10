@@ -51,14 +51,16 @@ jobs:
           push: true
           platforms: linux/amd64 # add ",linux/arm64" for apple m1 build, but it will slow down job
           tags: ghcr.io/${{ github.repository }}:latest
-  deploy-kube:
+  deploy-helm:
     name: Deploy Image to Kubernetes
     needs: [docker-image]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-hub/kubectl@v1.26.0
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-        with:
-          args: replace --force -f k8s.yaml
+      - uses: azure/setup-helm@v3
+      - name: Add kubeconfig
+        run: |
+            mkdir ~/.kube && touch ~/.kube/config
+            echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ~/.kube/config
+      - name: Deploy helm chart
+        run: helm upgrade --install twitter ./deploy
