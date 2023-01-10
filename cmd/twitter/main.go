@@ -16,6 +16,7 @@ import (
 )
 
 var cfg struct {
+	LogLevel      string `env:"LOG_LEVEL" envDefault:"debug"`
 	PostgresqlDSN string `env:"POSTGRESQL_DSN" envDefault:"host=localhost user=postgres"`
 	MigrationsDir string `env:"MIGRATIONS_DIR" envDefault:"./migrations"`
 }
@@ -23,6 +24,7 @@ var cfg struct {
 func main() {
 	err := env.Parse(&cfg)
 	handle(err, "parse config")
+	log.SetLevel(cfg.LogLevel)
 
 	db, err := sql.Open("pgx", cfg.PostgresqlDSN)
 	handle(err, "connect to postgres")

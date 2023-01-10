@@ -1,0 +1,4 @@
+apiVersion: v2
+name: twitter
+version: 1.0.0
+description: The microblogging and social networking service

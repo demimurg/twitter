@@ -1,0 +1,7 @@
+image: ghcr.io/demimurg/twitter
+replicas: 1
+
+env:
+  LOG_LEVEL: info
+  MIGRATIONS_DIR: "./migrations"
+  POSTGRESQL_DSN: "host=10.152.183.130 user=postgres password=I0bE7OROzR"
