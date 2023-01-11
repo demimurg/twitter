@@ -4,4 +4,9 @@ replicas: 1
 env:
   LOG_LEVEL: info
   MIGRATIONS_DIR: "./migrations"
-  POSTGRESQL_DSN: "host=10.152.183.130 user=postgres password=I0bE7OROzR"
+  POSTGRESQL_DSN: "host=10.152.183.70 user=postgres password=I0bE7OROzR"
+
+global:
+  storageClass: manual
+  auth:
+    postgresPassword: I0bE7OROzR
