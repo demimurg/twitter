@@ -45,7 +45,7 @@ func main() {
 	grace.Run(
 		grace.GRPC(srv, ":80"),
 		grace.GRPCUI(":81", "localhost:80"),
-		grace.PromHTTP(":82"),
+		grace.Prometheus(":82"),
 	)
 }
 

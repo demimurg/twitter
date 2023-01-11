@@ -59,7 +59,7 @@ func TestRun(t *testing.T) {
 					require.NoError(t, err)
 				}
 			case <-time.After(2 * time.Second):
-				t.Error("routines doesn't shutdown in two second")
+				t.Error("processes doesn't shutdown in two second")
 			}
 		})
 	}
