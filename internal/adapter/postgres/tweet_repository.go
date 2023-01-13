@@ -17,15 +17,17 @@ type tweetRepo struct {
 	db *sql.DB
 }
 
-func (t *tweetRepo) Add(ctx context.Context, userID int, tweetText string) error {
-	_, err := t.db.ExecContext(ctx, `
+func (t *tweetRepo) Add(ctx context.Context, userID int, tweetText string) (id int, err error) {
+	row := t.db.QueryRowContext(ctx, `
         INSERT INTO tweet (user_id, text)
         VALUES ($1, $2)
+        RETURNING id
     `, userID, tweetText)
-	if err != nil {
-		return fmt.Errorf("insert tweet to db: %w", err)
+
+	if err := row.Scan(&id); err != nil {
+		return 0, fmt.Errorf("insert tweet to db: %w", err)
 	}
-	return nil
+	return id, nil
 }
 
 func (t *tweetRepo) Update(ctx context.Context, tweetID int, newText string) error {
@@ -40,15 +42,17 @@ func (t *tweetRepo) Update(ctx context.Context, tweetID int, newText string) err
 	return nil
 }
 
-func (t *tweetRepo) AddComment(ctx context.Context, userID, tweetID int, commentText string) error {
-	_, err := t.db.ExecContext(ctx, `
+func (t *tweetRepo) AddComment(ctx context.Context, userID, tweetID int, commentText string) (id int, err error) {
+    row := t.db.QueryRowContext(ctx, `
         INSERT INTO comment (user_id, tweet_id, text)
         VALUES ($1, $2, $3)
+        RETURNING id
     `, userID, tweetID, commentText)
-	if err != nil {
-		return fmt.Errorf("insert comment to db: %w", err)
+
+    if err := row.Scan(&id); err != nil {
+		return 0, fmt.Errorf("insert comment to db: %w", err)
 	}
-	return nil
+	return id, nil
 }
 
 func (t *tweetRepo) UpdateComment(ctx context.Context, commentID int, newText string) error {

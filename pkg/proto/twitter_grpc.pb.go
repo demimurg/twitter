@@ -23,6 +23,9 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TwitterClient interface {
 	AddTweet(ctx context.Context, in *AddTweetRequest, opts ...grpc.CallOption) (*AddTweetResponse, error)
+	AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*AddCommentResponse, error)
+	UpdateTweet(ctx context.Context, in *UpdateTweetRequest, opts ...grpc.CallOption) (*UpdateTweetResponse, error)
+	UpdateComment(ctx context.Context, in *UpdateCommentRequest, opts ...grpc.CallOption) (*UpdateCommentResponse, error)
 	GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest, opts ...grpc.CallOption) (*GetNewsFeedResponse, error)
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
 	UpdateCaption(ctx context.Context, in *UpdateCaptionRequest, opts ...grpc.CallOption) (*UpdateCaptionResponse, error)
@@ -43,6 +46,33 @@ func NewTwitterClient(cc grpc.ClientConnInterface) TwitterClient {
 func (c *twitterClient) AddTweet(ctx context.Context, in *AddTweetRequest, opts ...grpc.CallOption) (*AddTweetResponse, error) {
 	out := new(AddTweetResponse)
 	err := c.cc.Invoke(ctx, "/Twitter/AddTweet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *twitterClient) AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*AddCommentResponse, error) {
+	out := new(AddCommentResponse)
+	err := c.cc.Invoke(ctx, "/Twitter/AddComment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *twitterClient) UpdateTweet(ctx context.Context, in *UpdateTweetRequest, opts ...grpc.CallOption) (*UpdateTweetResponse, error) {
+	out := new(UpdateTweetResponse)
+	err := c.cc.Invoke(ctx, "/Twitter/UpdateTweet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *twitterClient) UpdateComment(ctx context.Context, in *UpdateCommentRequest, opts ...grpc.CallOption) (*UpdateCommentResponse, error) {
+	out := new(UpdateCommentResponse)
+	err := c.cc.Invoke(ctx, "/Twitter/UpdateComment", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -117,6 +147,9 @@ func (c *twitterClient) RecommendUsers(ctx context.Context, in *RecommendUsersRe
 // for forward compatibility
 type TwitterServer interface {
 	AddTweet(context.Context, *AddTweetRequest) (*AddTweetResponse, error)
+	AddComment(context.Context, *AddCommentRequest) (*AddCommentResponse, error)
+	UpdateTweet(context.Context, *UpdateTweetRequest) (*UpdateTweetResponse, error)
+	UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentResponse, error)
 	GetNewsFeed(context.Context, *GetNewsFeedRequest) (*GetNewsFeedResponse, error)
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
 	UpdateCaption(context.Context, *UpdateCaptionRequest) (*UpdateCaptionResponse, error)
@@ -133,6 +166,15 @@ type UnimplementedTwitterServer struct {
 
 func (UnimplementedTwitterServer) AddTweet(context.Context, *AddTweetRequest) (*AddTweetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTweet not implemented")
+}
+func (UnimplementedTwitterServer) AddComment(context.Context, *AddCommentRequest) (*AddCommentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddComment not implemented")
+}
+func (UnimplementedTwitterServer) UpdateTweet(context.Context, *UpdateTweetRequest) (*UpdateTweetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateTweet not implemented")
+}
+func (UnimplementedTwitterServer) UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateComment not implemented")
 }
 func (UnimplementedTwitterServer) GetNewsFeed(context.Context, *GetNewsFeedRequest) (*GetNewsFeedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewsFeed not implemented")
@@ -182,6 +224,60 @@ func _Twitter_AddTweet_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).AddTweet(ctx, req.(*AddTweetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Twitter_AddComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TwitterServer).AddComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Twitter/AddComment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TwitterServer).AddComment(ctx, req.(*AddCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Twitter_UpdateTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTweetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TwitterServer).UpdateTweet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Twitter/UpdateTweet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TwitterServer).UpdateTweet(ctx, req.(*UpdateTweetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Twitter_UpdateComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TwitterServer).UpdateComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Twitter/UpdateComment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TwitterServer).UpdateComment(ctx, req.(*UpdateCommentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -322,6 +418,18 @@ var Twitter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddTweet",
 			Handler:    _Twitter_AddTweet_Handler,
+		},
+		{
+			MethodName: "AddComment",
+			Handler:    _Twitter_AddComment_Handler,
+		},
+		{
+			MethodName: "UpdateTweet",
+			Handler:    _Twitter_UpdateTweet_Handler,
+		},
+		{
+			MethodName: "UpdateComment",
+			Handler:    _Twitter_UpdateComment_Handler,
 		},
 		{
 			MethodName: "GetNewsFeed",

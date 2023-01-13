@@ -2,14 +2,16 @@ package tests
 
 import (
 	"github.com/demimurg/twitter/pkg/proto"
+    "time"
 )
 
 // TestFeed for basic operations, subtests can't be run separate
 // it should be understand like one related story
 func (s *endToEndTestSuite) TestFeed() {
 	var (
-		elonID    int64
-		elonTweet = "hey guys, should i buy twitter?"
+		elonID      int64
+		elonTweetID int64
+		elonTweet   = "hey guys, should i buy twitter?"
 	)
 	s.Run("first elon musk tweet", func() {
 		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{User: &proto.UserProfile{
@@ -20,10 +22,20 @@ func (s *endToEndTestSuite) TestFeed() {
 		s.NoError(err)
 		elonID = resp.UserId
 
-		_, err = s.cli.AddTweet(ctx, &proto.AddTweetRequest{
+		tResp, err := s.cli.AddTweet(ctx, &proto.AddTweetRequest{
 			Text: elonTweet, UserId: elonID,
 		})
 		s.NoError(err)
+		elonTweetID = tResp.TweetId
+	})
+
+	s.Run("elon updated his tweet", func() {
+		updatedTweet := "i think there too much fake accounts and stocks too high"
+		_, err := s.cli.UpdateTweet(ctx, &proto.UpdateTweetRequest{
+			UserId: elonID, TweetId: elonTweetID, NewText: updatedTweet,
+		})
+		s.NoError(err)
+		elonTweet = updatedTweet
 	})
 
 	s.Run("unregistered user can't send tweet", func() {
@@ -34,10 +46,10 @@ func (s *endToEndTestSuite) TestFeed() {
 	})
 
 	var amberID int64
-	s.Run("elon have new follower", func() {
+	s.Run("elon have new follower amber", func() {
 		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{User: &proto.UserProfile{
 			FullName:    "Amber Heard",
-			Email:       "beach@club.com",
+			Email:       "makeyou@cry.com",
 			DateOfBirth: date(1986, 04, 22),
 		}})
 		s.NoError(err)
@@ -59,6 +71,19 @@ func (s *endToEndTestSuite) TestFeed() {
 
 		s.Len(resp.Tweets, 1)
 		s.Equal(elonTweet, resp.Tweets[0])
+	})
+
+	s.Run("amber adds comment to elon tweet and update it", func() {
+		resp, err := s.cli.AddComment(ctx, &proto.AddCommentRequest{
+			UserId: amberID, TweetId: elonTweetID, Text: "wanna go on a date?",
+		})
+        s.Require().NoError(err)
+
+        <-time.After(time.Millisecond) // waits elon response
+		_, err = s.cli.UpdateComment(ctx, &proto.UpdateCommentRequest{
+			UserId: amberID, CommentId: resp.CommentId, NewText: "nevermind, idiot.",
+		})
+		s.NoError(err)
 	})
 
 	s.Run("amber wants to unfollow elon", func() {

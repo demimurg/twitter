@@ -15,12 +15,12 @@ type FeedManager interface {
 	// RemoveFollower will unsubscribe follower from new tweets of the user
 	RemoveFollower(ctx context.Context, userID, fromUserID int) error
 
-	AddTweet(ctx context.Context, userID int, text string) error
-	GetNewsFeed(ctx context.Context, userID int) ([]entity.Tweet, error)
-
+    AddTweet(ctx context.Context, userID int, text string) (id int, err error)
+    AddComment(ctx context.Context, userID, tweetID int, text string) (id int, err error)
 	EditTweet(ctx context.Context, tweetID int, text string) error
 	EditComment(ctx context.Context, commentID int, text string) error
 
+	GetNewsFeed(ctx context.Context, userID int) ([]entity.Tweet, error)
 	GetRecommendedUsers(ctx context.Context, userID int) ([]entity.User, error)
 }
 
@@ -43,6 +43,10 @@ type feedManager struct {
 	tweetsRepo    TweetRepository
 }
 
+func (fm *feedManager) AddComment(ctx context.Context, userID, tweetID int, text string) (id int, err error) {
+    return fm.tweetsRepo.AddComment(ctx, userID, tweetID, text)
+}
+
 func (fm *feedManager) AddFollower(ctx context.Context, userID, toUserID int) error {
 	return fm.followersRepo.Add(ctx, userID, toUserID)
 }
@@ -51,9 +55,9 @@ func (fm *feedManager) RemoveFollower(ctx context.Context, userID, fromUserID in
 	return fm.followersRepo.Remove(ctx, userID, fromUserID)
 }
 
-func (fm *feedManager) AddTweet(ctx context.Context, userID int, text string) error {
+func (fm *feedManager) AddTweet(ctx context.Context, userID int, text string) (id int, err error) {
 	if len(text) > entity.MaxAllowedSymbols {
-		return fmt.Errorf(
+		return 0, fmt.Errorf(
 			"%w: tweet length %d more than allowed %d",
 			ErrValidationFailed, len(text), entity.MaxAllowedSymbols,
 		)
@@ -61,43 +65,43 @@ func (fm *feedManager) AddTweet(ctx context.Context, userID int, text string) er
 
 	user, err := fm.usersRepo.Get(ctx, userID)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if user.DeletedAt != nil {
-		return ErrUserDeactivated
+		return 0, ErrUserDeactivated
 	}
 
 	return fm.tweetsRepo.Add(ctx, userID, text)
 }
 
-func (fm *feedManager) GetNewsFeed(ctx context.Context, userID int) ([]entity.Tweet, error) {
-	following, err := fm.followersRepo.GetFollowee(ctx, userID, 10)
-	if err != nil {
-		return nil, err
-	}
-
-	var newsFeed []entity.Tweet
-	for _, followingID := range following {
-		tweets, err := fm.tweetsRepo.GetLatest(ctx, followingID, 10)
-		if err != nil {
-			log.Error(ctx, "can't get tweets",
-				"error", err,
-				"userID", userID)
-			continue
-		}
-
-		newsFeed = append(newsFeed, tweets...)
-	}
-
-	return newsFeed, nil
-}
-
 func (fm *feedManager) EditTweet(ctx context.Context, tweetID int, text string) error {
-	return fm.tweetsRepo.Update(ctx, tweetID, text)
+    return fm.tweetsRepo.Update(ctx, tweetID, text)
 }
 
 func (fm *feedManager) EditComment(ctx context.Context, commentID int, text string) error {
 	return fm.tweetsRepo.UpdateComment(ctx, commentID, text)
+}
+
+func (fm *feedManager) GetNewsFeed(ctx context.Context, userID int) ([]entity.Tweet, error) {
+    following, err := fm.followersRepo.GetFollowee(ctx, userID, 10)
+    if err != nil {
+        return nil, err
+    }
+
+    var newsFeed []entity.Tweet
+    for _, followingID := range following {
+        tweets, err := fm.tweetsRepo.GetLatest(ctx, followingID, 10)
+        if err != nil {
+            log.Error(ctx, "can't get tweets",
+                "error", err,
+                "userID", userID)
+            continue
+        }
+
+        newsFeed = append(newsFeed, tweets...)
+    }
+
+    return newsFeed, nil
 }
 
 func (fm *feedManager) GetRecommendedUsers(ctx context.Context, userID int) ([]entity.User, error) {

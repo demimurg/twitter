@@ -18,18 +18,17 @@ type userRepo struct {
 	db *sql.DB
 }
 
-func (u *userRepo) Add(ctx context.Context, name, email, caption string, birthDate time.Time) (int, error) {
+func (u *userRepo) Add(ctx context.Context, name, email, caption string, birthDate time.Time) (id int, err error) {
 	row := u.db.QueryRowContext(ctx, `
         INSERT INTO users (full_name, email, caption, birth_date)
         VALUES ($1, $2, $3, $4)
         RETURNING id
     `, name, email, caption, birthDate)
 
-	var userID int
-	if err := row.Scan(&userID); err != nil {
+	if err := row.Scan(&id); err != nil {
 		return 0, fmt.Errorf("insert user to db: %w", err)
 	}
-	return userID, nil
+	return id, nil
 }
 
 func (u *userRepo) Get(ctx context.Context, userID int) (*entity.User, error) {

@@ -36,6 +36,12 @@ type UserProfilerMock struct {
 	afterRegisterCounter  uint64
 	beforeRegisterCounter uint64
 	RegisterMock          mUserProfilerMockRegister
+
+	funcUpdateCaption          func(ctx context.Context, userID int, newCaption string) (err error)
+	inspectFuncUpdateCaption   func(ctx context.Context, userID int, newCaption string)
+	afterUpdateCaptionCounter  uint64
+	beforeUpdateCaptionCounter uint64
+	UpdateCaptionMock          mUserProfilerMockUpdateCaption
 }
 
 // NewUserProfilerMock returns a mock for usecase.UserProfiler
@@ -53,6 +59,9 @@ func NewUserProfilerMock(t minimock.Tester) *UserProfilerMock {
 
 	m.RegisterMock = mUserProfilerMockRegister{mock: m}
 	m.RegisterMock.callArgs = []*UserProfilerMockRegisterParams{}
+
+	m.UpdateCaptionMock = mUserProfilerMockUpdateCaption{mock: m}
+	m.UpdateCaptionMock.callArgs = []*UserProfilerMockUpdateCaptionParams{}
 
 	return m
 }
@@ -710,6 +719,223 @@ func (m *UserProfilerMock) MinimockRegisterInspect() {
 	}
 }
 
+type mUserProfilerMockUpdateCaption struct {
+	mock               *UserProfilerMock
+	defaultExpectation *UserProfilerMockUpdateCaptionExpectation
+	expectations       []*UserProfilerMockUpdateCaptionExpectation
+
+	callArgs []*UserProfilerMockUpdateCaptionParams
+	mutex    sync.RWMutex
+}
+
+// UserProfilerMockUpdateCaptionExpectation specifies expectation struct of the UserProfiler.UpdateCaption
+type UserProfilerMockUpdateCaptionExpectation struct {
+	mock    *UserProfilerMock
+	params  *UserProfilerMockUpdateCaptionParams
+	results *UserProfilerMockUpdateCaptionResults
+	Counter uint64
+}
+
+// UserProfilerMockUpdateCaptionParams contains parameters of the UserProfiler.UpdateCaption
+type UserProfilerMockUpdateCaptionParams struct {
+	ctx        context.Context
+	userID     int
+	newCaption string
+}
+
+// UserProfilerMockUpdateCaptionResults contains results of the UserProfiler.UpdateCaption
+type UserProfilerMockUpdateCaptionResults struct {
+	err error
+}
+
+// Expect sets up expected params for UserProfiler.UpdateCaption
+func (mmUpdateCaption *mUserProfilerMockUpdateCaption) Expect(ctx context.Context, userID int, newCaption string) *mUserProfilerMockUpdateCaption {
+	if mmUpdateCaption.mock.funcUpdateCaption != nil {
+		mmUpdateCaption.mock.t.Fatalf("UserProfilerMock.UpdateCaption mock is already set by Set")
+	}
+
+	if mmUpdateCaption.defaultExpectation == nil {
+		mmUpdateCaption.defaultExpectation = &UserProfilerMockUpdateCaptionExpectation{}
+	}
+
+	mmUpdateCaption.defaultExpectation.params = &UserProfilerMockUpdateCaptionParams{ctx, userID, newCaption}
+	for _, e := range mmUpdateCaption.expectations {
+		if minimock.Equal(e.params, mmUpdateCaption.defaultExpectation.params) {
+			mmUpdateCaption.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmUpdateCaption.defaultExpectation.params)
+		}
+	}
+
+	return mmUpdateCaption
+}
+
+// Inspect accepts an inspector function that has same arguments as the UserProfiler.UpdateCaption
+func (mmUpdateCaption *mUserProfilerMockUpdateCaption) Inspect(f func(ctx context.Context, userID int, newCaption string)) *mUserProfilerMockUpdateCaption {
+	if mmUpdateCaption.mock.inspectFuncUpdateCaption != nil {
+		mmUpdateCaption.mock.t.Fatalf("Inspect function is already set for UserProfilerMock.UpdateCaption")
+	}
+
+	mmUpdateCaption.mock.inspectFuncUpdateCaption = f
+
+	return mmUpdateCaption
+}
+
+// Return sets up results that will be returned by UserProfiler.UpdateCaption
+func (mmUpdateCaption *mUserProfilerMockUpdateCaption) Return(err error) *UserProfilerMock {
+	if mmUpdateCaption.mock.funcUpdateCaption != nil {
+		mmUpdateCaption.mock.t.Fatalf("UserProfilerMock.UpdateCaption mock is already set by Set")
+	}
+
+	if mmUpdateCaption.defaultExpectation == nil {
+		mmUpdateCaption.defaultExpectation = &UserProfilerMockUpdateCaptionExpectation{mock: mmUpdateCaption.mock}
+	}
+	mmUpdateCaption.defaultExpectation.results = &UserProfilerMockUpdateCaptionResults{err}
+	return mmUpdateCaption.mock
+}
+
+// Set uses given function f to mock the UserProfiler.UpdateCaption method
+func (mmUpdateCaption *mUserProfilerMockUpdateCaption) Set(f func(ctx context.Context, userID int, newCaption string) (err error)) *UserProfilerMock {
+	if mmUpdateCaption.defaultExpectation != nil {
+		mmUpdateCaption.mock.t.Fatalf("Default expectation is already set for the UserProfiler.UpdateCaption method")
+	}
+
+	if len(mmUpdateCaption.expectations) > 0 {
+		mmUpdateCaption.mock.t.Fatalf("Some expectations are already set for the UserProfiler.UpdateCaption method")
+	}
+
+	mmUpdateCaption.mock.funcUpdateCaption = f
+	return mmUpdateCaption.mock
+}
+
+// When sets expectation for the UserProfiler.UpdateCaption which will trigger the result defined by the following
+// Then helper
+func (mmUpdateCaption *mUserProfilerMockUpdateCaption) When(ctx context.Context, userID int, newCaption string) *UserProfilerMockUpdateCaptionExpectation {
+	if mmUpdateCaption.mock.funcUpdateCaption != nil {
+		mmUpdateCaption.mock.t.Fatalf("UserProfilerMock.UpdateCaption mock is already set by Set")
+	}
+
+	expectation := &UserProfilerMockUpdateCaptionExpectation{
+		mock:   mmUpdateCaption.mock,
+		params: &UserProfilerMockUpdateCaptionParams{ctx, userID, newCaption},
+	}
+	mmUpdateCaption.expectations = append(mmUpdateCaption.expectations, expectation)
+	return expectation
+}
+
+// Then sets up UserProfiler.UpdateCaption return parameters for the expectation previously defined by the When method
+func (e *UserProfilerMockUpdateCaptionExpectation) Then(err error) *UserProfilerMock {
+	e.results = &UserProfilerMockUpdateCaptionResults{err}
+	return e.mock
+}
+
+// UpdateCaption implements usecase.UserProfiler
+func (mmUpdateCaption *UserProfilerMock) UpdateCaption(ctx context.Context, userID int, newCaption string) (err error) {
+	mm_atomic.AddUint64(&mmUpdateCaption.beforeUpdateCaptionCounter, 1)
+	defer mm_atomic.AddUint64(&mmUpdateCaption.afterUpdateCaptionCounter, 1)
+
+	if mmUpdateCaption.inspectFuncUpdateCaption != nil {
+		mmUpdateCaption.inspectFuncUpdateCaption(ctx, userID, newCaption)
+	}
+
+	mm_params := &UserProfilerMockUpdateCaptionParams{ctx, userID, newCaption}
+
+	// Record call args
+	mmUpdateCaption.UpdateCaptionMock.mutex.Lock()
+	mmUpdateCaption.UpdateCaptionMock.callArgs = append(mmUpdateCaption.UpdateCaptionMock.callArgs, mm_params)
+	mmUpdateCaption.UpdateCaptionMock.mutex.Unlock()
+
+	for _, e := range mmUpdateCaption.UpdateCaptionMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.err
+		}
+	}
+
+	if mmUpdateCaption.UpdateCaptionMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmUpdateCaption.UpdateCaptionMock.defaultExpectation.Counter, 1)
+		mm_want := mmUpdateCaption.UpdateCaptionMock.defaultExpectation.params
+		mm_got := UserProfilerMockUpdateCaptionParams{ctx, userID, newCaption}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmUpdateCaption.t.Errorf("UserProfilerMock.UpdateCaption got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmUpdateCaption.UpdateCaptionMock.defaultExpectation.results
+		if mm_results == nil {
+			mmUpdateCaption.t.Fatal("No results are set for the UserProfilerMock.UpdateCaption")
+		}
+		return (*mm_results).err
+	}
+	if mmUpdateCaption.funcUpdateCaption != nil {
+		return mmUpdateCaption.funcUpdateCaption(ctx, userID, newCaption)
+	}
+	mmUpdateCaption.t.Fatalf("Unexpected call to UserProfilerMock.UpdateCaption. %v %v %v", ctx, userID, newCaption)
+	return
+}
+
+// UpdateCaptionAfterCounter returns a count of finished UserProfilerMock.UpdateCaption invocations
+func (mmUpdateCaption *UserProfilerMock) UpdateCaptionAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmUpdateCaption.afterUpdateCaptionCounter)
+}
+
+// UpdateCaptionBeforeCounter returns a count of UserProfilerMock.UpdateCaption invocations
+func (mmUpdateCaption *UserProfilerMock) UpdateCaptionBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmUpdateCaption.beforeUpdateCaptionCounter)
+}
+
+// Calls returns a list of arguments used in each call to UserProfilerMock.UpdateCaption.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmUpdateCaption *mUserProfilerMockUpdateCaption) Calls() []*UserProfilerMockUpdateCaptionParams {
+	mmUpdateCaption.mutex.RLock()
+
+	argCopy := make([]*UserProfilerMockUpdateCaptionParams, len(mmUpdateCaption.callArgs))
+	copy(argCopy, mmUpdateCaption.callArgs)
+
+	mmUpdateCaption.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockUpdateCaptionDone returns true if the count of the UpdateCaption invocations corresponds
+// the number of defined expectations
+func (m *UserProfilerMock) MinimockUpdateCaptionDone() bool {
+	for _, e := range m.UpdateCaptionMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.UpdateCaptionMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterUpdateCaptionCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcUpdateCaption != nil && mm_atomic.LoadUint64(&m.afterUpdateCaptionCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockUpdateCaptionInspect logs each unmet expectation
+func (m *UserProfilerMock) MinimockUpdateCaptionInspect() {
+	for _, e := range m.UpdateCaptionMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to UserProfilerMock.UpdateCaption with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.UpdateCaptionMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterUpdateCaptionCounter) < 1 {
+		if m.UpdateCaptionMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to UserProfilerMock.UpdateCaption")
+		} else {
+			m.t.Errorf("Expected call to UserProfilerMock.UpdateCaption with params: %#v", *m.UpdateCaptionMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcUpdateCaption != nil && mm_atomic.LoadUint64(&m.afterUpdateCaptionCounter) < 1 {
+		m.t.Error("Expected call to UserProfilerMock.UpdateCaption")
+	}
+}
+
 // MinimockFinish checks that all mocked methods have been called the expected number of times
 func (m *UserProfilerMock) MinimockFinish() {
 	if !m.minimockDone() {
@@ -718,6 +944,8 @@ func (m *UserProfilerMock) MinimockFinish() {
 		m.MinimockLoginInspect()
 
 		m.MinimockRegisterInspect()
+
+		m.MinimockUpdateCaptionInspect()
 		m.t.FailNow()
 	}
 }
@@ -743,5 +971,6 @@ func (m *UserProfilerMock) minimockDone() bool {
 	return done &&
 		m.MinimockDeactivateDone() &&
 		m.MinimockLoginDone() &&
-		m.MinimockRegisterDone()
+		m.MinimockRegisterDone() &&
+		m.MinimockUpdateCaptionDone()
 }

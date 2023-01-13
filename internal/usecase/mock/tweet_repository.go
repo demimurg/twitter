@@ -18,13 +18,13 @@ import (
 type TweetRepositoryMock struct {
 	t minimock.Tester
 
-	funcAdd          func(ctx context.Context, userID int, tweetText string) (err error)
+	funcAdd          func(ctx context.Context, userID int, tweetText string) (id int, err error)
 	inspectFuncAdd   func(ctx context.Context, userID int, tweetText string)
 	afterAddCounter  uint64
 	beforeAddCounter uint64
 	AddMock          mTweetRepositoryMockAdd
 
-	funcAddComment          func(ctx context.Context, userID int, tweetID int, commentText string) (err error)
+	funcAddComment          func(ctx context.Context, userID int, tweetID int, commentText string) (id int, err error)
 	inspectFuncAddComment   func(ctx context.Context, userID int, tweetID int, commentText string)
 	afterAddCommentCounter  uint64
 	beforeAddCommentCounter uint64
@@ -100,6 +100,7 @@ type TweetRepositoryMockAddParams struct {
 
 // TweetRepositoryMockAddResults contains results of the TweetRepository.Add
 type TweetRepositoryMockAddResults struct {
+	id  int
 	err error
 }
 
@@ -135,7 +136,7 @@ func (mmAdd *mTweetRepositoryMockAdd) Inspect(f func(ctx context.Context, userID
 }
 
 // Return sets up results that will be returned by TweetRepository.Add
-func (mmAdd *mTweetRepositoryMockAdd) Return(err error) *TweetRepositoryMock {
+func (mmAdd *mTweetRepositoryMockAdd) Return(id int, err error) *TweetRepositoryMock {
 	if mmAdd.mock.funcAdd != nil {
 		mmAdd.mock.t.Fatalf("TweetRepositoryMock.Add mock is already set by Set")
 	}
@@ -143,12 +144,12 @@ func (mmAdd *mTweetRepositoryMockAdd) Return(err error) *TweetRepositoryMock {
 	if mmAdd.defaultExpectation == nil {
 		mmAdd.defaultExpectation = &TweetRepositoryMockAddExpectation{mock: mmAdd.mock}
 	}
-	mmAdd.defaultExpectation.results = &TweetRepositoryMockAddResults{err}
+	mmAdd.defaultExpectation.results = &TweetRepositoryMockAddResults{id, err}
 	return mmAdd.mock
 }
 
 // Set uses given function f to mock the TweetRepository.Add method
-func (mmAdd *mTweetRepositoryMockAdd) Set(f func(ctx context.Context, userID int, tweetText string) (err error)) *TweetRepositoryMock {
+func (mmAdd *mTweetRepositoryMockAdd) Set(f func(ctx context.Context, userID int, tweetText string) (id int, err error)) *TweetRepositoryMock {
 	if mmAdd.defaultExpectation != nil {
 		mmAdd.mock.t.Fatalf("Default expectation is already set for the TweetRepository.Add method")
 	}
@@ -177,13 +178,13 @@ func (mmAdd *mTweetRepositoryMockAdd) When(ctx context.Context, userID int, twee
 }
 
 // Then sets up TweetRepository.Add return parameters for the expectation previously defined by the When method
-func (e *TweetRepositoryMockAddExpectation) Then(err error) *TweetRepositoryMock {
-	e.results = &TweetRepositoryMockAddResults{err}
+func (e *TweetRepositoryMockAddExpectation) Then(id int, err error) *TweetRepositoryMock {
+	e.results = &TweetRepositoryMockAddResults{id, err}
 	return e.mock
 }
 
 // Add implements usecase.TweetRepository
-func (mmAdd *TweetRepositoryMock) Add(ctx context.Context, userID int, tweetText string) (err error) {
+func (mmAdd *TweetRepositoryMock) Add(ctx context.Context, userID int, tweetText string) (id int, err error) {
 	mm_atomic.AddUint64(&mmAdd.beforeAddCounter, 1)
 	defer mm_atomic.AddUint64(&mmAdd.afterAddCounter, 1)
 
@@ -201,7 +202,7 @@ func (mmAdd *TweetRepositoryMock) Add(ctx context.Context, userID int, tweetText
 	for _, e := range mmAdd.AddMock.expectations {
 		if minimock.Equal(e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.err
+			return e.results.id, e.results.err
 		}
 	}
 
@@ -217,7 +218,7 @@ func (mmAdd *TweetRepositoryMock) Add(ctx context.Context, userID int, tweetText
 		if mm_results == nil {
 			mmAdd.t.Fatal("No results are set for the TweetRepositoryMock.Add")
 		}
-		return (*mm_results).err
+		return (*mm_results).id, (*mm_results).err
 	}
 	if mmAdd.funcAdd != nil {
 		return mmAdd.funcAdd(ctx, userID, tweetText)
@@ -318,6 +319,7 @@ type TweetRepositoryMockAddCommentParams struct {
 
 // TweetRepositoryMockAddCommentResults contains results of the TweetRepository.AddComment
 type TweetRepositoryMockAddCommentResults struct {
+	id  int
 	err error
 }
 
@@ -353,7 +355,7 @@ func (mmAddComment *mTweetRepositoryMockAddComment) Inspect(f func(ctx context.C
 }
 
 // Return sets up results that will be returned by TweetRepository.AddComment
-func (mmAddComment *mTweetRepositoryMockAddComment) Return(err error) *TweetRepositoryMock {
+func (mmAddComment *mTweetRepositoryMockAddComment) Return(id int, err error) *TweetRepositoryMock {
 	if mmAddComment.mock.funcAddComment != nil {
 		mmAddComment.mock.t.Fatalf("TweetRepositoryMock.AddComment mock is already set by Set")
 	}
@@ -361,12 +363,12 @@ func (mmAddComment *mTweetRepositoryMockAddComment) Return(err error) *TweetRepo
 	if mmAddComment.defaultExpectation == nil {
 		mmAddComment.defaultExpectation = &TweetRepositoryMockAddCommentExpectation{mock: mmAddComment.mock}
 	}
-	mmAddComment.defaultExpectation.results = &TweetRepositoryMockAddCommentResults{err}
+	mmAddComment.defaultExpectation.results = &TweetRepositoryMockAddCommentResults{id, err}
 	return mmAddComment.mock
 }
 
 // Set uses given function f to mock the TweetRepository.AddComment method
-func (mmAddComment *mTweetRepositoryMockAddComment) Set(f func(ctx context.Context, userID int, tweetID int, commentText string) (err error)) *TweetRepositoryMock {
+func (mmAddComment *mTweetRepositoryMockAddComment) Set(f func(ctx context.Context, userID int, tweetID int, commentText string) (id int, err error)) *TweetRepositoryMock {
 	if mmAddComment.defaultExpectation != nil {
 		mmAddComment.mock.t.Fatalf("Default expectation is already set for the TweetRepository.AddComment method")
 	}
@@ -395,13 +397,13 @@ func (mmAddComment *mTweetRepositoryMockAddComment) When(ctx context.Context, us
 }
 
 // Then sets up TweetRepository.AddComment return parameters for the expectation previously defined by the When method
-func (e *TweetRepositoryMockAddCommentExpectation) Then(err error) *TweetRepositoryMock {
-	e.results = &TweetRepositoryMockAddCommentResults{err}
+func (e *TweetRepositoryMockAddCommentExpectation) Then(id int, err error) *TweetRepositoryMock {
+	e.results = &TweetRepositoryMockAddCommentResults{id, err}
 	return e.mock
 }
 
 // AddComment implements usecase.TweetRepository
-func (mmAddComment *TweetRepositoryMock) AddComment(ctx context.Context, userID int, tweetID int, commentText string) (err error) {
+func (mmAddComment *TweetRepositoryMock) AddComment(ctx context.Context, userID int, tweetID int, commentText string) (id int, err error) {
 	mm_atomic.AddUint64(&mmAddComment.beforeAddCommentCounter, 1)
 	defer mm_atomic.AddUint64(&mmAddComment.afterAddCommentCounter, 1)
 
@@ -419,7 +421,7 @@ func (mmAddComment *TweetRepositoryMock) AddComment(ctx context.Context, userID 
 	for _, e := range mmAddComment.AddCommentMock.expectations {
 		if minimock.Equal(e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.err
+			return e.results.id, e.results.err
 		}
 	}
 
@@ -435,7 +437,7 @@ func (mmAddComment *TweetRepositoryMock) AddComment(ctx context.Context, userID 
 		if mm_results == nil {
 			mmAddComment.t.Fatal("No results are set for the TweetRepositoryMock.AddComment")
 		}
-		return (*mm_results).err
+		return (*mm_results).id, (*mm_results).err
 	}
 	if mmAddComment.funcAddComment != nil {
 		return mmAddComment.funcAddComment(ctx, userID, tweetID, commentText)

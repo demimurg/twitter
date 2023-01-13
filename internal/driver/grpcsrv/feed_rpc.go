@@ -11,14 +11,36 @@ import (
 )
 
 func (t *twitter) AddTweet(ctx context.Context, req *proto.AddTweetRequest) (*proto.AddTweetResponse, error) {
-	err := t.fm.AddTweet(ctx, int(req.UserId), req.Text)
+	tweetID, err := t.fm.AddTweet(ctx, int(req.UserId), req.Text)
 	if err != nil {
 		if errors.Is(err, usecase.ErrValidationFailed) {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		return nil, err
 	}
-	return &proto.AddTweetResponse{}, nil
+    return &proto.AddTweetResponse{ TweetId: int64(tweetID) }, nil
+}
+
+func (t *twitter) AddComment(ctx context.Context, req *proto.AddCommentRequest) (*proto.AddCommentResponse, error) {
+    commentID, err := t.fm.AddComment(ctx, int(req.UserId), int(req.TweetId), req.Text)
+    if err != nil {
+        return nil, err
+    }
+    return &proto.AddCommentResponse{ CommentId: int64(commentID) }, nil
+}
+func (t *twitter) UpdateTweet(ctx context.Context, req *proto.UpdateTweetRequest) (*proto.UpdateTweetResponse, error) {
+    err := t.fm.EditTweet(ctx, int(req.TweetId), req.NewText)
+    if err != nil {
+        return nil, err
+    }
+    return &proto.UpdateTweetResponse{}, nil
+}
+func (t *twitter) UpdateComment(ctx context.Context, req *proto.UpdateCommentRequest) (*proto.UpdateCommentResponse, error) {
+    err := t.fm.EditComment(ctx, int(req.CommentId), req.NewText)
+    if err != nil {
+        return nil, err
+    }
+    return &proto.UpdateCommentResponse{}, nil
 }
 
 func (t *twitter) GetNewsFeed(ctx context.Context, req *proto.GetNewsFeedRequest) (*proto.GetNewsFeedResponse, error) {

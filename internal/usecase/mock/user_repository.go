@@ -19,7 +19,7 @@ import (
 type UserRepositoryMock struct {
 	t minimock.Tester
 
-	funcAdd          func(ctx context.Context, name string, email string, caption string, birthDate time.Time) (i1 int, err error)
+	funcAdd          func(ctx context.Context, name string, email string, caption string, birthDate time.Time) (id int, err error)
 	inspectFuncAdd   func(ctx context.Context, name string, email string, caption string, birthDate time.Time)
 	afterAddCounter  uint64
 	beforeAddCounter uint64
@@ -112,7 +112,7 @@ type UserRepositoryMockAddParams struct {
 
 // UserRepositoryMockAddResults contains results of the UserRepository.Add
 type UserRepositoryMockAddResults struct {
-	i1  int
+	id  int
 	err error
 }
 
@@ -148,7 +148,7 @@ func (mmAdd *mUserRepositoryMockAdd) Inspect(f func(ctx context.Context, name st
 }
 
 // Return sets up results that will be returned by UserRepository.Add
-func (mmAdd *mUserRepositoryMockAdd) Return(i1 int, err error) *UserRepositoryMock {
+func (mmAdd *mUserRepositoryMockAdd) Return(id int, err error) *UserRepositoryMock {
 	if mmAdd.mock.funcAdd != nil {
 		mmAdd.mock.t.Fatalf("UserRepositoryMock.Add mock is already set by Set")
 	}
@@ -156,12 +156,12 @@ func (mmAdd *mUserRepositoryMockAdd) Return(i1 int, err error) *UserRepositoryMo
 	if mmAdd.defaultExpectation == nil {
 		mmAdd.defaultExpectation = &UserRepositoryMockAddExpectation{mock: mmAdd.mock}
 	}
-	mmAdd.defaultExpectation.results = &UserRepositoryMockAddResults{i1, err}
+	mmAdd.defaultExpectation.results = &UserRepositoryMockAddResults{id, err}
 	return mmAdd.mock
 }
 
 // Set uses given function f to mock the UserRepository.Add method
-func (mmAdd *mUserRepositoryMockAdd) Set(f func(ctx context.Context, name string, email string, caption string, birthDate time.Time) (i1 int, err error)) *UserRepositoryMock {
+func (mmAdd *mUserRepositoryMockAdd) Set(f func(ctx context.Context, name string, email string, caption string, birthDate time.Time) (id int, err error)) *UserRepositoryMock {
 	if mmAdd.defaultExpectation != nil {
 		mmAdd.mock.t.Fatalf("Default expectation is already set for the UserRepository.Add method")
 	}
@@ -190,13 +190,13 @@ func (mmAdd *mUserRepositoryMockAdd) When(ctx context.Context, name string, emai
 }
 
 // Then sets up UserRepository.Add return parameters for the expectation previously defined by the When method
-func (e *UserRepositoryMockAddExpectation) Then(i1 int, err error) *UserRepositoryMock {
-	e.results = &UserRepositoryMockAddResults{i1, err}
+func (e *UserRepositoryMockAddExpectation) Then(id int, err error) *UserRepositoryMock {
+	e.results = &UserRepositoryMockAddResults{id, err}
 	return e.mock
 }
 
 // Add implements usecase.UserRepository
-func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string, email string, caption string, birthDate time.Time) (i1 int, err error) {
+func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string, email string, caption string, birthDate time.Time) (id int, err error) {
 	mm_atomic.AddUint64(&mmAdd.beforeAddCounter, 1)
 	defer mm_atomic.AddUint64(&mmAdd.afterAddCounter, 1)
 
@@ -214,7 +214,7 @@ func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string, email str
 	for _, e := range mmAdd.AddMock.expectations {
 		if minimock.Equal(e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.i1, e.results.err
+			return e.results.id, e.results.err
 		}
 	}
 
@@ -230,7 +230,7 @@ func (mmAdd *UserRepositoryMock) Add(ctx context.Context, name string, email str
 		if mm_results == nil {
 			mmAdd.t.Fatal("No results are set for the UserRepositoryMock.Add")
 		}
-		return (*mm_results).i1, (*mm_results).err
+		return (*mm_results).id, (*mm_results).err
 	}
 	if mmAdd.funcAdd != nil {
 		return mmAdd.funcAdd(ctx, name, email, caption, birthDate)

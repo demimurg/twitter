@@ -35,7 +35,7 @@ func TestFeedManager_AddNewTweet(t *testing.T) {
 					Return(&entity.User{ID: fakeUserID}, nil)
 				m.TweetRepositoryMock.AddMock.
 					Expect(ctx, fakeUserID, "hello world!").
-					Return(nil)
+					Return(0, nil)
 			},
 		},
 		{
@@ -64,7 +64,7 @@ func TestFeedManager_AddNewTweet(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			feedManager := newFeedManager(t, tc.expect)
-			err := feedManager.AddTweet(ctx, fakeUserID, tc.tweetText)
+			_, err := feedManager.AddTweet(ctx, fakeUserID, tc.tweetText)
 
 			assert.Equal(t, tc.wantError, err != nil, "not expected error: %v", err)
 		})

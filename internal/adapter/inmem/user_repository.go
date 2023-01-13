@@ -2,8 +2,9 @@ package inmem
 
 import (
 	"context"
-    "github.com/pkg/errors"
-    "time"
+	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/demimurg/twitter/internal/entity"
 	"github.com/demimurg/twitter/internal/usecase"
@@ -12,18 +13,16 @@ import (
 var errNoSuchUser = errors.New("there is no such user in memory")
 
 func NewUserRepository() usecase.UserRepository {
-    s := make([]entity.User, 0, 100) // initial storage size 100 users
-    s = append(s, entity.User{FullName: "Pavel Durov"}) // book place to start new ids from 1
-	return &userRepo{storage: s}
+	return &userRepo{users: make([]entity.User, 0, 100)} // initial tweets size 100 users
 }
 
 type userRepo struct {
-	storage []entity.User
+	users []entity.User
 }
 
 func (u *userRepo) Add(_ context.Context, name, email, caption string, birthDate time.Time) (int, error) {
-	id := len(u.storage)
-	u.storage = append(u.storage, entity.User{
+	id := len(u.users)
+	u.users = append(u.users, entity.User{
 		ID:        id,
 		Email:     email,
 		FullName:  name,
@@ -34,47 +33,47 @@ func (u *userRepo) Add(_ context.Context, name, email, caption string, birthDate
 }
 
 func (u *userRepo) Get(_ context.Context, userID int) (*entity.User, error) {
-	if userID >= len(u.storage) || userID < 0 {
-        return nil, errNoSuchUser
+	if userID >= len(u.users) || userID < 0 {
+		return nil, errNoSuchUser
 	}
 
-	return &u.storage[userID], nil
+	return &u.users[userID], nil
 }
 
 func (u *userRepo) GetAll(_ context.Context, limit int) ([]entity.User, error) {
-	if len(u.storage) < limit {
-		return u.storage, nil
+	if len(u.users) < limit {
+		return u.users, nil
 	}
-	return u.storage[:limit], nil
+	return u.users[:limit], nil
 }
 
 func (u *userRepo) GetByEmail(_ context.Context, email string) (*entity.User, error) {
-	for _, user := range u.storage {
+	for _, user := range u.users {
 		if user.Email == email {
 			return &user, nil
 		}
 	}
 
-    return nil, errNoSuchUser
+	return nil, errNoSuchUser
 }
 
 func (u *userRepo) UpdateCaption(_ context.Context, userID int, caption string) error {
-    for i := range u.storage {
-        if u.storage[i].ID == userID {
-            u.storage[i].Caption = caption
-            return nil
-        }
-    }
-    return errNoSuchUser
+	for i := range u.users {
+		if u.users[i].ID == userID {
+			u.users[i].Caption = caption
+			return nil
+		}
+	}
+	return errNoSuchUser
 }
 
 func (u *userRepo) Delete(_ context.Context, userID int) error {
-    for i := range u.storage {
-        if u.storage[i].ID == userID {
-            deletedNow := time.Now()
-            u.storage[i].DeletedAt = &deletedNow
-            return nil
-        }
-    }
-    return errNoSuchUser
+	for i := range u.users {
+		if u.users[i].ID == userID {
+			deletedNow := time.Now()
+			u.users[i].DeletedAt = &deletedNow
+			return nil
+		}
+	}
+	return errNoSuchUser
 }
