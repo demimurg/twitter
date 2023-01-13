@@ -950,6 +950,232 @@ var _ interface {
 	ErrorName() string
 } = RegisterResponseValidationError{}
 
+// Validate checks the field values on UpdateCaptionRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdateCaptionRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateCaptionRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateCaptionRequestMultiError, or nil if none found.
+func (m *UpdateCaptionRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateCaptionRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetUserId() <= 0 {
+		err := UpdateCaptionRequestValidationError{
+			field:  "UserId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(m.GetNewCaption()) > 512 {
+		err := UpdateCaptionRequestValidationError{
+			field:  "NewCaption",
+			reason: "value length must be at most 512 bytes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return UpdateCaptionRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateCaptionRequestMultiError is an error wrapping multiple validation
+// errors returned by UpdateCaptionRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateCaptionRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateCaptionRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateCaptionRequestMultiError) AllErrors() []error { return m }
+
+// UpdateCaptionRequestValidationError is the validation error returned by
+// UpdateCaptionRequest.Validate if the designated constraints aren't met.
+type UpdateCaptionRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateCaptionRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateCaptionRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateCaptionRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateCaptionRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateCaptionRequestValidationError) ErrorName() string {
+	return "UpdateCaptionRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateCaptionRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateCaptionRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateCaptionRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateCaptionRequestValidationError{}
+
+// Validate checks the field values on UpdateCaptionResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdateCaptionResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateCaptionResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateCaptionResponseMultiError, or nil if none found.
+func (m *UpdateCaptionResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateCaptionResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return UpdateCaptionResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateCaptionResponseMultiError is an error wrapping multiple validation
+// errors returned by UpdateCaptionResponse.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateCaptionResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateCaptionResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateCaptionResponseMultiError) AllErrors() []error { return m }
+
+// UpdateCaptionResponseValidationError is the validation error returned by
+// UpdateCaptionResponse.Validate if the designated constraints aren't met.
+type UpdateCaptionResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateCaptionResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateCaptionResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateCaptionResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateCaptionResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateCaptionResponseValidationError) ErrorName() string {
+	return "UpdateCaptionResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateCaptionResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateCaptionResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateCaptionResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateCaptionResponseValidationError{}
+
 // Validate checks the field values on FollowRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.

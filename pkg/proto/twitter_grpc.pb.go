@@ -8,7 +8,6 @@ package proto
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -26,6 +25,7 @@ type TwitterClient interface {
 	AddTweet(ctx context.Context, in *AddTweetRequest, opts ...grpc.CallOption) (*AddTweetResponse, error)
 	GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest, opts ...grpc.CallOption) (*GetNewsFeedResponse, error)
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+	UpdateCaption(ctx context.Context, in *UpdateCaptionRequest, opts ...grpc.CallOption) (*UpdateCaptionResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	Follow(ctx context.Context, in *FollowRequest, opts ...grpc.CallOption) (*FollowResponse, error)
 	Unfollow(ctx context.Context, in *UnfollowRequest, opts ...grpc.CallOption) (*UnfollowResponse, error)
@@ -61,6 +61,15 @@ func (c *twitterClient) GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest,
 func (c *twitterClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
 	out := new(RegisterResponse)
 	err := c.cc.Invoke(ctx, "/Twitter/Register", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *twitterClient) UpdateCaption(ctx context.Context, in *UpdateCaptionRequest, opts ...grpc.CallOption) (*UpdateCaptionResponse, error) {
+	out := new(UpdateCaptionResponse)
+	err := c.cc.Invoke(ctx, "/Twitter/UpdateCaption", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -110,6 +119,7 @@ type TwitterServer interface {
 	AddTweet(context.Context, *AddTweetRequest) (*AddTweetResponse, error)
 	GetNewsFeed(context.Context, *GetNewsFeedRequest) (*GetNewsFeedResponse, error)
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
+	UpdateCaption(context.Context, *UpdateCaptionRequest) (*UpdateCaptionResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	Follow(context.Context, *FollowRequest) (*FollowResponse, error)
 	Unfollow(context.Context, *UnfollowRequest) (*UnfollowResponse, error)
@@ -129,6 +139,9 @@ func (UnimplementedTwitterServer) GetNewsFeed(context.Context, *GetNewsFeedReque
 }
 func (UnimplementedTwitterServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedTwitterServer) UpdateCaption(context.Context, *UpdateCaptionRequest) (*UpdateCaptionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCaption not implemented")
 }
 func (UnimplementedTwitterServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
@@ -205,6 +218,24 @@ func _Twitter_Register_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).Register(ctx, req.(*RegisterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Twitter_UpdateCaption_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCaptionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TwitterServer).UpdateCaption(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Twitter/UpdateCaption",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TwitterServer).UpdateCaption(ctx, req.(*UpdateCaptionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -299,6 +330,10 @@ var Twitter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Register",
 			Handler:    _Twitter_Register_Handler,
+		},
+		{
+			MethodName: "UpdateCaption",
+			Handler:    _Twitter_UpdateCaption_Handler,
 		},
 		{
 			MethodName: "Login",

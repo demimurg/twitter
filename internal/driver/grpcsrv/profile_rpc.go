@@ -38,6 +38,15 @@ func (t *twitter) Login(ctx context.Context, req *proto.LoginRequest) (*proto.Lo
 	}, nil
 }
 
+func (t *twitter) UpdateCaption(ctx context.Context, req *proto.UpdateCaptionRequest) (*proto.UpdateCaptionResponse, error) {
+    err := t.up.UpdateCaption(ctx, int(req.UserId), req.NewCaption)
+    if err != nil {
+        return nil, err
+    }
+
+    return &proto.UpdateCaptionResponse{}, nil
+}
+
 func convertToUserProfile(user *entity.User) *proto.UserProfile {
 	return &proto.UserProfile{
 		Email:       user.Email,
