@@ -22,10 +22,6 @@ var cfg struct {
 }
 
 func main() {
-	err := env.Parse(&cfg)
-	handle(err, "parse config")
-	log.SetLevel(cfg.LogLevel)
-
 	db, err := sql.Open("pgx", cfg.PostgresqlDSN)
 	handle(err, "connect to postgres")
 	defer db.Close()
@@ -39,14 +35,20 @@ func main() {
 	followerRepo := postgres.NewFollowerRepository(db)
 
 	feedManager := usecase.NewFeedManager(userRepo, followerRepo, tweetRepo)
-	userRegistrator := usecase.NewUserRegistrator(userRepo, scamClient)
+	userProfiler := usecase.NewUserProfiler(userRepo, scamClient)
 
-	srv := grpcsrv.NewTwitter(feedManager, userRegistrator)
+	srv := grpcsrv.NewTwitter(feedManager, userProfiler)
 	grace.Run(
 		grace.GRPC(srv, ":80"),
 		grace.GRPCUI(":81", "localhost:80"),
 		grace.Prometheus(":82"),
 	)
+}
+
+func init() {
+    err := env.Parse(&cfg)
+    handle(err, "parse config")
+    log.SetLevel(cfg.LogLevel)
 }
 
 func handle(err error, msg string) {

@@ -14,12 +14,12 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-func NewTwitter(feedManager usecase.FeedManager, userRegistrator usecase.UserRegistrator) *grpc.Server {
+func NewTwitter(feedManager usecase.FeedManager, userProfiler usecase.UserProfiler) *grpc.Server {
 	srv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(logRequest, recoverPanic, grpc_validator.UnaryServerInterceptor()),
 	)
 	proto.RegisterTwitterServer(srv, &twitter{
-		fm: feedManager, ur: userRegistrator,
+		fm: feedManager, up: userProfiler,
 	})
 	reflection.Register(srv)
 	return srv
@@ -28,7 +28,7 @@ func NewTwitter(feedManager usecase.FeedManager, userRegistrator usecase.UserReg
 type twitter struct {
 	proto.UnimplementedTwitterServer
 	fm usecase.FeedManager
-	ur usecase.UserRegistrator
+	up usecase.UserProfiler
 }
 
 func logRequest(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {

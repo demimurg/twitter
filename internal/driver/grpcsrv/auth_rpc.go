@@ -13,7 +13,7 @@ import (
 )
 
 func (t *twitter) Register(ctx context.Context, req *proto.RegisterRequest) (*proto.RegisterResponse, error) {
-	user, err := t.ur.Register(
+	user, err := t.up.Register(
 		ctx, req.User.FullName, req.User.Email,
 		req.User.Caption, req.User.DateOfBirth.AsTime(),
 	)
@@ -27,7 +27,7 @@ func (t *twitter) Register(ctx context.Context, req *proto.RegisterRequest) (*pr
 }
 
 func (t *twitter) Login(ctx context.Context, req *proto.LoginRequest) (*proto.LoginResponse, error) {
-	user, err := t.ur.Login(ctx, req.Email)
+	user, err := t.up.Login(ctx, req.Email)
 	if err != nil {
 		return nil, err
 	}

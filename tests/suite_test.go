@@ -25,9 +25,9 @@ func TestE2E(t *testing.T) {
 	followerRepo := inmem.NewFollowerRepository()
 
 	feedManager := usecase.NewFeedManager(userRepo, followerRepo, tweetRepo)
-	userRegistrator := usecase.NewUserRegistrator(userRepo, scamClient)
+	userProfiler := usecase.NewUserProfiler(userRepo, scamClient)
 
-	srv := grpcsrv.NewTwitter(feedManager, userRegistrator)
+	srv := grpcsrv.NewTwitter(feedManager, userProfiler)
 	go func() {
 		err := grace.GRPC(srv, ":8080").Run()
 		require.NoError(t, err)

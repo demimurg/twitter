@@ -10,7 +10,7 @@ import (
 	"github.com/demimurg/twitter/pkg/log"
 )
 
-type UserRegistrator interface {
+type UserProfiler interface {
 	Register(ctx context.Context, name, email, caption string, birthDate time.Time) (*entity.User, error)
 	Deactivate(ctx context.Context, userID int) error
 
@@ -19,17 +19,17 @@ type UserRegistrator interface {
 
 var ErrValidationFailed = errors.New("validation failed")
 
-func NewUserRegistrator(userRepo UserRepository, scamClient ScamDetectorClient) UserRegistrator {
-	return &userRegistrator{userRepo, scamClient}
+func NewUserProfiler(userRepo UserRepository, scamClient ScamDetectorClient) UserProfiler {
+	return &userProfiler{userRepo, scamClient}
 }
 
-type userRegistrator struct {
+type userProfiler struct {
 	userRepo   UserRepository
 	scamClient ScamDetectorClient
 }
 
-func (ur *userRegistrator) Register(ctx context.Context, name, email, caption string, birthDate time.Time) (*entity.User, error) {
-	err := ur.scamClient.CheckEmail(ctx, email)
+func (up *userProfiler) Register(ctx context.Context, name, email, caption string, birthDate time.Time) (*entity.User, error) {
+	err := up.scamClient.CheckEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, ErrFakeEmail) {
 			return nil, fmt.Errorf("%s can't be registered: %w", name, err)
@@ -37,7 +37,7 @@ func (ur *userRegistrator) Register(ctx context.Context, name, email, caption st
 		log.Error(ctx, "scam client returned error", err)
 	}
 
-	id, err := ur.userRepo.Add(ctx, name, email, caption, birthDate)
+	id, err := up.userRepo.Add(ctx, name, email, caption, birthDate)
 	if err != nil {
 		return nil, err
 	}
@@ -48,10 +48,10 @@ func (ur *userRegistrator) Register(ctx context.Context, name, email, caption st
 	}, nil
 }
 
-func (ur *userRegistrator) Login(ctx context.Context, email string) (*entity.User, error) {
-	return ur.userRepo.GetByEmail(ctx, email)
+func (up *userProfiler) Login(ctx context.Context, email string) (*entity.User, error) {
+	return up.userRepo.GetByEmail(ctx, email)
 }
 
-func (ur *userRegistrator) Deactivate(ctx context.Context, userID int) error {
-	return ur.userRepo.Delete(ctx, userID)
+func (up *userProfiler) Deactivate(ctx context.Context, userID int) error {
+	return up.userRepo.Delete(ctx, userID)
 }

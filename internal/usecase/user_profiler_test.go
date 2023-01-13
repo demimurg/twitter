@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUserRegistrator_Register(t *testing.T) {
+func TestUserProfiler_Register(t *testing.T) {
 	var ctx = context.Background()
 
 	testCases := []struct {
@@ -21,7 +21,7 @@ func TestUserRegistrator_Register(t *testing.T) {
 		email     string
 		caption   string
 		birthDate time.Time
-		expect    func(urmocks)
+		expect    func(upmocks)
 		wantUser  *entity.User
 		wantError bool
 	}{
@@ -31,7 +31,7 @@ func TestUserRegistrator_Register(t *testing.T) {
 			email:     "elon.musk@twitter.com",
 			caption:   "billionaire, philanthropist",
 			birthDate: date(1971, 06, 28),
-			expect: func(m urmocks) {
+			expect: func(m upmocks) {
 				m.ScamDetectorClientMock.CheckEmailMock.
 					Expect(ctx, "elon.musk@twitter.com").
 					Return(nil)
@@ -50,7 +50,7 @@ func TestUserRegistrator_Register(t *testing.T) {
 			userName:  "Elon Musk",
 			email:     "real-elon-musk@twittor.org",
 			birthDate: date(1971, 06, 28),
-			expect: func(m urmocks) {
+			expect: func(m upmocks) {
 				m.ScamDetectorClientMock.CheckEmailMock.
 					Expect(ctx, "real-elon-musk@twittor.org").
 					Return(ErrFakeEmail)
@@ -62,7 +62,7 @@ func TestUserRegistrator_Register(t *testing.T) {
 			userName:  "Elon Musk",
 			email:     "elon.musk@twitter.com",
 			birthDate: date(1971, 06, 28),
-			expect: func(m urmocks) {
+			expect: func(m upmocks) {
 				// client may return any error, but not ErrFakeEmail
 				m.ScamDetectorClientMock.CheckEmailMock.
 					Expect(ctx, "elon.musk@twitter.com").
@@ -79,8 +79,8 @@ func TestUserRegistrator_Register(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ur := newUserRegistrator(t, tc.expect)
-			user, err := ur.Register(ctx, tc.userName, tc.email, tc.caption, tc.birthDate)
+			up := newUserProfiler(t, tc.expect)
+			user, err := up.Register(ctx, tc.userName, tc.email, tc.caption, tc.birthDate)
 			assert.Equal(t, tc.wantError, err != nil, "not expected error: %v", err)
 			assert.Equal(t, tc.wantUser, user)
 		})
@@ -91,36 +91,36 @@ func date(year, month, day int) time.Time {
 	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 }
 
-func TestUserRegistrator_Deactivate(t *testing.T) {
+func TestUserProfiler_Deactivate(t *testing.T) {
 	ctx := context.Background()
-	expect := func(m urmocks) {
+	expect := func(m upmocks) {
 		m.UserRepositoryMock.DeleteMock.
 			Expect(ctx, fakeUserID).Return(nil)
 	}
-	r := newUserRegistrator(t, expect)
+	up := newUserProfiler(t, expect)
 
-	err := r.Deactivate(ctx, fakeUserID)
+	err := up.Deactivate(ctx, fakeUserID)
 	assert.NoError(t, err)
 }
 
 // ---------------------------------- SETUP MOCKS ----------------------------------
 
-// user registrator fmmocks
-type urmocks struct {
+// user profiler fmmocks
+type upmocks struct {
 	*mock.UserRepositoryMock
 	*mock.ScamDetectorClientMock
 }
 
-// newUserRegistrator will create user registrator with mocked dependencies ans set expectations to them
-func newUserRegistrator(t *testing.T, expect func(urmocks)) UserRegistrator {
+// newUserProfiler will create user profiler with mocked dependencies ans set expectations to them
+func newUserProfiler(t *testing.T, expect func(upmocks)) UserProfiler {
 	mc := minimock.NewController(t)
 	t.Cleanup(mc.Finish)
 
-	m := urmocks{
+	m := upmocks{
 		mock.NewUserRepositoryMock(mc),
 		mock.NewScamDetectorClientMock(mc),
 	}
 	expect(m)
 
-	return NewUserRegistrator(m.UserRepositoryMock, m.ScamDetectorClientMock)
+	return NewUserProfiler(m.UserRepositoryMock, m.ScamDetectorClientMock)
 }
