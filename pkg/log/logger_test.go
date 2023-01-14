@@ -13,28 +13,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var (
-	stdout *os.File
-	ctx    = context.Background()
-	buffer = make([]byte, 512)
-)
-
-func init() {
-	realStdout := os.Stdout // copy to return after logger building
-	r, w, _ := os.Pipe()
-	os.Stdout, stdout = w, r
-	ChangeConfig(func(c *zap.Config) {
-		c.EncoderConfig.TimeKey = zapcore.OmitKey
-	})
-	os.Stdout = realStdout
-}
-
-func readStdout() string {
-	n, _ := stdout.Read(buffer)
-	return strings.Trim(string(buffer[:n]), "\n")
-}
-
 func TestLogger(t *testing.T) {
+	initLoggerForTest()
+	ctx := context.Background()
+
 	t.Run("simple info log", func(t *testing.T) {
 		Info(ctx, "some message")
 		assert.Equal(t, `{"level":"info","msg":"some message"}`, readStdout())
@@ -71,4 +53,35 @@ func TestLogger(t *testing.T) {
 		Error(ctx, "something", errors.New("bad thing happend"))
 		assert.Equal(t, `{"level":"error","msg":"something","error":"bad thing happend"}`, readStdout())
 	})
+}
+
+var (
+	stdout *os.File // fake stdout for logger
+	buffer = make([]byte, 512)
+)
+
+func initLoggerForTest() {
+    // copy to return after logger building,
+    // to be able to see test info output
+	realStdout := os.Stdout
+	r, w, err := os.Pipe()
+	if err != nil {
+		panic(err)
+	}
+
+	os.Stdout, stdout = w, r
+	// build logger that will use pipe to write,
+	// so we can read this data in code and not in terminal
+	ChangeConfig(func(c *zap.Config) {
+		c.EncoderConfig.TimeKey = zapcore.OmitKey
+	})
+	os.Stdout = realStdout
+}
+
+func readStdout() string {
+	n, err := stdout.Read(buffer)
+    if err != nil {
+        panic(err)
+    }
+	return strings.Trim(string(buffer[:n]), "\n")
 }
