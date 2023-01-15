@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/github/demimurg/twitter/branch/main/graph/badge.svg?token=NMZND94SUY)](https://codecov.io/github/demimurg/twitter)
+
 ## Testing
 
 You should mock dependencies using following way with minimock library:
