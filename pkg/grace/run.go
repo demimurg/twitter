@@ -27,7 +27,7 @@ func Run(processes ...Process) {
 
 	for _, proc := range processes {
 		proc := proc // clone for using in goroutine
-        ctx := log.With(ctx, "name", proc.Name())
+		ctx := log.With(ctx, "name", proc.Name())
 
 		go func() {
 			defer func() {

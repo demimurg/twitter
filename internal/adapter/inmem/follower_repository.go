@@ -31,7 +31,7 @@ func (f *followerRepo) Remove(_ context.Context, followerID, fromUserID int) err
 	return nil
 }
 
-// filter only first entrance of exculde value, order can be changed!
+// filter only first entrance of exclude value, order can be changed!
 func filter(values []int, exclude int) []int {
 	for i, val := range values {
 		if val != exclude {

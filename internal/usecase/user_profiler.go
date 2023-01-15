@@ -13,7 +13,7 @@ import (
 type UserProfiler interface {
 	Register(ctx context.Context, name, email, caption string, birthDate time.Time) (*entity.User, error)
 	Deactivate(ctx context.Context, userID int) error
-    UpdateCaption(ctx context.Context, userID int, newCaption string) error
+	UpdateCaption(ctx context.Context, userID int, newCaption string) error
 
 	Login(ctx context.Context, email string) (*entity.User, error)
 }
@@ -58,5 +58,5 @@ func (up *userProfiler) Deactivate(ctx context.Context, userID int) error {
 }
 
 func (up *userProfiler) UpdateCaption(ctx context.Context, userID int, newCaption string) error {
-    return up.userRepo.UpdateCaption(ctx, userID, newCaption)
+	return up.userRepo.UpdateCaption(ctx, userID, newCaption)
 }

@@ -46,9 +46,9 @@ func main() {
 }
 
 func init() {
-    err := env.Parse(&cfg)
-    handle(err, "parse config")
-    log.SetLevel(cfg.LogLevel)
+	err := env.Parse(&cfg)
+	handle(err, "parse config")
+	log.SetLevel(cfg.LogLevel)
 }
 
 func handle(err error, msg string) {

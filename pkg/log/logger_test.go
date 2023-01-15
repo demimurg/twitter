@@ -50,8 +50,8 @@ func TestLogger(t *testing.T) {
 	})
 
 	t.Run("log error with shorthand", func(t *testing.T) {
-		Error(ctx, "something", errors.New("bad thing happend"))
-		assert.Equal(t, `{"level":"error","msg":"something","error":"bad thing happend"}`, readStdout())
+		Error(ctx, "something", errors.New("bad thing happened"))
+		assert.Equal(t, `{"level":"error","msg":"something","error":"bad thing happened"}`, readStdout())
 	})
 }
 
@@ -61,8 +61,8 @@ var (
 )
 
 func initLoggerForTest() {
-    // copy to return after logger building,
-    // to be able to see test info output
+	// copy to return after logger building,
+	// to be able to see test info output
 	realStdout := os.Stdout
 	r, w, err := os.Pipe()
 	if err != nil {
@@ -80,8 +80,8 @@ func initLoggerForTest() {
 
 func readStdout() string {
 	n, err := stdout.Read(buffer)
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 	return strings.Trim(string(buffer[:n]), "\n")
 }

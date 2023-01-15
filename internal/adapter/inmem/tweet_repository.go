@@ -11,8 +11,8 @@ import (
 )
 
 var (
-    errTweetNotFound = errors.New("can't find tweet in memory")
-    errCommentNotFound = errors.New("can't find comment in memory")
+	errTweetNotFound   = errors.New("can't find tweet in memory")
+	errCommentNotFound = errors.New("can't find comment in memory")
 )
 
 func NewTweetRepository() usecase.TweetRepository {
@@ -33,8 +33,8 @@ type comment struct {
 }
 
 func (t *tweetRepo) Add(_ context.Context, userID int, tweetText string) (id int, err error) {
-    id = len(t.tweets) // add to the end
-    t.tweets = append(t.tweets, entity.Tweet{
+	id = len(t.tweets) // add to the end
+	t.tweets = append(t.tweets, entity.Tweet{
 		ID:        id,
 		UserID:    userID,
 		Text:      tweetText,
@@ -55,23 +55,23 @@ func (t *tweetRepo) Update(_ context.Context, tweetID int, newText string) error
 
 func (t *tweetRepo) AddComment(_ context.Context, userID, tweetID int, commentText string) (id int, err error) {
 	var c comment
-    c.ID = len(t.comments)
-    c.UserID = userID
-    c.tweetID = tweetID
-    c.Text = commentText
+	c.ID = len(t.comments)
+	c.UserID = userID
+	c.tweetID = tweetID
+	c.Text = commentText
 
 	t.comments = append(t.comments, c)
 	return c.ID, nil
 }
 
 func (t *tweetRepo) UpdateComment(_ context.Context, commentID int, newText string) error {
-    for i := range t.comments {
-        if t.comments[i].ID == commentID {
-            t.comments[i].Text = newText
-            return nil
-        }
-    }
-    return errCommentNotFound
+	for i := range t.comments {
+		if t.comments[i].ID == commentID {
+			t.comments[i].Text = newText
+			return nil
+		}
+	}
+	return errCommentNotFound
 }
 
 func (t *tweetRepo) GetLatest(_ context.Context, userID int, limit int) ([]entity.Tweet, error) {

@@ -43,13 +43,13 @@ func (t *tweetRepo) Update(ctx context.Context, tweetID int, newText string) err
 }
 
 func (t *tweetRepo) AddComment(ctx context.Context, userID, tweetID int, commentText string) (id int, err error) {
-    row := t.db.QueryRowContext(ctx, `
+	row := t.db.QueryRowContext(ctx, `
         INSERT INTO comment (user_id, tweet_id, text)
         VALUES ($1, $2, $3)
         RETURNING id
     `, userID, tweetID, commentText)
 
-    if err := row.Scan(&id); err != nil {
+	if err := row.Scan(&id); err != nil {
 		return 0, fmt.Errorf("insert comment to db: %w", err)
 	}
 	return id, nil

@@ -22,8 +22,8 @@ const (
 
 // Process is a simple interface for long running processes
 type Process interface {
-    // Name will be logged on start
-    Name() string
+	// Name will be logged on start
+	Name() string
 	// Run blocks until application stops
 	Run() error
 	// Shutdown will gracefully shutdown process
@@ -44,7 +44,7 @@ type grpcProc struct {
 }
 
 func (g *grpcProc) Name() string {
-    return "GRPC " + g.addr
+	return "GRPC " + g.addr
 }
 
 func (g *grpcProc) Run() error {
@@ -100,7 +100,7 @@ type httpProc struct {
 }
 
 func (h *httpProc) Name() string {
-    return "HTTP " + h.addr
+	return "HTTP " + h.addr
 }
 
 func (h *httpProc) Run() error {
@@ -169,11 +169,11 @@ func Prometheus(addr string) Process {
 
 type prometheusProc struct {
 	// embed to change process type in logging (%T used)
-    httpProc
+	httpProc
 }
 
 func (p *prometheusProc) Name() string {
-    return "Prometheus " + p.httpProc.addr
+	return "Prometheus " + p.httpProc.addr
 }
 
 // ------------------------ GRPC UI ------------------------
@@ -194,12 +194,12 @@ func GRPCUI(addr, appServerAddr string) Process {
 }
 
 type grpcuiProc struct {
-    httpProc
+	httpProc
 	appServerAddr string
 }
 
 func (g *grpcuiProc) Name() string {
-    return "GRPC UI " + g.httpProc.addr
+	return "GRPC UI " + g.httpProc.addr
 }
 
 func (g *grpcuiProc) Run() error {

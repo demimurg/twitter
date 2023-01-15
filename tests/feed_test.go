@@ -2,7 +2,7 @@ package tests
 
 import (
 	"github.com/demimurg/twitter/pkg/proto"
-    "time"
+	"time"
 )
 
 // TestFeed for basic operations, subtests can't be run separate
@@ -77,9 +77,9 @@ func (s *endToEndTestSuite) TestFeed() {
 		resp, err := s.cli.AddComment(ctx, &proto.AddCommentRequest{
 			UserId: amberID, TweetId: elonTweetID, Text: "wanna go on a date?",
 		})
-        s.Require().NoError(err)
+		s.Require().NoError(err)
 
-        <-time.After(time.Millisecond) // waits elon response
+		<-time.After(time.Millisecond) // waits elon response
 		_, err = s.cli.UpdateComment(ctx, &proto.UpdateCommentRequest{
 			UserId: amberID, CommentId: resp.CommentId, NewText: "nevermind, idiot.",
 		})

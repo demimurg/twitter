@@ -68,7 +68,7 @@ func TestUserProfiler_Register(t *testing.T) {
 					Expect(ctx, "elon.musk@twitter.com").
 					Return(errors.New("sorry, scam client is down"))
 				// problem with scam client doesn't stop us to go here
-				// it's called gracefull degradation
+				// it's called graceful degradation
 				m.UserRepositoryMock.AddMock.
 					Expect(ctx, "Elon Musk", "elon.musk@twitter.com", "", date(1971, 6, 28)).
 					Return(1, nil)

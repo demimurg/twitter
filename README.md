@@ -1,4 +1,5 @@
 [![codecov](https://codecov.io/github/demimurg/twitter/branch/main/graph/badge.svg?token=NMZND94SUY)](https://codecov.io/github/demimurg/twitter)
+[![Go Report Card](https://goreportcard.com/badge/github.com/demimurg/twitter)](https://goreportcard.com/report/github.com/demimurg/twitter)
 
 ## Testing
 
