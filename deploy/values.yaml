@@ -1,12 +1,24 @@
 image: ghcr.io/demimurg/twitter
 replicas: 1
+host: "<secret>"
 
 env:
   LOG_LEVEL: info
   MIGRATIONS_DIR: "./migrations"
-  POSTGRESQL_DSN: "host=10.152.183.70 user=postgres password=I0bE7OROzR"
+  POSTGRESQL_DSN: "<secret>"
 
-global:
-  storageClass: manual
+  # --------------------------------------- INFRA ---------------------------------------
+
+postgresql:
+  fullnameOverride: postgresql
   auth:
-    postgresPassword: I0bE7OROzR
+    postgresPassword: "<secret>"
+  primary:
+    persistence:
+      size: 10Gi
+
+grafana:
+  fullnameOverride: grafana
+  persistence:
+    enabled: true
+    size: 2Gi

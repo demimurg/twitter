@@ -6,3 +6,9 @@ dependencies:
   - name: postgresql
     version: "12.1.9"
     repository: "https://charts.bitnami.com/bitnami"
+  - name: grafana
+    version: "6.50.0"
+    repository: "https://grafana.github.io/helm-charts"
+  - name: loki-stack
+    version: "2.8.9"
+    repository: "https://grafana.github.io/helm-charts"

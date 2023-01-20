@@ -66,4 +66,8 @@ jobs:
             mkdir ~/.kube && touch ~/.kube/config
             echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ~/.kube/config
       - name: Deploy helm chart
-        run: helm upgrade --install twitter ./deploy
+        run: >
+            helm upgrade --install twitter ./deploy
+            --set env.POSTGRESQL_DSN=${{ secrets.CHART_PG_DSN }}
+            --set host=${{ secrets.CHART_HOST }}
+            --set postgresql.auth.postgresPassword=${{ secrets.CHART_PG_PASSWORD }}
