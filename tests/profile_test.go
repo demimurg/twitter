@@ -35,11 +35,8 @@ func (s *endToEndTestSuite) TestAuth() {
 		})
 		s.Require().NoError(err)
 
-		s.Equal(gretaID, resp.UserId)
-		s.Equal(gretaProfile.FullName, resp.UserProfile.FullName)
-		s.Equal(gretaProfile.Email, resp.UserProfile.Email)
-		s.Equal(gretaProfile.Caption, resp.UserProfile.Caption)
-		s.Equal(gretaProfile.DateOfBirth.AsTime(), resp.UserProfile.DateOfBirth.AsTime())
+		s.Equal(gretaID, resp.UserId, "check greta id")
+		s.EqualProto(gretaProfile, resp.UserProfile, "check greta profile")
 	})
 
 	s.Run("greta set new caption for profile", func() {

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/demimurg/twitter/internal/entity"
+
 	"github.com/demimurg/twitter/internal/usecase"
 	"github.com/demimurg/twitter/pkg/proto"
 	"google.golang.org/grpc/codes"
@@ -77,10 +79,35 @@ func (t *twitter) RecommendUsers(ctx context.Context, req *proto.RecommendUsersR
 	if err != nil {
 		return nil, err
 	}
+	return &proto.RecommendUsersResponse{
+		Users: convertToUserProfiles(users),
+	}, nil
+}
 
+func (t *twitter) GetFollowing(ctx context.Context, req *proto.GetFollowingRequest) (*proto.GetFollowingResponse, error) {
+	users, err := t.fm.GetFollowing(ctx, int(req.UserId))
+	if err != nil {
+		return nil, err
+	}
+	return &proto.GetFollowingResponse{
+		Users: convertToUserProfiles(users),
+	}, nil
+}
+
+func (t *twitter) GetFollowers(ctx context.Context, req *proto.GetFollowersRequest) (*proto.GetFollowersResponse, error) {
+	users, err := t.fm.GetFollowers(ctx, int(req.UserId))
+	if err != nil {
+		return nil, err
+	}
+	return &proto.GetFollowersResponse{
+		Users: convertToUserProfiles(users),
+	}, nil
+}
+
+func convertToUserProfiles(users []entity.User) []*proto.UserProfile {
 	protoUsers := make([]*proto.UserProfile, 0, len(users))
 	for _, user := range users {
 		protoUsers = append(protoUsers, convertToUserProfile(&user))
 	}
-	return &proto.RecommendUsersResponse{Users: protoUsers}, nil
+	return protoUsers
 }

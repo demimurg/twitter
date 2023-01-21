@@ -8,7 +8,7 @@ import (
 	"github.com/demimurg/twitter/pkg/log"
 	"github.com/demimurg/twitter/pkg/proto"
 	"github.com/google/uuid"
-	"github.com/grpc-ecosystem/go-grpc-middleware/validator"
+	grpc_validator "github.com/grpc-ecosystem/go-grpc-middleware/validator"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

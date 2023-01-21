@@ -9,13 +9,17 @@ service Twitter {
     rpc AddComment(AddCommentRequest) returns (AddCommentResponse);
     rpc UpdateTweet(UpdateTweetRequest) returns (UpdateTweetResponse);
     rpc UpdateComment(UpdateCommentRequest) returns (UpdateCommentResponse);
+    
     rpc GetNewsFeed(GetNewsFeedRequest) returns (GetNewsFeedResponse);
+    rpc Follow(FollowRequest) returns (FollowResponse);
+    rpc Unfollow(UnfollowRequest) returns (UnfollowResponse);
+    rpc GetFollowing(GetFollowingRequest) returns (GetFollowingResponse);
+    rpc GetFollowers(GetFollowersRequest) returns (GetFollowersResponse);
+    rpc RecommendUsers(RecommendUsersRequest) returns (RecommendUsersResponse);
+    
     rpc Register(RegisterRequest) returns (RegisterResponse);
     rpc UpdateCaption(UpdateCaptionRequest) returns (UpdateCaptionResponse);
     rpc Login(LoginRequest) returns (LoginResponse);
-    rpc Follow(FollowRequest) returns (FollowResponse);
-    rpc Unfollow(UnfollowRequest) returns (UnfollowResponse);
-    rpc RecommendUsers(RecommendUsersRequest) returns (RecommendUsersResponse);
 }
 
 // TODO: user id should be removed after auth with jwt will be implemented
@@ -118,5 +122,21 @@ message RecommendUsersRequest {
 };
 
 message RecommendUsersResponse {
+    repeated UserProfile users = 1;
+};
+
+message GetFollowingRequest {
+    int64 user_id = 1;
+};
+
+message GetFollowingResponse {
+    repeated UserProfile users = 1;
+};
+
+message GetFollowersRequest {
+    int64 user_id = 1;
+};
+
+message GetFollowersResponse {
     repeated UserProfile users = 1;
 };

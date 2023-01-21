@@ -23,17 +23,17 @@ type FollowerRepositoryMock struct {
 	beforeAddCounter uint64
 	AddMock          mFollowerRepositoryMockAdd
 
-	funcGetFollowee          func(ctx context.Context, userID int, topN int) (ia1 []int, err error)
-	inspectFuncGetFollowee   func(ctx context.Context, userID int, topN int)
-	afterGetFolloweeCounter  uint64
-	beforeGetFolloweeCounter uint64
-	GetFolloweeMock          mFollowerRepositoryMockGetFollowee
-
 	funcGetFollowers          func(ctx context.Context, userID int, topN int) (ia1 []int, err error)
 	inspectFuncGetFollowers   func(ctx context.Context, userID int, topN int)
 	afterGetFollowersCounter  uint64
 	beforeGetFollowersCounter uint64
 	GetFollowersMock          mFollowerRepositoryMockGetFollowers
+
+	funcGetFollowing          func(ctx context.Context, userID int, topN int) (ia1 []int, err error)
+	inspectFuncGetFollowing   func(ctx context.Context, userID int, topN int)
+	afterGetFollowingCounter  uint64
+	beforeGetFollowingCounter uint64
+	GetFollowingMock          mFollowerRepositoryMockGetFollowing
 
 	funcRemove          func(ctx context.Context, followerID int, fromUserID int) (err error)
 	inspectFuncRemove   func(ctx context.Context, followerID int, fromUserID int)
@@ -52,11 +52,11 @@ func NewFollowerRepositoryMock(t minimock.Tester) *FollowerRepositoryMock {
 	m.AddMock = mFollowerRepositoryMockAdd{mock: m}
 	m.AddMock.callArgs = []*FollowerRepositoryMockAddParams{}
 
-	m.GetFolloweeMock = mFollowerRepositoryMockGetFollowee{mock: m}
-	m.GetFolloweeMock.callArgs = []*FollowerRepositoryMockGetFolloweeParams{}
-
 	m.GetFollowersMock = mFollowerRepositoryMockGetFollowers{mock: m}
 	m.GetFollowersMock.callArgs = []*FollowerRepositoryMockGetFollowersParams{}
+
+	m.GetFollowingMock = mFollowerRepositoryMockGetFollowing{mock: m}
+	m.GetFollowingMock.callArgs = []*FollowerRepositoryMockGetFollowingParams{}
 
 	m.RemoveMock = mFollowerRepositoryMockRemove{mock: m}
 	m.RemoveMock.callArgs = []*FollowerRepositoryMockRemoveParams{}
@@ -281,224 +281,6 @@ func (m *FollowerRepositoryMock) MinimockAddInspect() {
 	}
 }
 
-type mFollowerRepositoryMockGetFollowee struct {
-	mock               *FollowerRepositoryMock
-	defaultExpectation *FollowerRepositoryMockGetFolloweeExpectation
-	expectations       []*FollowerRepositoryMockGetFolloweeExpectation
-
-	callArgs []*FollowerRepositoryMockGetFolloweeParams
-	mutex    sync.RWMutex
-}
-
-// FollowerRepositoryMockGetFolloweeExpectation specifies expectation struct of the FollowerRepository.GetFollowee
-type FollowerRepositoryMockGetFolloweeExpectation struct {
-	mock    *FollowerRepositoryMock
-	params  *FollowerRepositoryMockGetFolloweeParams
-	results *FollowerRepositoryMockGetFolloweeResults
-	Counter uint64
-}
-
-// FollowerRepositoryMockGetFolloweeParams contains parameters of the FollowerRepository.GetFollowee
-type FollowerRepositoryMockGetFolloweeParams struct {
-	ctx    context.Context
-	userID int
-	topN   int
-}
-
-// FollowerRepositoryMockGetFolloweeResults contains results of the FollowerRepository.GetFollowee
-type FollowerRepositoryMockGetFolloweeResults struct {
-	ia1 []int
-	err error
-}
-
-// Expect sets up expected params for FollowerRepository.GetFollowee
-func (mmGetFollowee *mFollowerRepositoryMockGetFollowee) Expect(ctx context.Context, userID int, topN int) *mFollowerRepositoryMockGetFollowee {
-	if mmGetFollowee.mock.funcGetFollowee != nil {
-		mmGetFollowee.mock.t.Fatalf("FollowerRepositoryMock.GetFollowee mock is already set by Set")
-	}
-
-	if mmGetFollowee.defaultExpectation == nil {
-		mmGetFollowee.defaultExpectation = &FollowerRepositoryMockGetFolloweeExpectation{}
-	}
-
-	mmGetFollowee.defaultExpectation.params = &FollowerRepositoryMockGetFolloweeParams{ctx, userID, topN}
-	for _, e := range mmGetFollowee.expectations {
-		if minimock.Equal(e.params, mmGetFollowee.defaultExpectation.params) {
-			mmGetFollowee.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetFollowee.defaultExpectation.params)
-		}
-	}
-
-	return mmGetFollowee
-}
-
-// Inspect accepts an inspector function that has same arguments as the FollowerRepository.GetFollowee
-func (mmGetFollowee *mFollowerRepositoryMockGetFollowee) Inspect(f func(ctx context.Context, userID int, topN int)) *mFollowerRepositoryMockGetFollowee {
-	if mmGetFollowee.mock.inspectFuncGetFollowee != nil {
-		mmGetFollowee.mock.t.Fatalf("Inspect function is already set for FollowerRepositoryMock.GetFollowee")
-	}
-
-	mmGetFollowee.mock.inspectFuncGetFollowee = f
-
-	return mmGetFollowee
-}
-
-// Return sets up results that will be returned by FollowerRepository.GetFollowee
-func (mmGetFollowee *mFollowerRepositoryMockGetFollowee) Return(ia1 []int, err error) *FollowerRepositoryMock {
-	if mmGetFollowee.mock.funcGetFollowee != nil {
-		mmGetFollowee.mock.t.Fatalf("FollowerRepositoryMock.GetFollowee mock is already set by Set")
-	}
-
-	if mmGetFollowee.defaultExpectation == nil {
-		mmGetFollowee.defaultExpectation = &FollowerRepositoryMockGetFolloweeExpectation{mock: mmGetFollowee.mock}
-	}
-	mmGetFollowee.defaultExpectation.results = &FollowerRepositoryMockGetFolloweeResults{ia1, err}
-	return mmGetFollowee.mock
-}
-
-// Set uses given function f to mock the FollowerRepository.GetFollowee method
-func (mmGetFollowee *mFollowerRepositoryMockGetFollowee) Set(f func(ctx context.Context, userID int, topN int) (ia1 []int, err error)) *FollowerRepositoryMock {
-	if mmGetFollowee.defaultExpectation != nil {
-		mmGetFollowee.mock.t.Fatalf("Default expectation is already set for the FollowerRepository.GetFollowee method")
-	}
-
-	if len(mmGetFollowee.expectations) > 0 {
-		mmGetFollowee.mock.t.Fatalf("Some expectations are already set for the FollowerRepository.GetFollowee method")
-	}
-
-	mmGetFollowee.mock.funcGetFollowee = f
-	return mmGetFollowee.mock
-}
-
-// When sets expectation for the FollowerRepository.GetFollowee which will trigger the result defined by the following
-// Then helper
-func (mmGetFollowee *mFollowerRepositoryMockGetFollowee) When(ctx context.Context, userID int, topN int) *FollowerRepositoryMockGetFolloweeExpectation {
-	if mmGetFollowee.mock.funcGetFollowee != nil {
-		mmGetFollowee.mock.t.Fatalf("FollowerRepositoryMock.GetFollowee mock is already set by Set")
-	}
-
-	expectation := &FollowerRepositoryMockGetFolloweeExpectation{
-		mock:   mmGetFollowee.mock,
-		params: &FollowerRepositoryMockGetFolloweeParams{ctx, userID, topN},
-	}
-	mmGetFollowee.expectations = append(mmGetFollowee.expectations, expectation)
-	return expectation
-}
-
-// Then sets up FollowerRepository.GetFollowee return parameters for the expectation previously defined by the When method
-func (e *FollowerRepositoryMockGetFolloweeExpectation) Then(ia1 []int, err error) *FollowerRepositoryMock {
-	e.results = &FollowerRepositoryMockGetFolloweeResults{ia1, err}
-	return e.mock
-}
-
-// GetFollowee implements usecase.FollowerRepository
-func (mmGetFollowee *FollowerRepositoryMock) GetFollowee(ctx context.Context, userID int, topN int) (ia1 []int, err error) {
-	mm_atomic.AddUint64(&mmGetFollowee.beforeGetFolloweeCounter, 1)
-	defer mm_atomic.AddUint64(&mmGetFollowee.afterGetFolloweeCounter, 1)
-
-	if mmGetFollowee.inspectFuncGetFollowee != nil {
-		mmGetFollowee.inspectFuncGetFollowee(ctx, userID, topN)
-	}
-
-	mm_params := &FollowerRepositoryMockGetFolloweeParams{ctx, userID, topN}
-
-	// Record call args
-	mmGetFollowee.GetFolloweeMock.mutex.Lock()
-	mmGetFollowee.GetFolloweeMock.callArgs = append(mmGetFollowee.GetFolloweeMock.callArgs, mm_params)
-	mmGetFollowee.GetFolloweeMock.mutex.Unlock()
-
-	for _, e := range mmGetFollowee.GetFolloweeMock.expectations {
-		if minimock.Equal(e.params, mm_params) {
-			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.ia1, e.results.err
-		}
-	}
-
-	if mmGetFollowee.GetFolloweeMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmGetFollowee.GetFolloweeMock.defaultExpectation.Counter, 1)
-		mm_want := mmGetFollowee.GetFolloweeMock.defaultExpectation.params
-		mm_got := FollowerRepositoryMockGetFolloweeParams{ctx, userID, topN}
-		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmGetFollowee.t.Errorf("FollowerRepositoryMock.GetFollowee got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
-		}
-
-		mm_results := mmGetFollowee.GetFolloweeMock.defaultExpectation.results
-		if mm_results == nil {
-			mmGetFollowee.t.Fatal("No results are set for the FollowerRepositoryMock.GetFollowee")
-		}
-		return (*mm_results).ia1, (*mm_results).err
-	}
-	if mmGetFollowee.funcGetFollowee != nil {
-		return mmGetFollowee.funcGetFollowee(ctx, userID, topN)
-	}
-	mmGetFollowee.t.Fatalf("Unexpected call to FollowerRepositoryMock.GetFollowee. %v %v %v", ctx, userID, topN)
-	return
-}
-
-// GetFolloweeAfterCounter returns a count of finished FollowerRepositoryMock.GetFollowee invocations
-func (mmGetFollowee *FollowerRepositoryMock) GetFolloweeAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmGetFollowee.afterGetFolloweeCounter)
-}
-
-// GetFolloweeBeforeCounter returns a count of FollowerRepositoryMock.GetFollowee invocations
-func (mmGetFollowee *FollowerRepositoryMock) GetFolloweeBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmGetFollowee.beforeGetFolloweeCounter)
-}
-
-// Calls returns a list of arguments used in each call to FollowerRepositoryMock.GetFollowee.
-// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmGetFollowee *mFollowerRepositoryMockGetFollowee) Calls() []*FollowerRepositoryMockGetFolloweeParams {
-	mmGetFollowee.mutex.RLock()
-
-	argCopy := make([]*FollowerRepositoryMockGetFolloweeParams, len(mmGetFollowee.callArgs))
-	copy(argCopy, mmGetFollowee.callArgs)
-
-	mmGetFollowee.mutex.RUnlock()
-
-	return argCopy
-}
-
-// MinimockGetFolloweeDone returns true if the count of the GetFollowee invocations corresponds
-// the number of defined expectations
-func (m *FollowerRepositoryMock) MinimockGetFolloweeDone() bool {
-	for _, e := range m.GetFolloweeMock.expectations {
-		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			return false
-		}
-	}
-
-	// if default expectation was set then invocations count should be greater than zero
-	if m.GetFolloweeMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetFolloweeCounter) < 1 {
-		return false
-	}
-	// if func was set then invocations count should be greater than zero
-	if m.funcGetFollowee != nil && mm_atomic.LoadUint64(&m.afterGetFolloweeCounter) < 1 {
-		return false
-	}
-	return true
-}
-
-// MinimockGetFolloweeInspect logs each unmet expectation
-func (m *FollowerRepositoryMock) MinimockGetFolloweeInspect() {
-	for _, e := range m.GetFolloweeMock.expectations {
-		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to FollowerRepositoryMock.GetFollowee with params: %#v", *e.params)
-		}
-	}
-
-	// if default expectation was set then invocations count should be greater than zero
-	if m.GetFolloweeMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetFolloweeCounter) < 1 {
-		if m.GetFolloweeMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to FollowerRepositoryMock.GetFollowee")
-		} else {
-			m.t.Errorf("Expected call to FollowerRepositoryMock.GetFollowee with params: %#v", *m.GetFolloweeMock.defaultExpectation.params)
-		}
-	}
-	// if func was set then invocations count should be greater than zero
-	if m.funcGetFollowee != nil && mm_atomic.LoadUint64(&m.afterGetFolloweeCounter) < 1 {
-		m.t.Error("Expected call to FollowerRepositoryMock.GetFollowee")
-	}
-}
-
 type mFollowerRepositoryMockGetFollowers struct {
 	mock               *FollowerRepositoryMock
 	defaultExpectation *FollowerRepositoryMockGetFollowersExpectation
@@ -714,6 +496,224 @@ func (m *FollowerRepositoryMock) MinimockGetFollowersInspect() {
 	// if func was set then invocations count should be greater than zero
 	if m.funcGetFollowers != nil && mm_atomic.LoadUint64(&m.afterGetFollowersCounter) < 1 {
 		m.t.Error("Expected call to FollowerRepositoryMock.GetFollowers")
+	}
+}
+
+type mFollowerRepositoryMockGetFollowing struct {
+	mock               *FollowerRepositoryMock
+	defaultExpectation *FollowerRepositoryMockGetFollowingExpectation
+	expectations       []*FollowerRepositoryMockGetFollowingExpectation
+
+	callArgs []*FollowerRepositoryMockGetFollowingParams
+	mutex    sync.RWMutex
+}
+
+// FollowerRepositoryMockGetFollowingExpectation specifies expectation struct of the FollowerRepository.GetFollowing
+type FollowerRepositoryMockGetFollowingExpectation struct {
+	mock    *FollowerRepositoryMock
+	params  *FollowerRepositoryMockGetFollowingParams
+	results *FollowerRepositoryMockGetFollowingResults
+	Counter uint64
+}
+
+// FollowerRepositoryMockGetFollowingParams contains parameters of the FollowerRepository.GetFollowing
+type FollowerRepositoryMockGetFollowingParams struct {
+	ctx    context.Context
+	userID int
+	topN   int
+}
+
+// FollowerRepositoryMockGetFollowingResults contains results of the FollowerRepository.GetFollowing
+type FollowerRepositoryMockGetFollowingResults struct {
+	ia1 []int
+	err error
+}
+
+// Expect sets up expected params for FollowerRepository.GetFollowing
+func (mmGetFollowing *mFollowerRepositoryMockGetFollowing) Expect(ctx context.Context, userID int, topN int) *mFollowerRepositoryMockGetFollowing {
+	if mmGetFollowing.mock.funcGetFollowing != nil {
+		mmGetFollowing.mock.t.Fatalf("FollowerRepositoryMock.GetFollowing mock is already set by Set")
+	}
+
+	if mmGetFollowing.defaultExpectation == nil {
+		mmGetFollowing.defaultExpectation = &FollowerRepositoryMockGetFollowingExpectation{}
+	}
+
+	mmGetFollowing.defaultExpectation.params = &FollowerRepositoryMockGetFollowingParams{ctx, userID, topN}
+	for _, e := range mmGetFollowing.expectations {
+		if minimock.Equal(e.params, mmGetFollowing.defaultExpectation.params) {
+			mmGetFollowing.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetFollowing.defaultExpectation.params)
+		}
+	}
+
+	return mmGetFollowing
+}
+
+// Inspect accepts an inspector function that has same arguments as the FollowerRepository.GetFollowing
+func (mmGetFollowing *mFollowerRepositoryMockGetFollowing) Inspect(f func(ctx context.Context, userID int, topN int)) *mFollowerRepositoryMockGetFollowing {
+	if mmGetFollowing.mock.inspectFuncGetFollowing != nil {
+		mmGetFollowing.mock.t.Fatalf("Inspect function is already set for FollowerRepositoryMock.GetFollowing")
+	}
+
+	mmGetFollowing.mock.inspectFuncGetFollowing = f
+
+	return mmGetFollowing
+}
+
+// Return sets up results that will be returned by FollowerRepository.GetFollowing
+func (mmGetFollowing *mFollowerRepositoryMockGetFollowing) Return(ia1 []int, err error) *FollowerRepositoryMock {
+	if mmGetFollowing.mock.funcGetFollowing != nil {
+		mmGetFollowing.mock.t.Fatalf("FollowerRepositoryMock.GetFollowing mock is already set by Set")
+	}
+
+	if mmGetFollowing.defaultExpectation == nil {
+		mmGetFollowing.defaultExpectation = &FollowerRepositoryMockGetFollowingExpectation{mock: mmGetFollowing.mock}
+	}
+	mmGetFollowing.defaultExpectation.results = &FollowerRepositoryMockGetFollowingResults{ia1, err}
+	return mmGetFollowing.mock
+}
+
+// Set uses given function f to mock the FollowerRepository.GetFollowing method
+func (mmGetFollowing *mFollowerRepositoryMockGetFollowing) Set(f func(ctx context.Context, userID int, topN int) (ia1 []int, err error)) *FollowerRepositoryMock {
+	if mmGetFollowing.defaultExpectation != nil {
+		mmGetFollowing.mock.t.Fatalf("Default expectation is already set for the FollowerRepository.GetFollowing method")
+	}
+
+	if len(mmGetFollowing.expectations) > 0 {
+		mmGetFollowing.mock.t.Fatalf("Some expectations are already set for the FollowerRepository.GetFollowing method")
+	}
+
+	mmGetFollowing.mock.funcGetFollowing = f
+	return mmGetFollowing.mock
+}
+
+// When sets expectation for the FollowerRepository.GetFollowing which will trigger the result defined by the following
+// Then helper
+func (mmGetFollowing *mFollowerRepositoryMockGetFollowing) When(ctx context.Context, userID int, topN int) *FollowerRepositoryMockGetFollowingExpectation {
+	if mmGetFollowing.mock.funcGetFollowing != nil {
+		mmGetFollowing.mock.t.Fatalf("FollowerRepositoryMock.GetFollowing mock is already set by Set")
+	}
+
+	expectation := &FollowerRepositoryMockGetFollowingExpectation{
+		mock:   mmGetFollowing.mock,
+		params: &FollowerRepositoryMockGetFollowingParams{ctx, userID, topN},
+	}
+	mmGetFollowing.expectations = append(mmGetFollowing.expectations, expectation)
+	return expectation
+}
+
+// Then sets up FollowerRepository.GetFollowing return parameters for the expectation previously defined by the When method
+func (e *FollowerRepositoryMockGetFollowingExpectation) Then(ia1 []int, err error) *FollowerRepositoryMock {
+	e.results = &FollowerRepositoryMockGetFollowingResults{ia1, err}
+	return e.mock
+}
+
+// GetFollowing implements usecase.FollowerRepository
+func (mmGetFollowing *FollowerRepositoryMock) GetFollowing(ctx context.Context, userID int, topN int) (ia1 []int, err error) {
+	mm_atomic.AddUint64(&mmGetFollowing.beforeGetFollowingCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetFollowing.afterGetFollowingCounter, 1)
+
+	if mmGetFollowing.inspectFuncGetFollowing != nil {
+		mmGetFollowing.inspectFuncGetFollowing(ctx, userID, topN)
+	}
+
+	mm_params := &FollowerRepositoryMockGetFollowingParams{ctx, userID, topN}
+
+	// Record call args
+	mmGetFollowing.GetFollowingMock.mutex.Lock()
+	mmGetFollowing.GetFollowingMock.callArgs = append(mmGetFollowing.GetFollowingMock.callArgs, mm_params)
+	mmGetFollowing.GetFollowingMock.mutex.Unlock()
+
+	for _, e := range mmGetFollowing.GetFollowingMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.ia1, e.results.err
+		}
+	}
+
+	if mmGetFollowing.GetFollowingMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetFollowing.GetFollowingMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetFollowing.GetFollowingMock.defaultExpectation.params
+		mm_got := FollowerRepositoryMockGetFollowingParams{ctx, userID, topN}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetFollowing.t.Errorf("FollowerRepositoryMock.GetFollowing got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetFollowing.GetFollowingMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetFollowing.t.Fatal("No results are set for the FollowerRepositoryMock.GetFollowing")
+		}
+		return (*mm_results).ia1, (*mm_results).err
+	}
+	if mmGetFollowing.funcGetFollowing != nil {
+		return mmGetFollowing.funcGetFollowing(ctx, userID, topN)
+	}
+	mmGetFollowing.t.Fatalf("Unexpected call to FollowerRepositoryMock.GetFollowing. %v %v %v", ctx, userID, topN)
+	return
+}
+
+// GetFollowingAfterCounter returns a count of finished FollowerRepositoryMock.GetFollowing invocations
+func (mmGetFollowing *FollowerRepositoryMock) GetFollowingAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetFollowing.afterGetFollowingCounter)
+}
+
+// GetFollowingBeforeCounter returns a count of FollowerRepositoryMock.GetFollowing invocations
+func (mmGetFollowing *FollowerRepositoryMock) GetFollowingBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetFollowing.beforeGetFollowingCounter)
+}
+
+// Calls returns a list of arguments used in each call to FollowerRepositoryMock.GetFollowing.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetFollowing *mFollowerRepositoryMockGetFollowing) Calls() []*FollowerRepositoryMockGetFollowingParams {
+	mmGetFollowing.mutex.RLock()
+
+	argCopy := make([]*FollowerRepositoryMockGetFollowingParams, len(mmGetFollowing.callArgs))
+	copy(argCopy, mmGetFollowing.callArgs)
+
+	mmGetFollowing.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetFollowingDone returns true if the count of the GetFollowing invocations corresponds
+// the number of defined expectations
+func (m *FollowerRepositoryMock) MinimockGetFollowingDone() bool {
+	for _, e := range m.GetFollowingMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetFollowingMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetFollowingCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetFollowing != nil && mm_atomic.LoadUint64(&m.afterGetFollowingCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetFollowingInspect logs each unmet expectation
+func (m *FollowerRepositoryMock) MinimockGetFollowingInspect() {
+	for _, e := range m.GetFollowingMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to FollowerRepositoryMock.GetFollowing with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetFollowingMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetFollowingCounter) < 1 {
+		if m.GetFollowingMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to FollowerRepositoryMock.GetFollowing")
+		} else {
+			m.t.Errorf("Expected call to FollowerRepositoryMock.GetFollowing with params: %#v", *m.GetFollowingMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetFollowing != nil && mm_atomic.LoadUint64(&m.afterGetFollowingCounter) < 1 {
+		m.t.Error("Expected call to FollowerRepositoryMock.GetFollowing")
 	}
 }
 
@@ -939,9 +939,9 @@ func (m *FollowerRepositoryMock) MinimockFinish() {
 	if !m.minimockDone() {
 		m.MinimockAddInspect()
 
-		m.MinimockGetFolloweeInspect()
-
 		m.MinimockGetFollowersInspect()
+
+		m.MinimockGetFollowingInspect()
 
 		m.MinimockRemoveInspect()
 		m.t.FailNow()
@@ -968,7 +968,7 @@ func (m *FollowerRepositoryMock) minimockDone() bool {
 	done := true
 	return done &&
 		m.MinimockAddDone() &&
-		m.MinimockGetFolloweeDone() &&
 		m.MinimockGetFollowersDone() &&
+		m.MinimockGetFollowingDone() &&
 		m.MinimockRemoveDone()
 }

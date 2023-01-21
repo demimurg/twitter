@@ -15,6 +15,9 @@ type FeedManager interface {
 	// RemoveFollower will unsubscribe follower from new tweets of the user
 	RemoveFollower(ctx context.Context, userID, fromUserID int) error
 
+	GetFollowing(ctx context.Context, userID int) ([]entity.User, error)
+	GetFollowers(ctx context.Context, userID int) ([]entity.User, error)
+
 	AddTweet(ctx context.Context, userID int, text string) (id int, err error)
 	AddComment(ctx context.Context, userID, tweetID int, text string) (id int, err error)
 	EditTweet(ctx context.Context, tweetID int, text string) error
@@ -83,7 +86,7 @@ func (fm *feedManager) EditComment(ctx context.Context, commentID int, text stri
 }
 
 func (fm *feedManager) GetNewsFeed(ctx context.Context, userID int) ([]entity.Tweet, error) {
-	following, err := fm.followersRepo.GetFollowee(ctx, userID, 10)
+	following, err := fm.followersRepo.GetFollowing(ctx, userID, 10)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +97,7 @@ func (fm *feedManager) GetNewsFeed(ctx context.Context, userID int) ([]entity.Tw
 		if err != nil {
 			log.Error(ctx, "can't get tweets",
 				"error", err,
-				"userID", userID)
+				"user_id", userID)
 			continue
 		}
 
@@ -118,4 +121,33 @@ func (fm *feedManager) GetRecommendedUsers(ctx context.Context, userID int) ([]e
 		}
 	}
 	return recommended, nil
+}
+
+func (fm *feedManager) GetFollowing(ctx context.Context, userID int) ([]entity.User, error) {
+	ids, err := fm.followersRepo.GetFollowing(ctx, userID, 100)
+	if err != nil {
+		return nil, err
+	}
+	return fm.getUsers(ctx, ids), nil
+}
+func (fm *feedManager) GetFollowers(ctx context.Context, userID int) ([]entity.User, error) {
+	ids, err := fm.followersRepo.GetFollowers(ctx, userID, 100)
+	if err != nil {
+		return nil, err
+	}
+	return fm.getUsers(ctx, ids), nil
+}
+
+func (fm *feedManager) getUsers(ctx context.Context, userIDs []int) []entity.User {
+	var users = make([]entity.User, 0, len(userIDs))
+	for _, userID := range userIDs {
+		user, err := fm.usersRepo.Get(ctx, userID)
+		if err != nil {
+			log.Error(ctx, "can't get user by id",
+				"user_id", userID,
+				"error", err)
+		}
+		users = append(users, *user)
+	}
+	return users
 }

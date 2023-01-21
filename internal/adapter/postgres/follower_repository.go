@@ -39,7 +39,7 @@ func (f *followerRepo) Remove(ctx context.Context, followerID, fromUserID int) e
 	return nil
 }
 
-func (f *followerRepo) GetFollowee(ctx context.Context, userID, topN int) ([]int, error) {
+func (f *followerRepo) GetFollowing(ctx context.Context, userID, topN int) ([]int, error) {
 	rows, err := f.db.QueryContext(ctx, `
         SELECT followee_id FROM follower
         WHERE follower_id = $1 AND deleted_at IS NULL

@@ -2785,3 +2785,483 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = RecommendUsersResponseValidationError{}
+
+// Validate checks the field values on GetFollowingRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetFollowingRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetFollowingRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetFollowingRequestMultiError, or nil if none found.
+func (m *GetFollowingRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetFollowingRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UserId
+
+	if len(errors) > 0 {
+		return GetFollowingRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetFollowingRequestMultiError is an error wrapping multiple validation
+// errors returned by GetFollowingRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetFollowingRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetFollowingRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetFollowingRequestMultiError) AllErrors() []error { return m }
+
+// GetFollowingRequestValidationError is the validation error returned by
+// GetFollowingRequest.Validate if the designated constraints aren't met.
+type GetFollowingRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetFollowingRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetFollowingRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetFollowingRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetFollowingRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetFollowingRequestValidationError) ErrorName() string {
+	return "GetFollowingRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetFollowingRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetFollowingRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetFollowingRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetFollowingRequestValidationError{}
+
+// Validate checks the field values on GetFollowingResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetFollowingResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetFollowingResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetFollowingResponseMultiError, or nil if none found.
+func (m *GetFollowingResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetFollowingResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetUsers() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetFollowingResponseValidationError{
+						field:  fmt.Sprintf("Users[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetFollowingResponseValidationError{
+						field:  fmt.Sprintf("Users[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetFollowingResponseValidationError{
+					field:  fmt.Sprintf("Users[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GetFollowingResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetFollowingResponseMultiError is an error wrapping multiple validation
+// errors returned by GetFollowingResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GetFollowingResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetFollowingResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetFollowingResponseMultiError) AllErrors() []error { return m }
+
+// GetFollowingResponseValidationError is the validation error returned by
+// GetFollowingResponse.Validate if the designated constraints aren't met.
+type GetFollowingResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetFollowingResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetFollowingResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetFollowingResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetFollowingResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetFollowingResponseValidationError) ErrorName() string {
+	return "GetFollowingResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetFollowingResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetFollowingResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetFollowingResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetFollowingResponseValidationError{}
+
+// Validate checks the field values on GetFollowersRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetFollowersRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetFollowersRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetFollowersRequestMultiError, or nil if none found.
+func (m *GetFollowersRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetFollowersRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UserId
+
+	if len(errors) > 0 {
+		return GetFollowersRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetFollowersRequestMultiError is an error wrapping multiple validation
+// errors returned by GetFollowersRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetFollowersRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetFollowersRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetFollowersRequestMultiError) AllErrors() []error { return m }
+
+// GetFollowersRequestValidationError is the validation error returned by
+// GetFollowersRequest.Validate if the designated constraints aren't met.
+type GetFollowersRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetFollowersRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetFollowersRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetFollowersRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetFollowersRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetFollowersRequestValidationError) ErrorName() string {
+	return "GetFollowersRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetFollowersRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetFollowersRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetFollowersRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetFollowersRequestValidationError{}
+
+// Validate checks the field values on GetFollowersResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetFollowersResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetFollowersResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetFollowersResponseMultiError, or nil if none found.
+func (m *GetFollowersResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetFollowersResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetUsers() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetFollowersResponseValidationError{
+						field:  fmt.Sprintf("Users[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetFollowersResponseValidationError{
+						field:  fmt.Sprintf("Users[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetFollowersResponseValidationError{
+					field:  fmt.Sprintf("Users[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GetFollowersResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetFollowersResponseMultiError is an error wrapping multiple validation
+// errors returned by GetFollowersResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GetFollowersResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetFollowersResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetFollowersResponseMultiError) AllErrors() []error { return m }
+
+// GetFollowersResponseValidationError is the validation error returned by
+// GetFollowersResponse.Validate if the designated constraints aren't met.
+type GetFollowersResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetFollowersResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetFollowersResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetFollowersResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetFollowersResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetFollowersResponseValidationError) ErrorName() string {
+	return "GetFollowersResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetFollowersResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetFollowersResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetFollowersResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetFollowersResponseValidationError{}

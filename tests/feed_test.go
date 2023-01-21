@@ -1,8 +1,9 @@
 package tests
 
 import (
-	"github.com/demimurg/twitter/pkg/proto"
 	"time"
+
+	"github.com/demimurg/twitter/pkg/proto"
 )
 
 // TestFeed for basic operations, subtests can't be run separate
@@ -10,15 +11,17 @@ import (
 func (s *endToEndTestSuite) TestFeed() {
 	var (
 		elonID      int64
+		elonProfile *proto.UserProfile
 		elonTweetID int64
 		elonTweet   = "hey guys, should i buy twitter?"
 	)
 	s.Run("first elon musk tweet", func() {
-		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{User: &proto.UserProfile{
+		elonProfile = &proto.UserProfile{
 			FullName:    "Elon Musk",
 			Email:       "elonID@tesla.us",
 			DateOfBirth: date(1971, 06, 28),
-		}})
+		}
+		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{User: elonProfile})
 		s.NoError(err)
 		elonID = resp.UserId
 
@@ -47,23 +50,33 @@ func (s *endToEndTestSuite) TestFeed() {
 
 	var amberID int64
 	s.Run("elon have new follower amber", func() {
-		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{User: &proto.UserProfile{
+		amberProfile := &proto.UserProfile{
 			FullName:    "Amber Heard",
 			Email:       "makeyou@cry.com",
 			DateOfBirth: date(1986, 04, 22),
-		}})
-		s.NoError(err)
+		}
+		resp, err := s.cli.Register(ctx, &proto.RegisterRequest{User: amberProfile})
+		s.Require().NoError(err)
 		amberID = resp.UserId
 		s.NotEqual(elonID, amberID, "different users should have different ids")
 
 		_, err = s.cli.Follow(ctx, &proto.FollowRequest{
-			UserId:        elonID,
-			NewFollowerId: amberID,
+			UserId: elonID, NewFollowerId: amberID,
 		})
-		s.NoError(err)
+		s.Require().NoError(err, "ember send follow to elon")
+
+		fresp, err := s.cli.GetFollowers(ctx, &proto.GetFollowersRequest{UserId: elonID})
+		s.Require().NoError(err, "get elon followers")
+		s.Require().Len(fresp.Users, 1, "elon followed only be amber")
+		s.EqualProto(amberProfile, fresp.Users[0], "follower user equal amber profile")
 	})
 
 	s.Run("amber checks the news feed", func() {
+		fresp, err := s.cli.GetFollowing(ctx, &proto.GetFollowingRequest{UserId: amberID})
+		s.Require().NoError(err, "get users that amber following")
+		s.Require().Len(fresp.Users, 1, "amber should folow only elon")
+		s.EqualProto(elonProfile, fresp.Users[0], "followed user equal elon profile")
+
 		resp, err := s.cli.GetNewsFeed(ctx, &proto.GetNewsFeedRequest{
 			UserId: amberID, Limit: 10,
 		})

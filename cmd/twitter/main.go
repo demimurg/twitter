@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+
 	"github.com/caarlos0/env/v6"
 
 	"github.com/demimurg/twitter/internal/adapter/postgres"

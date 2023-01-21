@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/demimurg/twitter/internal/usecase"
 	"github.com/demimurg/twitter/pkg/grace"
 	"github.com/demimurg/twitter/pkg/proto"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -19,6 +19,23 @@ import (
 )
 
 func TestE2E(t *testing.T) {
+	suite.Run(t, &endToEndTestSuite{})
+}
+
+type endToEndTestSuite struct {
+	suite.Suite
+	// twitter client connected to grpc server
+	cli proto.TwitterClient
+	// this is the running process of twitter grpc server
+	srv grace.Process
+}
+
+func (s *endToEndTestSuite) SetupSuite() {
+	if s.srv != nil {
+		err := s.srv.Shutdown()
+		s.Require().NoError(err, "shutdown server")
+	}
+
 	scamClient := scamdetector.NewDummyClient()
 	userRepo := inmem.NewUserRepository()
 	tweetRepo := inmem.NewTweetRepository()
@@ -27,21 +44,26 @@ func TestE2E(t *testing.T) {
 	feedManager := usecase.NewFeedManager(userRepo, followerRepo, tweetRepo)
 	userProfiler := usecase.NewUserProfiler(userRepo, scamClient)
 
-	srv := grpcsrv.NewTwitter(feedManager, userProfiler)
+	s.srv = grace.GRPC(grpcsrv.NewTwitter(feedManager, userProfiler), ":8080")
 	go func() {
-		err := grace.GRPC(srv, ":8080").Run()
-		require.NoError(t, err)
+		err := s.srv.Run()
+		s.Require().NoError(err, "shutdown server")
 	}()
-	<-time.After(100 * time.Millisecond)
+
+	<-time.After(50 * time.Millisecond)
 
 	conn, err := grpc.Dial("localhost:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	require.NoError(t, err)
-	suite.Run(t, &endToEndTestSuite{cli: proto.NewTwitterClient(conn)})
+	s.Require().NoError(err, "dial server")
+	s.cli = proto.NewTwitterClient(conn)
 }
 
-type endToEndTestSuite struct {
-	suite.Suite
-	cli proto.TwitterClient
+// EqualProto makes a correct comparisons for protobuf structs
+func (s *endToEndTestSuite) EqualProto(expected, actual any, msg string) {
+	// stretchr equal func additionally compare private fields
+	// for protobuf it means that encoder temprorary data can break diff
+	expectJSON, _ := json.Marshal(expected)
+	actualJSON, _ := json.Marshal(actual)
+	s.JSONEq(string(expectJSON), string(actualJSON), msg)
 }
 
 var ctx = context.Background()

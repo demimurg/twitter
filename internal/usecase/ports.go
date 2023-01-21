@@ -31,8 +31,8 @@ type FollowerRepository interface {
 	Add(ctx context.Context, followerID, toUserID int) error
 	// Remove follower from some user
 	Remove(ctx context.Context, followerID, fromUserID int) error
-	// 	GetFollowee users with topN limit
-	GetFollowee(ctx context.Context, userID, topN int) ([]int, error)
+	// 	GetFollowing users with topN limit
+	GetFollowing(ctx context.Context, userID, topN int) ([]int, error)
 	// GetFollowers give subscribed users ids
 	GetFollowers(ctx context.Context, userID, topN int) ([]int, error)
 }
