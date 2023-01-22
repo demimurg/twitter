@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/avast/retry-go/v4"
+
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/fullstorydev/grpcui/standalone"
@@ -210,11 +212,13 @@ func (g *grpcuiProc) Run() error {
 		return fmt.Errorf("can't dial app server: %w", err)
 	}
 
-	handler, err := standalone.HandlerViaReflection(ctx, cc, cc.Target())
+	err = retry.Do(func() error {
+		g.Server.Handler, err = standalone.HandlerViaReflection(ctx, cc, cc.Target())
+		return err
+	}, retry.MaxDelay(10*time.Millisecond))
 	if err != nil {
-		return fmt.Errorf("grpcui can't init handler")
+		return fmt.Errorf("grpcui can't init handler: %w", err)
 	}
-	g.Server.Handler = handler
 
 	return g.httpProc.Run()
 }

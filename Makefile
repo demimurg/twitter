@@ -1,4 +1,4 @@
-run:  
+run:
 	go run ./cmd/twitter | jq 
 
 fmt:
@@ -8,7 +8,7 @@ lint:
 	golangci-lint run
 
 test:
-	go test ./...
+	go test -race ./...
 
 test-e2e:
 	docker compose up -d --wait

@@ -8,12 +8,16 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/grpc/reflection"
+
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 )
 
 func TestRun(t *testing.T) {
+	t.Parallel()
 	grpcSrv := grpc.NewServer()
+	reflection.Register(grpcSrv)
 	httpSrv := &http.Server{Handler: http.NewServeMux()}
 
 	var testCases = []struct {
@@ -35,25 +39,28 @@ func TestRun(t *testing.T) {
 		},
 	}
 
-	for _, test := range testCases {
-		t.Run(test.name, func(t *testing.T) {
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
 			waitForExecute := make(chan struct{})
-			grpcPort, httpPort := getPort(), getPort()
+			grpcPort, grpcuiPort, httpPort, prometheusPort := getPort(), getPort(), getPort(), getPort()
 			go func() {
 				Run(
 					GRPC(grpcSrv, grpcPort),
+					GRPCUI(grpcuiPort, "localhost"+grpcPort),
 					HTTP(httpSrv, httpPort),
+					Prometheus(prometheusPort),
 				)
 				close(waitForExecute)
 			}()
 
-			<-time.After(10 * time.Millisecond)
-			err := test.terminate()
+			<-time.After(100 * time.Millisecond)
+			err := tc.terminate()
 			require.NoError(t, err)
 
 			select {
 			case <-waitForExecute:
-				for _, port := range []string{grpcPort, httpPort} {
+				for _, port := range []string{grpcPort, grpcuiPort, httpPort, prometheusPort} {
 					// if server isn't stop, it will "address already in use" error
 					_, err := net.Listen("tcp", port)
 					require.NoError(t, err)

@@ -1,4 +1,5 @@
 //go:build e2e
+
 package tests
 
 import (
@@ -8,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/avast/retry-go/v4"
 	"github.com/demimurg/twitter/internal/adapter/postgres"
 	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/require"
@@ -31,7 +33,9 @@ func TestE2E(t *testing.T) {
 		require.NoError(t, db.Close(), "close db connection")
 	}()
 
-	err = goose.Up(db, "../migrations")
+	err = retry.Do(func() error {
+		return goose.Up(db, "../migrations")
+	})
 	require.NoError(t, err, "migrate to last schema")
 
 	scamClient := scamdetector.NewDummyClient()

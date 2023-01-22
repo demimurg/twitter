@@ -6,3 +6,5 @@
 cmd/play
 # directory for go dependencies
 vendor
+# golang code coverage report
+coverage.out

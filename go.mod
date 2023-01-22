@@ -3,6 +3,7 @@ module github.com/demimurg/twitter
 go 1.19
 
 require (
+	github.com/avast/retry-go/v4 v4.3.2
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	github.com/gojuno/minimock/v3 v3.0.10
