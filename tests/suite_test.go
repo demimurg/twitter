@@ -1,17 +1,23 @@
+//go:build e2e
 package tests
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"testing"
 	"time"
 
-	"github.com/demimurg/twitter/internal/adapter/inmem"
+	"github.com/demimurg/twitter/internal/adapter/postgres"
+	"github.com/pressly/goose/v3"
+	"github.com/stretchr/testify/require"
+
 	"github.com/demimurg/twitter/internal/adapter/scamdetector"
 	"github.com/demimurg/twitter/internal/driver/grpcsrv"
 	"github.com/demimurg/twitter/internal/usecase"
 	"github.com/demimurg/twitter/pkg/grace"
 	"github.com/demimurg/twitter/pkg/proto"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -19,42 +25,52 @@ import (
 )
 
 func TestE2E(t *testing.T) {
-	suite.Run(t, &endToEndTestSuite{})
+	db, err := sql.Open("pgx", "host=localhost user=postgres")
+	require.NoError(t, err, "connect to postgres")
+	defer func() {
+		require.NoError(t, db.Close(), "close db connection")
+	}()
+
+	err = goose.Up(db, "../migrations")
+	require.NoError(t, err, "migrate to last schema")
+
+	scamClient := scamdetector.NewDummyClient()
+	userRepo := postgres.NewUserRepository(db)
+	tweetRepo := postgres.NewTweetRepository(db)
+	followerRepo := postgres.NewFollowerRepository(db)
+
+	feedManager := usecase.NewFeedManager(userRepo, followerRepo, tweetRepo)
+	userProfiler := usecase.NewUserProfiler(userRepo, scamClient)
+
+	srv := grace.GRPC(grpcsrv.NewTwitter(feedManager, userProfiler), ":8080")
+	go func() {
+		require.NoError(t, srv.Run(), "shutdown server")
+	}()
+	defer func() {
+		require.NoError(t, srv.Shutdown(), "send shutdown signal to server")
+	}()
+
+	<-time.After(50 * time.Millisecond)
+
+	conn, err := grpc.Dial("localhost:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err, "dial server")
+	cli := proto.NewTwitterClient(conn)
+
+	suite.Run(t, &endToEndTestSuite{cli: cli, db: db})
 }
 
 type endToEndTestSuite struct {
 	suite.Suite
 	// twitter client connected to grpc server
 	cli proto.TwitterClient
-	// this is the running process of twitter grpc server
-	srv grace.Process
+	// connection to database, to clean up state after suite
+	db *sql.DB
 }
 
-func (s *endToEndTestSuite) SetupSuite() {
-	if s.srv != nil {
-		err := s.srv.Shutdown()
-		s.Require().NoError(err, "shutdown server")
-	}
+func (s *endToEndTestSuite) TearDownSuite() {
+	_, err := s.db.Exec("TRUNCATE TABLE comment, tweet, follower, users")
+	s.Require().NoError(err, "truncate db tables")
 
-	scamClient := scamdetector.NewDummyClient()
-	userRepo := inmem.NewUserRepository()
-	tweetRepo := inmem.NewTweetRepository()
-	followerRepo := inmem.NewFollowerRepository()
-
-	feedManager := usecase.NewFeedManager(userRepo, followerRepo, tweetRepo)
-	userProfiler := usecase.NewUserProfiler(userRepo, scamClient)
-
-	s.srv = grace.GRPC(grpcsrv.NewTwitter(feedManager, userProfiler), ":8080")
-	go func() {
-		err := s.srv.Run()
-		s.Require().NoError(err, "shutdown server")
-	}()
-
-	<-time.After(50 * time.Millisecond)
-
-	conn, err := grpc.Dial("localhost:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	s.Require().NoError(err, "dial server")
-	s.cli = proto.NewTwitterClient(conn)
 }
 
 // EqualProto makes a correct comparisons for protobuf structs

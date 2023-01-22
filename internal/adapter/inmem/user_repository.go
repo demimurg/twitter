@@ -21,11 +21,11 @@ type userRepo struct {
 }
 
 func (u *userRepo) Add(_ context.Context, name, email, caption string, birthDate time.Time) (int, error) {
-    for _, user := range u.users {
-        if user.Email == email {
-            return 0, usecase.ErrUserExists
-        }
-    }
+	for _, user := range u.users {
+		if user.Email == email {
+			return 0, usecase.ErrUserExists
+		}
+	}
 
 	id := len(u.users)
 	u.users = append(u.users, entity.User{
