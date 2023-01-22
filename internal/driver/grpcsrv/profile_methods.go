@@ -18,9 +18,11 @@ func (t *twitter) Register(ctx context.Context, req *proto.RegisterRequest) (*pr
 		req.User.Caption, req.User.DateOfBirth.AsTime(),
 	)
 	if err != nil {
-		if errors.Is(err, usecase.ErrValidationFailed) {
+		if errors.Is(err, usecase.ErrFakeEmail) {
 			err = status.Error(codes.InvalidArgument, err.Error())
-		}
+		} else if errors.Is(err, usecase.ErrUserExists) {
+            err = status.Error(codes.AlreadyExists, err.Error())
+        }
 		return nil, err
 	}
 	return &proto.RegisterResponse{UserId: int64(user.ID)}, nil

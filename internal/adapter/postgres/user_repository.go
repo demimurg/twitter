@@ -3,8 +3,10 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"time"
+    "errors"
+    "fmt"
+    "github.com/jackc/pgx/v5/pgconn"
+    "time"
 
 	"github.com/demimurg/twitter/internal/entity"
 	"github.com/demimurg/twitter/internal/usecase"
@@ -26,6 +28,11 @@ func (u *userRepo) Add(ctx context.Context, name, email, caption string, birthDa
     `, name, email, caption, birthDate)
 
 	if err := row.Scan(&id); err != nil {
+        var pgErr *pgconn.PgError
+        if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+            // violates unique constraint "users_email_key"
+            return 0, usecase.ErrUserExists
+        }
 		return 0, fmt.Errorf("insert user to db: %w", err)
 	}
 	return id, nil

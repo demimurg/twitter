@@ -8,6 +8,8 @@ import (
 	"github.com/demimurg/twitter/internal/entity"
 )
 
+var ErrUserExists = errors.New("user already exists")
+
 type UserRepository interface {
 	// Add will creates new user in repo and returns id assigned to it
 	Add(ctx context.Context, name, email, caption string, birthDate time.Time) (id int, err error)
