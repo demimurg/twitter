@@ -4,6 +4,8 @@ package tests
 
 import (
 	"github.com/demimurg/twitter/pkg/proto"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // TestAuth for basic operations, subtests can't be run separate
@@ -52,5 +54,17 @@ func (s *endToEndTestSuite) TestAuth() {
 		})
 		s.Require().NoError(err)
 		s.Equal(callForChaos, resp.UserProfile.Caption)
+	})
+
+	s.Run("donald trump can't register no more", func() {
+		_, err := s.cli.Register(ctx, &proto.RegisterRequest{
+			User: &proto.UserProfile{
+				FullName:    "Donald Trump",
+				Email:       "donald.trump@inpresident.com",
+				Caption:     "Meet me at the Capitol",
+				DateOfBirth: date(1946, 06, 14),
+			},
+		})
+		s.True(status.Code(err) == codes.PermissionDenied, "permission must be denied for trump")
 	})
 }
