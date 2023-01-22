@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func TestLogger(t *testing.T) {
+func TestLog(t *testing.T) {
 	initLoggerForTest()
 	ctx := context.Background()
 
@@ -53,6 +53,23 @@ func TestLogger(t *testing.T) {
 		Error(ctx, "something", errors.New("bad thing happened"))
 		assert.Equal(t, `{"level":"error","msg":"something","error":"bad thing happened"}`, readStdout())
 	})
+
+	t.Run("temprorary unstructured log", func(t *testing.T) {
+		Print("something")
+		assert.Equal(t, `{"level":"debug","msg":"temprorary debug log","value":"something"}`, readStdout())
+	})
+}
+
+func TestSetLevel(t *testing.T) {
+    SetLevel("info")
+    initLoggerForTest()
+
+	Debug(context.Background(), "some message")
+	// use deadline to unblock read stdout call
+	_ = stdout.SetReadDeadline(time.Now().Add(10 * time.Millisecond))
+	assert.Equal(t, "", readStdout())
+	// drop deadline for stdout
+	_ = stdout.SetReadDeadline(time.Time{})
 }
 
 var (
@@ -81,7 +98,7 @@ func initLoggerForTest() {
 func readStdout() string {
 	n, err := stdout.Read(buffer)
 	if err != nil {
-		panic(err)
+		return ""
 	}
 	return strings.Trim(string(buffer[:n]), "\n")
 }

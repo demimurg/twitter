@@ -32,12 +32,13 @@ func init() {
 
 // SetLevel will parse and set "debug/info/error" levels. Any case accepted
 func SetLevel(name string) {
-	var err error
-	cfg.Level, err = zap.ParseAtomicLevel(name)
+	level, err := zap.ParseAtomicLevel(name)
 	if err != nil {
 		panic(err)
 	}
-	buildLogger()
+	ChangeConfig(func(cfg *zap.Config) {
+        cfg.Level = level
+    })
 }
 
 // ChangeConfig allows to override default zap logger config from init function
@@ -107,5 +108,5 @@ func Panic(ctx context.Context, msg string, keyVal ...any) {
 
 // Print is very simple func that can print any value as json, can be used for temprorary debug
 func Print(val any) {
-	l.Infow("temprorary debug log", "value", val)
+	l.Debugw("temprorary debug log", "value", val)
 }
