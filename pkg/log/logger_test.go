@@ -61,8 +61,8 @@ func TestLog(t *testing.T) {
 }
 
 func TestSetLevel(t *testing.T) {
-    SetLevel("info")
-    initLoggerForTest()
+	SetLevel("info")
+	initLoggerForTest()
 
 	Debug(context.Background(), "some message")
 	// use deadline to unblock read stdout call

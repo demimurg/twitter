@@ -37,8 +37,8 @@ func SetLevel(name string) {
 		panic(err)
 	}
 	ChangeConfig(func(cfg *zap.Config) {
-        cfg.Level = level
-    })
+		cfg.Level = level
+	})
 }
 
 // ChangeConfig allows to override default zap logger config from init function
