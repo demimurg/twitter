@@ -3,22 +3,87 @@ replicas: 1
 host: "<secret>"
 
 env:
-  LOG_LEVEL: info
-  MIGRATIONS_DIR: "./migrations"
-  POSTGRESQL_DSN: "<secret>"
+    LOG_LEVEL: info
+    MIGRATIONS_DIR: "./migrations"
+    POSTGRESQL_DSN: "<secret>"
 
-  # --------------------------------------- INFRA ---------------------------------------
+# --------------------------------------- INFRA ---------------------------------------
 
 postgresql:
-  fullnameOverride: postgresql
-  auth:
-    postgresPassword: "<secret>"
-  primary:
-    persistence:
-      size: 10Gi
+    fullnameOverride: postgresql # removes chart name ("twitter") prefix
+    auth:
+        postgresPassword: "<secret>"
+    primary:
+        persistence:
+            size: 10Gi
 
 grafana:
-  fullnameOverride: grafana
-  persistence:
-    enabled: true
-    size: 2Gi
+    fullnameOverride: grafana
+    persistence:
+        enabled: true
+        size: 2Gi
+
+loki:
+    fullnameOverride: loki
+    loki:
+        commonConfig:
+            replication_factor: 1
+        storage:
+            type: filesystem
+        auth_enabled: false
+    monitoring:
+        selfMonitoring:
+            enabled: false
+            grafanaAgent:
+                installOperator: false
+        serviceMonitor:
+            enabled: false
+        lokiCanary:
+            enabled: false
+    test:
+        enabled: false
+
+grafana-agent:
+    fullnameOverride: grafana-agent
+    agent:
+        configMap:
+            content: |-
+                discovery.kubernetes "pods" {
+                    role = "pod"
+                }
+
+                discovery.relabel "pods" {
+                    targets = discovery.kubernetes.pods.targets
+
+                    rule {
+                        action = "replace"
+                        source_labels = [
+                            "__meta_kubernetes_pod_label_app_kubernetes_io_name",
+                            "__meta_kubernetes_pod_label_k8s_app",
+                            "__meta_kubernetes_pod_label_app",
+                        ]
+                        target_label = "app"
+                        separator = ""
+                    }
+                    rule {
+                        action = "replace"
+                        source_labels = ["__meta_kubernetes_pod_name"]
+                        target_label = "pod"
+                    }
+                    rule {
+                        action = "replace"
+                        source_labels = ["__meta_kubernetes_namespace"]
+                        target_label = "namespace"
+                    }
+                }
+
+                loki.source.kubernetes "pods" {
+                    targets    = discovery.relabel.pods.output
+                    forward_to = [loki.write.default.receiver]
+                }
+
+                loki.write "default" {
+                    endpoint {
+                        url = "http://loki:3100/loki/api/v1/push"
+                    }
+                }
