@@ -43,6 +43,9 @@ loki:
     test:
         enabled: false
 
+mimir:
+    image: grafana/mimir:2.6.0
+
 grafana-agent:
     fullnameOverride: grafana-agent
     agent:
@@ -85,5 +88,16 @@ grafana-agent:
                 loki.write "default" {
                     endpoint {
                         url = "http://loki:3100/loki/api/v1/push"
+                    }
+                }
+
+                prometheus.scrape "twitter" {
+                    targets = [{"__address__" = "twitter:82"}]
+                    forward_to = [prometheus.remote_write.default.receiver]
+                }
+
+                prometheus.remote_write "default" {
+                    endpoint {
+                        url = "http://prometheus-server:80/api/v1/write"
                     }
                 }

@@ -105,7 +105,7 @@ func TestUserProfiler_Deactivate(t *testing.T) {
 
 // ---------------------------------- SETUP MOCKS ----------------------------------
 
-// user profiler fmmocks
+// user profiler mocks
 type upmocks struct {
 	*mock.UserRepositoryMock
 	*mock.ScamDetectorClientMock
