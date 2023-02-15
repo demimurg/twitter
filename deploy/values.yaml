@@ -98,6 +98,6 @@ grafana-agent:
 
                 prometheus.remote_write "default" {
                     endpoint {
-                        url = "http://prometheus-server:80/api/v1/write"
+                        url = "http://mimir:9009/api/v1/push"
                     }
                 }
