@@ -1,6 +1,6 @@
 module github.com/demimurg/twitter
 
-go 1.19
+go 1.20
 
 require (
 	github.com/Shopify/sarama v1.38.1
@@ -27,7 +27,7 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/fullstorydev/grpcui v1.3.1
 	github.com/fullstorydev/grpcurl v1.8.6 // indirect
-	github.com/golang/protobuf v1.5.2
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect

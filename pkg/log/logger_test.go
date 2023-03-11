@@ -55,8 +55,8 @@ func TestLog(t *testing.T) {
 	})
 
 	t.Run("temprorary unstructured log", func(t *testing.T) {
-		Print("something")
-		assert.Equal(t, `{"level":"debug","msg":"temprorary debug log","value":"something"}`, readStdout())
+		Print("some", "integer", "value", 5)
+		assert.Equal(t, `{"level":"debug","msg":"some integer value 5"}`, readStdout())
 	})
 }
 

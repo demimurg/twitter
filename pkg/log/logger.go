@@ -106,7 +106,16 @@ func Panic(ctx context.Context, msg string, keyVal ...any) {
 	from(ctx).Panicw(msg, keyVal...)
 }
 
-// Print is very simple func that works like log.Print but create json, should be used for temprorary debug only
+// Print is very simple func that works like log.Print but create json and add " " separator to values
+// *should be used for temprorary debug only
 func Print(vals ...any) {
-	l.Debug(vals...)
+	valsWithSpaces := make([]any, 0, 2*len(vals))
+	for i, val := range vals {
+		if i == 0 {
+			valsWithSpaces = append(valsWithSpaces, val)
+		} else {
+			valsWithSpaces = append(valsWithSpaces, " ", val)
+		}
+	}
+	l.Debug(valsWithSpaces...)
 }
