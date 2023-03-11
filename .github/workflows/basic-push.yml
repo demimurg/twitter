@@ -2,6 +2,7 @@ name: Basic
 on: [push]
 
 jobs:
+  # run unit and integration go tests with coverage counting
   go-test:
     name: Run Unit Tests
     runs-on: ubuntu-latest
@@ -25,6 +26,7 @@ jobs:
       - name: Stop infra containers
         run: docker compose down
       - uses: codecov/codecov-action@v3
+  # basic go code linter checks
   golangci-lint:
     name: Run Go Linter
     runs-on: ubuntu-latest
@@ -33,6 +35,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Start check with golangci-lint
         run: golangci-lint run
+  # protobuf backward compatibility and code style checks
   protobuf-lint:
     name: Run Protobuf Linter
     runs-on: ubuntu-latest
@@ -45,9 +48,23 @@ jobs:
       - uses: bufbuild/buf-breaking-action@v1
         with:
           against: https://github.com/demimurg/twitter.git#branch=main,ref=HEAD~1
+  # generate app version according to current commit v0.1.0-3-ac2f5ef (<last tag>-<commits after tag>-<short sha>)
+  version:
+      name: Create App Version
+      outputs:
+        short_sha: ${{ steps.generate.outputs.short_sha }}
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            fetch-depth: 0 # all history with tags
+        - name: Generate version from last tag and commit sha
+          id: generate
+          run: echo "short_sha=$(git describe --tags)" >> $GITHUB_OUTPUT
+  # build and push to ghcr docker image, use commit short sha as version
   docker-image:
     name: Build and Push Docker
-    needs: [go-test]
+    needs: [go-test, version]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -69,10 +86,11 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64 # add ",linux/arm64" for apple m1 build, but it will slow down job
-          tags: ghcr.io/${{ github.repository }}:$(git describe --tags)
+          tags: ghcr.io/${{ github.repository }}:${{ needs.version.outputs.short_sha }}
+  # deploy app to kubernetes using helm package manager
   deploy-helm:
     name: Deploy Image to Kubernetes
-    needs: [docker-image]
+    needs: [docker-image, version]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -85,7 +103,7 @@ jobs:
             echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ~/.kube/config
       - name: Deploy helm chart
         run: >
-            helm upgrade --install twitter ./deploy --version $(git describe --tags)
+            helm upgrade --install twitter ./deploy --version ${{ needs.version.outputs.short_sha }}
             --set env.POSTGRESQL_DSN=${{ secrets.CHART_PG_DSN }}
             --set host=${{ secrets.CHART_HOST }}
             --set postgresql.auth.postgresPassword=${{ secrets.CHART_PG_PASSWORD }}
