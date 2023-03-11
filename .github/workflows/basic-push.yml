@@ -69,7 +69,7 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64 # add ",linux/arm64" for apple m1 build, but it will slow down job
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/${{ github.repository }}:$(git describe --tags)
   deploy-helm:
     name: Deploy Image to Kubernetes
     needs: [docker-image]
@@ -85,7 +85,7 @@ jobs:
             echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ~/.kube/config
       - name: Deploy helm chart
         run: >
-            helm upgrade --install twitter ./deploy
+            helm upgrade --install twitter ./deploy --version $(git describe --tags)
             --set env.POSTGRESQL_DSN=${{ secrets.CHART_PG_DSN }}
             --set host=${{ secrets.CHART_HOST }}
             --set postgresql.auth.postgresPassword=${{ secrets.CHART_PG_PASSWORD }}

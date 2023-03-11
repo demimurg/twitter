@@ -106,7 +106,7 @@ func Panic(ctx context.Context, msg string, keyVal ...any) {
 	from(ctx).Panicw(msg, keyVal...)
 }
 
-// Print is very simple func that can print any value as json, can be used for temprorary debug
-func Print(val any) {
-	l.Debugw("temprorary debug log", "value", val)
+// Print is very simple func that works like log.Print but create json, should be used for temprorary debug only
+func Print(vals ...any) {
+	l.Debug(vals...)
 }

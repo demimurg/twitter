@@ -4,8 +4,6 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     app: {{ .Chart.Name }}
-  annotations:
-    hash: {{ randAlphaNum 6 }} # to redeploy resource each time
 spec:
   replicas: {{ .Values.replicas }}
   selector:
@@ -18,7 +16,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: {{ .Values.image }}:latest
+          image: {{ .Values.image }}:{{ .Chart.Version }}
           readinessProbe:
             tcpSocket:
               port: 80
