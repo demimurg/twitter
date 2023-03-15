@@ -1,110 +1,101 @@
 name: Basic
-on: [push]
+on: [ push ]
 
 jobs:
-  # run unit and integration go tests with coverage counting
-  go-test:
-    name: Run Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: stable
-      - name: Download dependencies
-        run: go mod vendor
-      - uses: actions/cache/save@v3
-        with:
-          path: ./vendor
-          key: go-vendor
-      - name: Run infra containers
-        run: docker compose up -d --wait
-      - name: Start testing
-        run: |
-            export PKGS=$(go list -tags=e2e ./... | grep -v "cmd\|mock\|inmem\|proto" | tr "\n" "," | sed "s/,$//")
-            go test -tags e2e -race -coverpkg $PKGS -coverprofile coverage.out ./...
-      - name: Stop infra containers
-        run: docker compose down
-      - uses: codecov/codecov-action@v3
-  # basic go code linter checks
-  golangci-lint:
-    name: Run Go Linter
-    runs-on: ubuntu-latest
-    container: golangci/golangci-lint:v1.50-alpine
-    steps:
-      - uses: actions/checkout@v3
-      - name: Start check with golangci-lint
-        run: golangci-lint run
-  # protobuf backward compatibility and code style checks
-  protobuf-lint:
-    name: Run Protobuf Linter
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: bufbuild/buf-setup-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: bufbuild/buf-lint-action@v1
-      - uses: bufbuild/buf-breaking-action@v1
-        with:
-          against: https://github.com/demimurg/twitter.git#branch=main,ref=HEAD~1
-  # generate app version according to current commit v0.1.0-3-ac2f5ef (<last tag>-<commits after tag>-<short sha>)
-  version:
-      name: Create App Version
-      outputs:
-        short_sha: ${{ steps.generate.outputs.short_sha }}
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v3
-          with:
-            fetch-depth: 0 # all history with tags
-        - name: Generate version from last tag and commit sha
-          id: generate
-          run: echo "short_sha=$(git describe --tags)" >> $GITHUB_OUTPUT
-  # build and push to ghcr docker image, use commit short sha as version
-  docker-image:
-    name: Build and Push Docker
-    needs: [version]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache/restore@v3
-        with:
-          path: ./vendor
-          key: go-vendor
-      - name: Log into the container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set up docker buildx engine
-        uses: docker/setup-buildx-action@v2
-      - name: Build and push docker image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          platforms: linux/amd64 # add ",linux/arm64" for apple m1 build, but it will slow down job
-          tags: ghcr.io/${{ github.repository }}:${{ needs.version.outputs.short_sha }}
-  # deploy app to kubernetes using helm package manager
-  deploy-helm:
-    name: Deploy Image to Kubernetes
-    needs: [version, go-test, docker-image]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: azure/setup-helm@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Add kubeconfig
-        run: |
-            mkdir ~/.kube && touch ~/.kube/config
-            echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ~/.kube/config
-      - name: Package Helm chart
-        run: helm package --version ${{ needs.version.outputs.short_sha }} ./deploy
-      - name: Deploy to Kubernetes
-        run: helm upgrade --install twitter *.tgz
-            --set env.POSTGRESQL_DSN=${{ secrets.CHART_PG_DSN }}
-            --set host=${{ secrets.CHART_HOST }}
-            --set postgresql.auth.postgresPassword=${{ secrets.CHART_PG_PASSWORD }}
+    # run unit and integration go tests with coverage counting
+    go-test:
+        name: Run Unit Tests
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-go@v3
+              with:
+                  go-version: stable
+                  cache: true
+            - name: Run infra containers
+              run: docker compose up -d --wait
+            - name: Start testing
+              run: |
+                  export PKGS=$(go list -tags=e2e ./... | grep -v "cmd\|mock\|inmem\|proto" | tr "\n" "," | sed "s/,$//")
+                  go test -tags e2e -race -coverpkg $PKGS -coverprofile coverage.out ./...
+            - name: Stop infra containers
+              run: docker compose down
+            - uses: codecov/codecov-action@v3
+    # basic go code linter checks
+    golangci-lint:
+        name: Run Go Linter
+        runs-on: ubuntu-latest
+        container: golangci/golangci-lint:v1.50-alpine
+        steps:
+            - uses: actions/checkout@v3
+            - name: Start check with golangci-lint
+              run: golangci-lint run
+    # protobuf backward compatibility and code style checks
+    protobuf-lint:
+        name: Run Protobuf Linter
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: bufbuild/buf-setup-action@v1
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+            - uses: bufbuild/buf-lint-action@v1
+            - uses: bufbuild/buf-breaking-action@v1
+              with:
+                  against: https://github.com/demimurg/twitter.git#branch=main,ref=HEAD~1
+    # generate app version according to current commit v0.1.0-3-ac2f5ef (<last tag>-<commits after tag>-<short sha>)
+    version:
+        name: Create App Version
+        outputs:
+            short_sha: ${{ steps.generate.outputs.short_sha }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0 # all history with tags
+            - name: Generate version from last tag and commit sha
+              id: generate
+              run: echo "short_sha=$(git describe --tags)" >> $GITHUB_OUTPUT
+    # build and push to ghcr docker image, use commit short sha as version
+    docker-image:
+        name: Build and Push Docker
+        needs: [ version ]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Log into the container registry
+              uses: docker/login-action@v2
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Set up docker buildx engine
+              uses: docker/setup-buildx-action@v2
+            - name: Build and push docker image
+              uses: docker/build-push-action@v3
+              with:
+                  context: .
+                  push: true
+                  platforms: linux/amd64 # add ",linux/arm64" for apple m1 build, but it will slow down job
+                  tags: ghcr.io/${{ github.repository }}:${{ needs.version.outputs.short_sha }}
+    # deploy app to kubernetes using helm package manager
+    deploy-helm:
+        name: Deploy Image to Kubernetes
+        needs: [ version, go-test, docker-image ]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: azure/setup-helm@v3
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+            - name: Add kubeconfig
+              run: |
+                  mkdir ~/.kube && touch ~/.kube/config
+                  echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ~/.kube/config
+            - name: Package Helm chart
+              run: helm package --version ${{ needs.version.outputs.short_sha }} ./deploy
+            - name: Deploy to Kubernetes
+              run: helm upgrade --install twitter *.tgz
+                  --set env.POSTGRESQL_DSN=${{ secrets.CHART_PG_DSN }}
+                  --set host=${{ secrets.CHART_HOST }}
+                  --set postgresql.auth.postgresPassword=${{ secrets.CHART_PG_PASSWORD }}
