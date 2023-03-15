@@ -44,6 +44,8 @@ loki:
             enabled: false
     test:
         enabled: false
+    gateway:
+        enabled: false
 
 mimir:
     image: grafana/mimir:2.7.0
