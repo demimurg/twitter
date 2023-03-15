@@ -31,6 +31,8 @@ loki:
         storage:
             type: filesystem
         auth_enabled: false
+    singleBinary:
+        replicas: 1
     monitoring:
         selfMonitoring:
             enabled: false
@@ -44,7 +46,7 @@ loki:
         enabled: false
 
 mimir:
-    image: grafana/mimir:2.6.0
+    image: grafana/mimir:2.7.0
 
 grafana-agent:
     fullnameOverride: grafana-agent
