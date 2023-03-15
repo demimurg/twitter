@@ -64,7 +64,7 @@ jobs:
   # build and push to ghcr docker image, use commit short sha as version
   docker-image:
     name: Build and Push Docker
-    needs: [go-test, version]
+    needs: [version]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -90,7 +90,7 @@ jobs:
   # deploy app to kubernetes using helm package manager
   deploy-helm:
     name: Deploy Image to Kubernetes
-    needs: [docker-image, version]
+    needs: [version, go-test, docker-image]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
