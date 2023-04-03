@@ -41,8 +41,8 @@ func main() {
 	srv := grpcsrv.NewTwitter(feedManager, userProfiler)
 	grace.Run(
 		grace.GRPC(srv, ":80"),
-		grace.GRPCUI(":81", "localhost:80"),
-		grace.Prometheus(":82"),
+		grace.Prometheus(":81"),
+		grace.GRPCUI(":82", "localhost:80"),
 	)
 }
 
