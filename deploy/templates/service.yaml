@@ -11,6 +11,6 @@ spec:
     - name: grpc
       port: 80
     - name: prom
-      port: 82
-    - name: grpcui
       port: 81
+    - name: grpcui
+      port: 82

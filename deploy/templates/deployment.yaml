@@ -22,8 +22,8 @@ spec:
               port: 80
           ports:
             - containerPort: 80 # app server
-            - containerPort: 81 # grpc ui
-            - containerPort: 82 # prometheus
+            - containerPort: 81 # prometheus
+            - containerPort: 82 # grpc ui
           env:
           {{- range $key, $val := .Values.env }}
             - name: {{ $key }}
