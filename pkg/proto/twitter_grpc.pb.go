@@ -47,7 +47,7 @@ func NewTwitterClient(cc grpc.ClientConnInterface) TwitterClient {
 
 func (c *twitterClient) AddTweet(ctx context.Context, in *AddTweetRequest, opts ...grpc.CallOption) (*AddTweetResponse, error) {
 	out := new(AddTweetResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/AddTweet", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/AddTweet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (c *twitterClient) AddTweet(ctx context.Context, in *AddTweetRequest, opts 
 
 func (c *twitterClient) AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*AddCommentResponse, error) {
 	out := new(AddCommentResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/AddComment", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/AddComment", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (c *twitterClient) AddComment(ctx context.Context, in *AddCommentRequest, o
 
 func (c *twitterClient) UpdateTweet(ctx context.Context, in *UpdateTweetRequest, opts ...grpc.CallOption) (*UpdateTweetResponse, error) {
 	out := new(UpdateTweetResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/UpdateTweet", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/UpdateTweet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (c *twitterClient) UpdateTweet(ctx context.Context, in *UpdateTweetRequest,
 
 func (c *twitterClient) UpdateComment(ctx context.Context, in *UpdateCommentRequest, opts ...grpc.CallOption) (*UpdateCommentResponse, error) {
 	out := new(UpdateCommentResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/UpdateComment", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/UpdateComment", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (c *twitterClient) UpdateComment(ctx context.Context, in *UpdateCommentRequ
 
 func (c *twitterClient) GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest, opts ...grpc.CallOption) (*GetNewsFeedResponse, error) {
 	out := new(GetNewsFeedResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/GetNewsFeed", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/GetNewsFeed", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (c *twitterClient) GetNewsFeed(ctx context.Context, in *GetNewsFeedRequest,
 
 func (c *twitterClient) Follow(ctx context.Context, in *FollowRequest, opts ...grpc.CallOption) (*FollowResponse, error) {
 	out := new(FollowResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/Follow", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/Follow", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (c *twitterClient) Follow(ctx context.Context, in *FollowRequest, opts ...g
 
 func (c *twitterClient) Unfollow(ctx context.Context, in *UnfollowRequest, opts ...grpc.CallOption) (*UnfollowResponse, error) {
 	out := new(UnfollowResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/Unfollow", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/Unfollow", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (c *twitterClient) Unfollow(ctx context.Context, in *UnfollowRequest, opts 
 
 func (c *twitterClient) GetFollowing(ctx context.Context, in *GetFollowingRequest, opts ...grpc.CallOption) (*GetFollowingResponse, error) {
 	out := new(GetFollowingResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/GetFollowing", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/GetFollowing", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (c *twitterClient) GetFollowing(ctx context.Context, in *GetFollowingReques
 
 func (c *twitterClient) GetFollowers(ctx context.Context, in *GetFollowersRequest, opts ...grpc.CallOption) (*GetFollowersResponse, error) {
 	out := new(GetFollowersResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/GetFollowers", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/GetFollowers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (c *twitterClient) GetFollowers(ctx context.Context, in *GetFollowersReques
 
 func (c *twitterClient) RecommendUsers(ctx context.Context, in *RecommendUsersRequest, opts ...grpc.CallOption) (*RecommendUsersResponse, error) {
 	out := new(RecommendUsersResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/RecommendUsers", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/RecommendUsers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (c *twitterClient) RecommendUsers(ctx context.Context, in *RecommendUsersRe
 
 func (c *twitterClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
 	out := new(RegisterResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/Register", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/Register", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (c *twitterClient) Register(ctx context.Context, in *RegisterRequest, opts 
 
 func (c *twitterClient) UpdateCaption(ctx context.Context, in *UpdateCaptionRequest, opts ...grpc.CallOption) (*UpdateCaptionResponse, error) {
 	out := new(UpdateCaptionResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/UpdateCaption", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/UpdateCaption", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (c *twitterClient) UpdateCaption(ctx context.Context, in *UpdateCaptionRequ
 
 func (c *twitterClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, "/Twitter/Login", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/github.com.demimurg.twitter.v1.Twitter/Login", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -248,7 +248,7 @@ func _Twitter_AddTweet_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/AddTweet",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/AddTweet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).AddTweet(ctx, req.(*AddTweetRequest))
@@ -266,7 +266,7 @@ func _Twitter_AddComment_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/AddComment",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/AddComment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).AddComment(ctx, req.(*AddCommentRequest))
@@ -284,7 +284,7 @@ func _Twitter_UpdateTweet_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/UpdateTweet",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/UpdateTweet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).UpdateTweet(ctx, req.(*UpdateTweetRequest))
@@ -302,7 +302,7 @@ func _Twitter_UpdateComment_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/UpdateComment",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/UpdateComment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).UpdateComment(ctx, req.(*UpdateCommentRequest))
@@ -320,7 +320,7 @@ func _Twitter_GetNewsFeed_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/GetNewsFeed",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/GetNewsFeed",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).GetNewsFeed(ctx, req.(*GetNewsFeedRequest))
@@ -338,7 +338,7 @@ func _Twitter_Follow_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/Follow",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/Follow",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).Follow(ctx, req.(*FollowRequest))
@@ -356,7 +356,7 @@ func _Twitter_Unfollow_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/Unfollow",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/Unfollow",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).Unfollow(ctx, req.(*UnfollowRequest))
@@ -374,7 +374,7 @@ func _Twitter_GetFollowing_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/GetFollowing",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/GetFollowing",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).GetFollowing(ctx, req.(*GetFollowingRequest))
@@ -392,7 +392,7 @@ func _Twitter_GetFollowers_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/GetFollowers",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/GetFollowers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).GetFollowers(ctx, req.(*GetFollowersRequest))
@@ -410,7 +410,7 @@ func _Twitter_RecommendUsers_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/RecommendUsers",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/RecommendUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).RecommendUsers(ctx, req.(*RecommendUsersRequest))
@@ -428,7 +428,7 @@ func _Twitter_Register_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/Register",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/Register",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).Register(ctx, req.(*RegisterRequest))
@@ -446,7 +446,7 @@ func _Twitter_UpdateCaption_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/UpdateCaption",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/UpdateCaption",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).UpdateCaption(ctx, req.(*UpdateCaptionRequest))
@@ -464,7 +464,7 @@ func _Twitter_Login_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Twitter/Login",
+		FullMethod: "/github.com.demimurg.twitter.v1.Twitter/Login",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TwitterServer).Login(ctx, req.(*LoginRequest))
@@ -476,7 +476,7 @@ func _Twitter_Login_Handler(srv interface{}, ctx context.Context, dec func(inter
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Twitter_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Twitter",
+	ServiceName: "github.com.demimurg.twitter.v1.Twitter",
 	HandlerType: (*TwitterServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

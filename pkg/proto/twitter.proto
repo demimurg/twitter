@@ -1,4 +1,5 @@
 syntax = "proto3";
+package github.com.demimurg.twitter.v1;
 option go_package = "github.com/demimurg/twitter/pkg/proto";
 
 import "google/protobuf/timestamp.proto";

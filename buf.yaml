@@ -8,5 +8,5 @@ lint:
     use:
         - DEFAULT
     except:
-        - PACKAGE_DEFINED
+        - PACKAGE_DIRECTORY_MATCH
         - SERVICE_SUFFIX
