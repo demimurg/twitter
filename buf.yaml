@@ -2,11 +2,11 @@ version: v1
 deps:
     - buf.build/envoyproxy/protoc-gen-validate
 breaking:
-  use:
-    - FILE
+    use:
+        - FILE
 lint:
-  use:
-    - DEFAULT
-  except:
-    - PACKAGE_DEFINED
-    - SERVICE_SUFFIX
+    use:
+        - DEFAULT
+    except:
+        - PACKAGE_DEFINED
+        - SERVICE_SUFFIX
