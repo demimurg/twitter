@@ -34,3 +34,33 @@ spec:
                 name: grafana
                 port:
                   number: 80
+
+---
+# we can use twitter.{{ .Values.host }}:30000 to externally access grpc server
+apiVersion: v1
+kind: Service
+metadata:
+  name: twitter-ext
+spec:
+  type: NodePort
+  selector:
+    app: twitter
+  ports:
+    - port: 80
+      nodePort: 30000
+
+---
+# we can use twitter-db.{{ .Values.host }}:30001 to externally access postgresql database
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-ext
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/component: primary
+    app.kubernetes.io/instance: twitter
+    app.kubernetes.io/name: postgresql
+  ports:
+    - port: 5432
+      nodePort: 30001

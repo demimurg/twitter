@@ -61,7 +61,7 @@ loki:
         enabled: false
 
 mimir:
-    image: grafana/mimir:2.7.0
+    image: grafana/mimir:2.8.0
 
 grafana-agent:
     fullnameOverride: grafana-agent
