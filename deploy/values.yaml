@@ -109,7 +109,7 @@ grafana-agent:
                 }
 
                 prometheus.scrape "twitter" {
-                    targets = [{"__address__" = "twitter:82"}]
+                    targets = [{"__address__" = "twitter:81"}]
                     forward_to = [prometheus.remote_write.default.receiver]
                 }
 
