@@ -34,6 +34,16 @@ spec:
                 name: grafana
                 port:
                   number: 80
+    - host: mimir.{{ .Values.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mimir
+                port:
+                  number: 9009
 
 ---
 # we can use twitter.{{ .Values.host }}:30000 to externally access grpc server

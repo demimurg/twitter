@@ -7,8 +7,9 @@ const packagePrefix = 'github.com.demimurg.twitter.v1.'
 export default () => {
     client.connect('twitter.demimurg.com:30000', {plaintext: true, reflect: true});
 
-    const data = {user_id: 1, limit: 50};
-    const response = client.invoke(packagePrefix + 'Twitter/GetNewsFeed', data);
+    const response = client.invoke(packagePrefix + 'Twitter/GetNewsFeed', {
+        user_id: 1, limit: 50,
+    });
     check(response, {'status is OK': (r) => r && r.status === grpc.StatusOK});
 
     client.close();
