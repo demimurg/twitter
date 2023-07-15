@@ -1,5 +1,5 @@
 name: Basic
-on: [ push ]
+on: [ push, workflow_dispatch ]
 
 jobs:
     # run unit and integration go tests with coverage counting
