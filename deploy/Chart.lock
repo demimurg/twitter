@@ -1,15 +1,15 @@
 dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 12.4.2
+  version: 12.6.6
 - name: grafana
   repository: https://grafana.github.io/helm-charts
-  version: 6.56.1
+  version: 6.58.3
 - name: grafana-agent
   repository: https://grafana.github.io/helm-charts
-  version: 0.13.0
+  version: 0.16.0
 - name: loki
   repository: https://grafana.github.io/helm-charts
-  version: 5.5.0
-digest: sha256:1815d0ceb9faf4d23dfd5b1bd0b3f58cda4b23715fd46f0b21ab413c10c90f08
-generated: "2023-05-04T16:59:11.423867+03:00"
+  version: 5.8.9
+digest: sha256:fd172b587e83e01ac86b24029fb7edfeb64afc101f3aede8921f7a5226dabec1
+generated: "2023-07-15T18:40:42.020533+03:00"
