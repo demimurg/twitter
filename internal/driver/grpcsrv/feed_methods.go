@@ -6,7 +6,6 @@ import (
 
 	"github.com/demimurg/twitter/internal/entity"
 
-	"github.com/demimurg/twitter/internal/usecase"
 	"github.com/demimurg/twitter/pkg/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -15,7 +14,7 @@ import (
 func (t *twitter) AddTweet(ctx context.Context, req *proto.AddTweetRequest) (*proto.AddTweetResponse, error) {
 	tweetID, err := t.fm.AddTweet(ctx, int(req.UserId), req.Text)
 	if err != nil {
-		if errors.Is(err, usecase.ErrValidationFailed) {
+		if errors.Is(err, entity.ErrValidationFailed) {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		return nil, err

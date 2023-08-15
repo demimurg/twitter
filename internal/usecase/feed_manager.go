@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/demimurg/twitter/internal/entity"
 	"github.com/demimurg/twitter/pkg/log"
@@ -59,11 +58,8 @@ func (fm *feedManager) RemoveFollower(ctx context.Context, userID, fromUserID in
 }
 
 func (fm *feedManager) AddTweet(ctx context.Context, userID int, text string) (id int, err error) {
-	if len(text) > entity.MaxAllowedSymbols {
-		return 0, fmt.Errorf(
-			"%w: tweet length %d more than allowed %d",
-			ErrValidationFailed, len(text), entity.MaxAllowedSymbols,
-		)
+	if err := entity.ValidateTweet(text); err != nil {
+		return 0, err
 	}
 
 	user, err := fm.usersRepo.Get(ctx, userID)

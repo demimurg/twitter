@@ -18,8 +18,6 @@ type UserProfiler interface {
 	Login(ctx context.Context, email string) (*entity.User, error)
 }
 
-var ErrValidationFailed = errors.New("validation failed")
-
 func NewUserProfiler(userRepo UserRepository, scamClient ScamDetectorClient) UserProfiler {
 	return &userProfiler{userRepo, scamClient}
 }
