@@ -57,8 +57,6 @@ func (m *AddTweetRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for UserId
-
 	if len(m.GetText()) > 512 {
 		err := AddTweetRequestValidationError{
 			field:  "Text",
@@ -271,8 +269,6 @@ func (m *AddCommentRequest) validate(all bool) error {
 	}
 
 	var errors []error
-
-	// no validation rules for UserId
 
 	// no validation rules for TweetId
 
@@ -492,8 +488,6 @@ func (m *UpdateTweetRequest) validate(all bool) error {
 	}
 
 	var errors []error
-
-	// no validation rules for UserId
 
 	if m.GetTweetId() < 0 {
 		err := UpdateTweetRequestValidationError{
@@ -721,8 +715,6 @@ func (m *UpdateCommentRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for UserId
-
 	if m.GetCommentId() < 0 {
 		err := UpdateCommentRequestValidationError{
 			field:  "CommentId",
@@ -948,8 +940,6 @@ func (m *GetNewsFeedRequest) validate(all bool) error {
 	}
 
 	var errors []error
-
-	// no validation rules for UserId
 
 	if m.GetLimit() <= 0 {
 		err := GetNewsFeedRequestValidationError{
@@ -1215,6 +1205,17 @@ func (m *RegisterRequest) validate(all bool) error {
 				cause:  err,
 			}
 		}
+	}
+
+	if utf8.RuneCountInString(m.GetPassword()) < 3 {
+		err := RegisterRequestValidationError{
+			field:  "Password",
+			reason: "value length must be at least 3 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	if len(errors) > 0 {
@@ -1533,6 +1534,8 @@ func (m *RegisterResponse) validate(all bool) error {
 
 	// no validation rules for UserId
 
+	// no validation rules for Jwt
+
 	if len(errors) > 0 {
 		return RegisterResponseMultiError(errors)
 	}
@@ -1632,8 +1635,6 @@ func (m *UpdateCaptionRequest) validate(all bool) error {
 	}
 
 	var errors []error
-
-	// no validation rules for UserId
 
 	if len(m.GetNewCaption()) > 512 {
 		err := UpdateCaptionRequestValidationError{
@@ -2063,8 +2064,6 @@ func (m *UnfollowRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for UserId
-
 	if m.GetOldFollowerId() <= 0 {
 		err := UnfollowRequestValidationError{
 			field:  "OldFollowerId",
@@ -2288,6 +2287,17 @@ func (m *LoginRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	if utf8.RuneCountInString(m.GetPassword()) < 3 {
+		err := LoginRequestValidationError{
+			field:  "Password",
+			reason: "value length must be at least 3 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		return LoginRequestMultiError(errors)
 	}
@@ -2468,6 +2478,8 @@ func (m *LoginResponse) validate(all bool) error {
 		}
 	}
 
+	// no validation rules for Jwt
+
 	if len(errors) > 0 {
 		return LoginResponseMultiError(errors)
 	}
@@ -2567,8 +2579,6 @@ func (m *RecommendUsersRequest) validate(all bool) error {
 	}
 
 	var errors []error
-
-	// no validation rules for UserId
 
 	if len(errors) > 0 {
 		return RecommendUsersRequestMultiError(errors)
@@ -2808,8 +2818,6 @@ func (m *GetFollowingRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for UserId
-
 	if len(errors) > 0 {
 		return GetFollowingRequestMultiError(errors)
 	}
@@ -3047,8 +3055,6 @@ func (m *GetFollowersRequest) validate(all bool) error {
 	}
 
 	var errors []error
-
-	// no validation rules for UserId
 
 	if len(errors) > 0 {
 		return GetFollowersRequestMultiError(errors)

@@ -23,11 +23,8 @@ service Twitter {
     rpc Login(LoginRequest) returns (LoginResponse);
 }
 
-// TODO: user id should be removed after auth with jwt will be implemented
-
 message AddTweetRequest {
-    int64 user_id = 1;
-    string text = 2 [(validate.rules).string.max_bytes = 512];
+    string text = 1 [(validate.rules).string.max_bytes = 512];
 };
 
 message AddTweetResponse {
@@ -35,9 +32,8 @@ message AddTweetResponse {
 };
 
 message AddCommentRequest {
-    int64 user_id = 1;
-    int64 tweet_id = 2;
-    string text = 3 [(validate.rules).string.max_bytes = 512];
+    int64 tweet_id = 1;
+    string text = 2 [(validate.rules).string.max_bytes = 512];
 };
 
 message AddCommentResponse {
@@ -45,25 +41,22 @@ message AddCommentResponse {
 };
 
 message UpdateTweetRequest {
-    int64 user_id = 1;
-    int64 tweet_id = 2 [(validate.rules).int64.gte = 0];
-    string new_text = 3 [(validate.rules).string.max_bytes = 512];
+    int64 tweet_id = 1 [(validate.rules).int64.gte = 0];
+    string new_text = 2 [(validate.rules).string.max_bytes = 512];
 };
 
 message UpdateTweetResponse {};
 
 message UpdateCommentRequest {
-    int64 user_id = 1;
-    int64 comment_id = 2 [(validate.rules).int64.gte = 0];
-    string new_text = 3 [(validate.rules).string.max_bytes = 512];
+    int64 comment_id = 1 [(validate.rules).int64.gte = 0];
+    string new_text = 2 [(validate.rules).string.max_bytes = 512];
 };
 
 message UpdateCommentResponse {};
 
 message GetNewsFeedRequest {
-    int64 user_id = 1;
-    int64 limit = 2 [(validate.rules).int64.gt = 0];
-    int64 offset = 3 [(validate.rules).int64.gte = 0];
+    int64 limit = 1 [(validate.rules).int64.gt = 0];
+    int64 offset = 2 [(validate.rules).int64.gte = 0];
 };
 
 message GetNewsFeedResponse {
@@ -72,6 +65,7 @@ message GetNewsFeedResponse {
 
 message RegisterRequest {
     UserProfile user = 1 [(validate.rules).message.required = true];
+    string password = 2 [(validate.rules).string.min_len = 3];
 };
 
 message UserProfile {
@@ -86,11 +80,11 @@ message UserProfile {
 
 message RegisterResponse {
     int64 user_id = 1;
+    string jwt = 2;
 };
 
 message UpdateCaptionRequest {
-    int64 user_id = 1;
-    string new_caption = 2 [(validate.rules).string.max_bytes = 512];
+    string new_caption = 1 [(validate.rules).string.max_bytes = 512];
 };
 
 message UpdateCaptionResponse {};
@@ -103,40 +97,35 @@ message FollowRequest {
 message FollowResponse {};
 
 message UnfollowRequest {
-    int64 user_id = 1;
-    int64 old_follower_id = 2 [(validate.rules).int64.gt = 0];
+    int64 old_follower_id = 1 [(validate.rules).int64.gt = 0];
 };
 
 message UnfollowResponse {};
 
 message LoginRequest {
     string email = 1 [(validate.rules).string.email = true];
+    string password = 2 [(validate.rules).string.min_len = 3];
 };
 
 message LoginResponse {
     int64 user_id = 1;
     UserProfile user_profile = 2;
+    string jwt = 3;
 };
 
-message RecommendUsersRequest {
-    int64 user_id = 1;
-};
+message RecommendUsersRequest {};
 
 message RecommendUsersResponse {
     repeated UserProfile users = 1;
 };
 
-message GetFollowingRequest {
-    int64 user_id = 1;
-};
+message GetFollowingRequest {};
 
 message GetFollowingResponse {
     repeated UserProfile users = 1;
 };
 
-message GetFollowersRequest {
-    int64 user_id = 1;
-};
+message GetFollowersRequest {};
 
 message GetFollowersResponse {
     repeated UserProfile users = 1;
