@@ -6,6 +6,7 @@ env:
     LOG_LEVEL: info
     MIGRATIONS_DIR: "./migrations"
     POSTGRESQL_DSN: "<secret>"
+    AUTH_SECRET: "<secret>"
 
 # --------------------------------------- INFRA ---------------------------------------
 

@@ -97,5 +97,6 @@ jobs:
             - name: Deploy to Kubernetes
               run: helm upgrade --install twitter *.tgz
                   --set env.POSTGRESQL_DSN=${{ secrets.CHART_PG_DSN }}
+                  --set env.AUTH_SECRET=${{ secrets.CHART_AUTH_SECRET }}
                   --set host=${{ secrets.CHART_HOST }}
                   --set postgresql.auth.postgresPassword=${{ secrets.CHART_PG_PASSWORD }}
