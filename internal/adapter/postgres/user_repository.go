@@ -21,12 +21,12 @@ type userRepo struct {
 	db *sql.DB
 }
 
-func (u *userRepo) Add(ctx context.Context, name, email, caption string, birthDate time.Time) (id int, err error) {
+func (u *userRepo) Add(ctx context.Context, name, email, password, caption string, birthDate time.Time) (id int, err error) {
 	row := u.db.QueryRowContext(ctx, `
-        INSERT INTO users (full_name, email, caption, birth_date)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO users (full_name, email, password, caption, birth_date)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING id
-    `, name, email, caption, birthDate)
+    `, name, email, password, caption, birthDate)
 
 	if err := row.Scan(&id); err != nil {
 		var pgErr *pgconn.PgError
@@ -86,12 +86,13 @@ func (u *userRepo) GetAll(ctx context.Context, limit int) ([]entity.User, error)
 
 	return users, nil
 }
-func (u *userRepo) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
+func (u *userRepo) GetByEmail(ctx context.Context, email, password string) (*entity.User, error) {
 	row := u.db.QueryRowContext(ctx, `
         SELECT id, full_name, email, caption, birth_date, deleted_at
         FROM users
-        WHERE email = $1 AND deleted_at IS NULL
-    `, email)
+        WHERE email = $1 AND password = $2
+			AND deleted_at IS NULL
+    `, email, password)
 
 	var user entity.User
 	err := row.Scan(
@@ -99,6 +100,9 @@ func (u *userRepo) GetByEmail(ctx context.Context, email string) (*entity.User, 
 		&user.Caption, &user.BirthDate, &user.DeletedAt,
 	)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, usecase.ErrWrongCredentials
+		}
 		return nil, fmt.Errorf("select user from db: %w", err)
 	}
 	return &user, nil

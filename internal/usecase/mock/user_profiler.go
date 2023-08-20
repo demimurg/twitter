@@ -25,14 +25,14 @@ type UserProfilerMock struct {
 	beforeDeactivateCounter uint64
 	DeactivateMock          mUserProfilerMockDeactivate
 
-	funcLogin          func(ctx context.Context, email string) (up1 *entity.User, err error)
-	inspectFuncLogin   func(ctx context.Context, email string)
+	funcLogin          func(ctx context.Context, email string, password string) (up1 *entity.User, err error)
+	inspectFuncLogin   func(ctx context.Context, email string, password string)
 	afterLoginCounter  uint64
 	beforeLoginCounter uint64
 	LoginMock          mUserProfilerMockLogin
 
-	funcRegister          func(ctx context.Context, name string, email string, caption string, birthDate time.Time) (up1 *entity.User, err error)
-	inspectFuncRegister   func(ctx context.Context, name string, email string, caption string, birthDate time.Time)
+	funcRegister          func(ctx context.Context, name string, email string, password string, caption string, birthDate time.Time) (up1 *entity.User, err error)
+	inspectFuncRegister   func(ctx context.Context, name string, email string, password string, caption string, birthDate time.Time)
 	afterRegisterCounter  uint64
 	beforeRegisterCounter uint64
 	RegisterMock          mUserProfilerMockRegister
@@ -301,8 +301,9 @@ type UserProfilerMockLoginExpectation struct {
 
 // UserProfilerMockLoginParams contains parameters of the UserProfiler.Login
 type UserProfilerMockLoginParams struct {
-	ctx   context.Context
-	email string
+	ctx      context.Context
+	email    string
+	password string
 }
 
 // UserProfilerMockLoginResults contains results of the UserProfiler.Login
@@ -312,7 +313,7 @@ type UserProfilerMockLoginResults struct {
 }
 
 // Expect sets up expected params for UserProfiler.Login
-func (mmLogin *mUserProfilerMockLogin) Expect(ctx context.Context, email string) *mUserProfilerMockLogin {
+func (mmLogin *mUserProfilerMockLogin) Expect(ctx context.Context, email string, password string) *mUserProfilerMockLogin {
 	if mmLogin.mock.funcLogin != nil {
 		mmLogin.mock.t.Fatalf("UserProfilerMock.Login mock is already set by Set")
 	}
@@ -321,7 +322,7 @@ func (mmLogin *mUserProfilerMockLogin) Expect(ctx context.Context, email string)
 		mmLogin.defaultExpectation = &UserProfilerMockLoginExpectation{}
 	}
 
-	mmLogin.defaultExpectation.params = &UserProfilerMockLoginParams{ctx, email}
+	mmLogin.defaultExpectation.params = &UserProfilerMockLoginParams{ctx, email, password}
 	for _, e := range mmLogin.expectations {
 		if minimock.Equal(e.params, mmLogin.defaultExpectation.params) {
 			mmLogin.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmLogin.defaultExpectation.params)
@@ -332,7 +333,7 @@ func (mmLogin *mUserProfilerMockLogin) Expect(ctx context.Context, email string)
 }
 
 // Inspect accepts an inspector function that has same arguments as the UserProfiler.Login
-func (mmLogin *mUserProfilerMockLogin) Inspect(f func(ctx context.Context, email string)) *mUserProfilerMockLogin {
+func (mmLogin *mUserProfilerMockLogin) Inspect(f func(ctx context.Context, email string, password string)) *mUserProfilerMockLogin {
 	if mmLogin.mock.inspectFuncLogin != nil {
 		mmLogin.mock.t.Fatalf("Inspect function is already set for UserProfilerMock.Login")
 	}
@@ -356,7 +357,7 @@ func (mmLogin *mUserProfilerMockLogin) Return(up1 *entity.User, err error) *User
 }
 
 // Set uses given function f to mock the UserProfiler.Login method
-func (mmLogin *mUserProfilerMockLogin) Set(f func(ctx context.Context, email string) (up1 *entity.User, err error)) *UserProfilerMock {
+func (mmLogin *mUserProfilerMockLogin) Set(f func(ctx context.Context, email string, password string) (up1 *entity.User, err error)) *UserProfilerMock {
 	if mmLogin.defaultExpectation != nil {
 		mmLogin.mock.t.Fatalf("Default expectation is already set for the UserProfiler.Login method")
 	}
@@ -371,14 +372,14 @@ func (mmLogin *mUserProfilerMockLogin) Set(f func(ctx context.Context, email str
 
 // When sets expectation for the UserProfiler.Login which will trigger the result defined by the following
 // Then helper
-func (mmLogin *mUserProfilerMockLogin) When(ctx context.Context, email string) *UserProfilerMockLoginExpectation {
+func (mmLogin *mUserProfilerMockLogin) When(ctx context.Context, email string, password string) *UserProfilerMockLoginExpectation {
 	if mmLogin.mock.funcLogin != nil {
 		mmLogin.mock.t.Fatalf("UserProfilerMock.Login mock is already set by Set")
 	}
 
 	expectation := &UserProfilerMockLoginExpectation{
 		mock:   mmLogin.mock,
-		params: &UserProfilerMockLoginParams{ctx, email},
+		params: &UserProfilerMockLoginParams{ctx, email, password},
 	}
 	mmLogin.expectations = append(mmLogin.expectations, expectation)
 	return expectation
@@ -391,15 +392,15 @@ func (e *UserProfilerMockLoginExpectation) Then(up1 *entity.User, err error) *Us
 }
 
 // Login implements usecase.UserProfiler
-func (mmLogin *UserProfilerMock) Login(ctx context.Context, email string) (up1 *entity.User, err error) {
+func (mmLogin *UserProfilerMock) Login(ctx context.Context, email string, password string) (up1 *entity.User, err error) {
 	mm_atomic.AddUint64(&mmLogin.beforeLoginCounter, 1)
 	defer mm_atomic.AddUint64(&mmLogin.afterLoginCounter, 1)
 
 	if mmLogin.inspectFuncLogin != nil {
-		mmLogin.inspectFuncLogin(ctx, email)
+		mmLogin.inspectFuncLogin(ctx, email, password)
 	}
 
-	mm_params := &UserProfilerMockLoginParams{ctx, email}
+	mm_params := &UserProfilerMockLoginParams{ctx, email, password}
 
 	// Record call args
 	mmLogin.LoginMock.mutex.Lock()
@@ -416,7 +417,7 @@ func (mmLogin *UserProfilerMock) Login(ctx context.Context, email string) (up1 *
 	if mmLogin.LoginMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmLogin.LoginMock.defaultExpectation.Counter, 1)
 		mm_want := mmLogin.LoginMock.defaultExpectation.params
-		mm_got := UserProfilerMockLoginParams{ctx, email}
+		mm_got := UserProfilerMockLoginParams{ctx, email, password}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
 			mmLogin.t.Errorf("UserProfilerMock.Login got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
@@ -428,9 +429,9 @@ func (mmLogin *UserProfilerMock) Login(ctx context.Context, email string) (up1 *
 		return (*mm_results).up1, (*mm_results).err
 	}
 	if mmLogin.funcLogin != nil {
-		return mmLogin.funcLogin(ctx, email)
+		return mmLogin.funcLogin(ctx, email, password)
 	}
-	mmLogin.t.Fatalf("Unexpected call to UserProfilerMock.Login. %v %v", ctx, email)
+	mmLogin.t.Fatalf("Unexpected call to UserProfilerMock.Login. %v %v %v", ctx, email, password)
 	return
 }
 
@@ -521,6 +522,7 @@ type UserProfilerMockRegisterParams struct {
 	ctx       context.Context
 	name      string
 	email     string
+	password  string
 	caption   string
 	birthDate time.Time
 }
@@ -532,7 +534,7 @@ type UserProfilerMockRegisterResults struct {
 }
 
 // Expect sets up expected params for UserProfiler.Register
-func (mmRegister *mUserProfilerMockRegister) Expect(ctx context.Context, name string, email string, caption string, birthDate time.Time) *mUserProfilerMockRegister {
+func (mmRegister *mUserProfilerMockRegister) Expect(ctx context.Context, name string, email string, password string, caption string, birthDate time.Time) *mUserProfilerMockRegister {
 	if mmRegister.mock.funcRegister != nil {
 		mmRegister.mock.t.Fatalf("UserProfilerMock.Register mock is already set by Set")
 	}
@@ -541,7 +543,7 @@ func (mmRegister *mUserProfilerMockRegister) Expect(ctx context.Context, name st
 		mmRegister.defaultExpectation = &UserProfilerMockRegisterExpectation{}
 	}
 
-	mmRegister.defaultExpectation.params = &UserProfilerMockRegisterParams{ctx, name, email, caption, birthDate}
+	mmRegister.defaultExpectation.params = &UserProfilerMockRegisterParams{ctx, name, email, password, caption, birthDate}
 	for _, e := range mmRegister.expectations {
 		if minimock.Equal(e.params, mmRegister.defaultExpectation.params) {
 			mmRegister.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmRegister.defaultExpectation.params)
@@ -552,7 +554,7 @@ func (mmRegister *mUserProfilerMockRegister) Expect(ctx context.Context, name st
 }
 
 // Inspect accepts an inspector function that has same arguments as the UserProfiler.Register
-func (mmRegister *mUserProfilerMockRegister) Inspect(f func(ctx context.Context, name string, email string, caption string, birthDate time.Time)) *mUserProfilerMockRegister {
+func (mmRegister *mUserProfilerMockRegister) Inspect(f func(ctx context.Context, name string, email string, password string, caption string, birthDate time.Time)) *mUserProfilerMockRegister {
 	if mmRegister.mock.inspectFuncRegister != nil {
 		mmRegister.mock.t.Fatalf("Inspect function is already set for UserProfilerMock.Register")
 	}
@@ -576,7 +578,7 @@ func (mmRegister *mUserProfilerMockRegister) Return(up1 *entity.User, err error)
 }
 
 // Set uses given function f to mock the UserProfiler.Register method
-func (mmRegister *mUserProfilerMockRegister) Set(f func(ctx context.Context, name string, email string, caption string, birthDate time.Time) (up1 *entity.User, err error)) *UserProfilerMock {
+func (mmRegister *mUserProfilerMockRegister) Set(f func(ctx context.Context, name string, email string, password string, caption string, birthDate time.Time) (up1 *entity.User, err error)) *UserProfilerMock {
 	if mmRegister.defaultExpectation != nil {
 		mmRegister.mock.t.Fatalf("Default expectation is already set for the UserProfiler.Register method")
 	}
@@ -591,14 +593,14 @@ func (mmRegister *mUserProfilerMockRegister) Set(f func(ctx context.Context, nam
 
 // When sets expectation for the UserProfiler.Register which will trigger the result defined by the following
 // Then helper
-func (mmRegister *mUserProfilerMockRegister) When(ctx context.Context, name string, email string, caption string, birthDate time.Time) *UserProfilerMockRegisterExpectation {
+func (mmRegister *mUserProfilerMockRegister) When(ctx context.Context, name string, email string, password string, caption string, birthDate time.Time) *UserProfilerMockRegisterExpectation {
 	if mmRegister.mock.funcRegister != nil {
 		mmRegister.mock.t.Fatalf("UserProfilerMock.Register mock is already set by Set")
 	}
 
 	expectation := &UserProfilerMockRegisterExpectation{
 		mock:   mmRegister.mock,
-		params: &UserProfilerMockRegisterParams{ctx, name, email, caption, birthDate},
+		params: &UserProfilerMockRegisterParams{ctx, name, email, password, caption, birthDate},
 	}
 	mmRegister.expectations = append(mmRegister.expectations, expectation)
 	return expectation
@@ -611,15 +613,15 @@ func (e *UserProfilerMockRegisterExpectation) Then(up1 *entity.User, err error) 
 }
 
 // Register implements usecase.UserProfiler
-func (mmRegister *UserProfilerMock) Register(ctx context.Context, name string, email string, caption string, birthDate time.Time) (up1 *entity.User, err error) {
+func (mmRegister *UserProfilerMock) Register(ctx context.Context, name string, email string, password string, caption string, birthDate time.Time) (up1 *entity.User, err error) {
 	mm_atomic.AddUint64(&mmRegister.beforeRegisterCounter, 1)
 	defer mm_atomic.AddUint64(&mmRegister.afterRegisterCounter, 1)
 
 	if mmRegister.inspectFuncRegister != nil {
-		mmRegister.inspectFuncRegister(ctx, name, email, caption, birthDate)
+		mmRegister.inspectFuncRegister(ctx, name, email, password, caption, birthDate)
 	}
 
-	mm_params := &UserProfilerMockRegisterParams{ctx, name, email, caption, birthDate}
+	mm_params := &UserProfilerMockRegisterParams{ctx, name, email, password, caption, birthDate}
 
 	// Record call args
 	mmRegister.RegisterMock.mutex.Lock()
@@ -636,7 +638,7 @@ func (mmRegister *UserProfilerMock) Register(ctx context.Context, name string, e
 	if mmRegister.RegisterMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmRegister.RegisterMock.defaultExpectation.Counter, 1)
 		mm_want := mmRegister.RegisterMock.defaultExpectation.params
-		mm_got := UserProfilerMockRegisterParams{ctx, name, email, caption, birthDate}
+		mm_got := UserProfilerMockRegisterParams{ctx, name, email, password, caption, birthDate}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
 			mmRegister.t.Errorf("UserProfilerMock.Register got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
@@ -648,9 +650,9 @@ func (mmRegister *UserProfilerMock) Register(ctx context.Context, name string, e
 		return (*mm_results).up1, (*mm_results).err
 	}
 	if mmRegister.funcRegister != nil {
-		return mmRegister.funcRegister(ctx, name, email, caption, birthDate)
+		return mmRegister.funcRegister(ctx, name, email, password, caption, birthDate)
 	}
-	mmRegister.t.Fatalf("Unexpected call to UserProfilerMock.Register. %v %v %v %v %v", ctx, name, email, caption, birthDate)
+	mmRegister.t.Fatalf("Unexpected call to UserProfilerMock.Register. %v %v %v %v %v %v", ctx, name, email, password, caption, birthDate)
 	return
 }
 

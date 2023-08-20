@@ -90,14 +90,13 @@ message UpdateCaptionRequest {
 message UpdateCaptionResponse {};
 
 message FollowRequest {
-    int64 user_id = 1;
-    int64 new_follower_id = 2 [(validate.rules).int64.gt = 0];
+    int64 followee_id = 1 [(validate.rules).int64.gt = 0];
 };
 
 message FollowResponse {};
 
 message UnfollowRequest {
-    int64 old_follower_id = 1 [(validate.rules).int64.gt = 0];
+    int64 followee_id = 1 [(validate.rules).int64.gt = 0];
 };
 
 message UnfollowResponse {};
@@ -119,13 +118,17 @@ message RecommendUsersResponse {
     repeated UserProfile users = 1;
 };
 
-message GetFollowingRequest {};
+message GetFollowingRequest {
+    int64 user_id = 1 [(validate.rules).int64.gt = 0];
+};
 
 message GetFollowingResponse {
     repeated UserProfile users = 1;
 };
 
-message GetFollowersRequest {};
+message GetFollowersRequest {
+    int64 user_id = 1 [(validate.rules).int64.gt = 0];
+};
 
 message GetFollowersResponse {
     repeated UserProfile users = 1;

@@ -20,7 +20,7 @@ type userRepo struct {
 	users []entity.User
 }
 
-func (u *userRepo) Add(_ context.Context, name, email, caption string, birthDate time.Time) (int, error) {
+func (u *userRepo) Add(_ context.Context, name, email, _, caption string, birthDate time.Time) (int, error) {
 	for _, user := range u.users {
 		if user.Email == email {
 			return 0, usecase.ErrUserExists
@@ -53,7 +53,7 @@ func (u *userRepo) GetAll(_ context.Context, limit int) ([]entity.User, error) {
 	return u.users[:limit], nil
 }
 
-func (u *userRepo) GetByEmail(_ context.Context, email string) (*entity.User, error) {
+func (u *userRepo) GetByEmail(_ context.Context, email, _ string) (*entity.User, error) {
 	for _, user := range u.users {
 		if user.Email == email {
 			return &user, nil

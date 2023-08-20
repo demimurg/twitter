@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/caarlos0/env/v6"
+	"github.com/caarlos0/env/v9"
 
 	"github.com/demimurg/twitter/internal/adapter/postgres"
 	"github.com/demimurg/twitter/internal/adapter/scamdetector"
@@ -20,6 +20,7 @@ var cfg struct {
 	LogLevel      string `env:"LOG_LEVEL" envDefault:"debug"`
 	PostgresqlDSN string `env:"POSTGRESQL_DSN" envDefault:"host=localhost user=postgres"`
 	MigrationsDir string `env:"MIGRATIONS_DIR" envDefault:"./migrations"`
+	AuthSecret    string `env:"AUTH_SECRET,unset" envDefault:"test_secret"`
 }
 
 func main() {
@@ -38,7 +39,7 @@ func main() {
 	feedManager := usecase.NewFeedManager(userRepo, followerRepo, tweetRepo)
 	userProfiler := usecase.NewUserProfiler(userRepo, scamClient)
 
-	srv := grpcsrv.NewTwitter(feedManager, userProfiler)
+	srv := grpcsrv.NewTwitter(feedManager, userProfiler, cfg.AuthSecret)
 	grace.Run(
 		grace.GRPC(srv, ":80"),
 		grace.Prometheus(":81"),

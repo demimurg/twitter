@@ -46,7 +46,7 @@ func TestE2E(t *testing.T) {
 	feedManager := usecase.NewFeedManager(userRepo, followerRepo, tweetRepo)
 	userProfiler := usecase.NewUserProfiler(userRepo, scamClient)
 
-	srv := grace.GRPC(grpcsrv.NewTwitter(feedManager, userProfiler), ":8080")
+	srv := grace.GRPC(grpcsrv.NewTwitter(feedManager, userProfiler, "e2e-auth-secret"), ":8080")
 	go func() {
 		require.NoError(t, srv.Run(), "shutdown server")
 	}()
@@ -71,7 +71,7 @@ type endToEndTestSuite struct {
 	db *sql.DB
 }
 
-func (s *endToEndTestSuite) TearDownSuite() {
+func (s *endToEndTestSuite) SetupSuite() {
 	_, err := s.db.Exec("TRUNCATE TABLE comment, tweet, follower, users")
 	s.Require().NoError(err, "truncate db tables")
 

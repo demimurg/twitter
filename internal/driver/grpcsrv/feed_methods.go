@@ -12,7 +12,7 @@ import (
 )
 
 func (t *twitter) AddTweet(ctx context.Context, req *proto.AddTweetRequest) (*proto.AddTweetResponse, error) {
-	tweetID, err := t.fm.AddTweet(ctx, int(req.UserId), req.Text)
+	tweetID, err := t.fm.AddTweet(ctx, getUserID(ctx), req.Text)
 	if err != nil {
 		if errors.Is(err, entity.ErrValidationFailed) {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -23,7 +23,7 @@ func (t *twitter) AddTweet(ctx context.Context, req *proto.AddTweetRequest) (*pr
 }
 
 func (t *twitter) AddComment(ctx context.Context, req *proto.AddCommentRequest) (*proto.AddCommentResponse, error) {
-	commentID, err := t.fm.AddComment(ctx, int(req.UserId), int(req.TweetId), req.Text)
+	commentID, err := t.fm.AddComment(ctx, getUserID(ctx), int(req.TweetId), req.Text)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +44,8 @@ func (t *twitter) UpdateComment(ctx context.Context, req *proto.UpdateCommentReq
 	return &proto.UpdateCommentResponse{}, nil
 }
 
-func (t *twitter) GetNewsFeed(ctx context.Context, req *proto.GetNewsFeedRequest) (*proto.GetNewsFeedResponse, error) {
-	feed, err := t.fm.GetNewsFeed(ctx, int(req.UserId))
+func (t *twitter) GetNewsFeed(ctx context.Context, _ *proto.GetNewsFeedRequest) (*proto.GetNewsFeedResponse, error) {
+	feed, err := t.fm.GetNewsFeed(ctx, getUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (t *twitter) GetNewsFeed(ctx context.Context, req *proto.GetNewsFeedRequest
 }
 
 func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*proto.FollowResponse, error) {
-	err := t.fm.AddFollower(ctx, int(req.NewFollowerId), int(req.UserId))
+	err := t.fm.AddFollower(ctx, getUserID(ctx), int(req.FolloweeId))
 	if err != nil {
 		return nil, err
 	}
@@ -66,15 +66,15 @@ func (t *twitter) Follow(ctx context.Context, req *proto.FollowRequest) (*proto.
 }
 
 func (t *twitter) Unfollow(ctx context.Context, req *proto.UnfollowRequest) (*proto.UnfollowResponse, error) {
-	err := t.fm.RemoveFollower(ctx, int(req.OldFollowerId), int(req.UserId))
+	err := t.fm.RemoveFollower(ctx, getUserID(ctx), int(req.FolloweeId))
 	if err != nil {
 		return nil, err
 	}
 	return &proto.UnfollowResponse{}, nil
 }
 
-func (t *twitter) RecommendUsers(ctx context.Context, req *proto.RecommendUsersRequest) (*proto.RecommendUsersResponse, error) {
-	users, err := t.fm.GetRecommendedUsers(ctx, int(req.UserId))
+func (t *twitter) RecommendUsers(ctx context.Context, _ *proto.RecommendUsersRequest) (*proto.RecommendUsersResponse, error) {
+	users, err := t.fm.GetRecommendedUsers(ctx, getUserID(ctx))
 	if err != nil {
 		return nil, err
 	}

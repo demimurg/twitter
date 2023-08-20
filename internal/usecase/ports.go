@@ -8,14 +8,18 @@ import (
 	"github.com/demimurg/twitter/internal/entity"
 )
 
-var ErrUserExists = errors.New("user already exists")
+var (
+	ErrUserExists       = errors.New("user already exists")
+	ErrWrongCredentials = errors.New("have no user with specified email and password")
+)
 
 type UserRepository interface {
 	// Add will creates new user in repo and returns id assigned to it
-	Add(ctx context.Context, name, email, caption string, birthDate time.Time) (id int, err error)
+	Add(ctx context.Context, name, email, password, caption string, birthDate time.Time) (id int, err error)
 	Get(ctx context.Context, userID int) (*entity.User, error)
 	GetAll(ctx context.Context, limit int) ([]entity.User, error)
-	GetByEmail(ctx context.Context, email string) (*entity.User, error)
+	// GetByEmail will return ErrWrongCredentials if no user found
+	GetByEmail(ctx context.Context, email, password string) (*entity.User, error)
 	UpdateCaption(ctx context.Context, userID int, caption string) error
 	Delete(ctx context.Context, userID int) error
 }

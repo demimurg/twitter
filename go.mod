@@ -4,9 +4,10 @@ go 1.20
 
 require (
 	github.com/avast/retry-go/v4 v4.3.2
-	github.com/caarlos0/env/v6 v6.10.1
+	github.com/caarlos0/env/v9 v9.0.0
 	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	github.com/gojuno/minimock/v3 v3.0.10
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jackc/pgx/v4 v4.17.0
@@ -19,6 +20,7 @@ require (
 )
 
 require (
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.13.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
@@ -33,7 +35,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fullstorydev/grpcui v1.3.1
 	github.com/fullstorydev/grpcurl v1.8.6 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"time"
@@ -11,11 +12,11 @@ import (
 )
 
 type UserProfiler interface {
-	Register(ctx context.Context, name, email, caption string, birthDate time.Time) (*entity.User, error)
+	Register(ctx context.Context, name, email, password, caption string, birthDate time.Time) (*entity.User, error)
 	Deactivate(ctx context.Context, userID int) error
 	UpdateCaption(ctx context.Context, userID int, newCaption string) error
 
-	Login(ctx context.Context, email string) (*entity.User, error)
+	Login(ctx context.Context, email, password string) (*entity.User, error)
 }
 
 func NewUserProfiler(userRepo UserRepository, scamClient ScamDetectorClient) UserProfiler {
@@ -27,7 +28,7 @@ type userProfiler struct {
 	scamClient ScamDetectorClient
 }
 
-func (up *userProfiler) Register(ctx context.Context, name, email, caption string, birthDate time.Time) (*entity.User, error) {
+func (up *userProfiler) Register(ctx context.Context, name, email, password, caption string, birthDate time.Time) (*entity.User, error) {
 	err := up.scamClient.CheckEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, ErrFakeEmail) {
@@ -36,7 +37,7 @@ func (up *userProfiler) Register(ctx context.Context, name, email, caption strin
 		log.Error(ctx, "scam client returned error", err)
 	}
 
-	id, err := up.userRepo.Add(ctx, name, email, caption, birthDate)
+	id, err := up.userRepo.Add(ctx, name, email, b64(password), caption, birthDate)
 	if err != nil {
 		return nil, err
 	}
@@ -47,8 +48,8 @@ func (up *userProfiler) Register(ctx context.Context, name, email, caption strin
 	}, nil
 }
 
-func (up *userProfiler) Login(ctx context.Context, email string) (*entity.User, error) {
-	return up.userRepo.GetByEmail(ctx, email)
+func (up *userProfiler) Login(ctx context.Context, email, password string) (*entity.User, error) {
+	return up.userRepo.GetByEmail(ctx, email, b64(password))
 }
 
 func (up *userProfiler) Deactivate(ctx context.Context, userID int) error {
@@ -57,4 +58,9 @@ func (up *userProfiler) Deactivate(ctx context.Context, userID int) error {
 
 func (up *userProfiler) UpdateCaption(ctx context.Context, userID int, newCaption string) error {
 	return up.userRepo.UpdateCaption(ctx, userID, newCaption)
+}
+
+// b64 shorthand for standart base64 encoding
+func b64(s string) string {
+	return base64.StdEncoding.EncodeToString([]byte(s))
 }

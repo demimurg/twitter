@@ -1851,11 +1851,9 @@ func (m *FollowRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for UserId
-
-	if m.GetNewFollowerId() <= 0 {
+	if m.GetFolloweeId() <= 0 {
 		err := FollowRequestValidationError{
-			field:  "NewFollowerId",
+			field:  "FolloweeId",
 			reason: "value must be greater than 0",
 		}
 		if !all {
@@ -2064,9 +2062,9 @@ func (m *UnfollowRequest) validate(all bool) error {
 
 	var errors []error
 
-	if m.GetOldFollowerId() <= 0 {
+	if m.GetFolloweeId() <= 0 {
 		err := UnfollowRequestValidationError{
-			field:  "OldFollowerId",
+			field:  "FolloweeId",
 			reason: "value must be greater than 0",
 		}
 		if !all {
@@ -2818,6 +2816,17 @@ func (m *GetFollowingRequest) validate(all bool) error {
 
 	var errors []error
 
+	if m.GetUserId() <= 0 {
+		err := GetFollowingRequestValidationError{
+			field:  "UserId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		return GetFollowingRequestMultiError(errors)
 	}
@@ -3055,6 +3064,17 @@ func (m *GetFollowersRequest) validate(all bool) error {
 	}
 
 	var errors []error
+
+	if m.GetUserId() <= 0 {
+		err := GetFollowersRequestValidationError{
+			field:  "UserId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return GetFollowersRequestMultiError(errors)
